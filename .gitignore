@@ -9,6 +9,8 @@
 *.user
 *.userosscache
 *.sln.docstates
+paradigm.txt
+Bethini.ini
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
