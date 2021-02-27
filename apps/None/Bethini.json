@@ -1,0 +1,261 @@
+{
+  "valueTypes": [],
+  "presetsIgnoreTheseSettings": [],
+  "Default": "",
+  "INIs": {
+    "Bethini.ini": "",
+    "theme.ini": "sTheme"
+  },
+  "customFunctions": {
+  },
+  "displayTabs": {
+    "Setup": {
+      "NoLabelFrame": {
+        "NumberOfVerticallyStackedSettings": "6",
+        "Settings": {
+          "Game Path": {
+            "browse": [ "directory", "SkyrimSE.exe", "file" ],
+            "choices": [ "FUNCGamePath", "Browse...", "Manual..." ],
+            "customWidth": "18",
+            "forceSelect": "1",
+            "settings": [ "sSkyrim Special EditionPath" ],
+            "targetINIs": [ "Bethini.ini" ],
+            "targetSections": [ "Directories" ],
+            "tooltip": "Specifies the path to the game directory.",
+            "type": "Dropdown"
+          },
+          "ModOrganizer.ini": {
+            "browse": [ "directory", "ModOrganizer.ini", "file" ],
+            "choices": "FUNCgetMODirectory",
+            "customWidth": "18",
+            "forceSelect": "1",
+            "settings": [ "sSkyrim Special EditionModOrganizerINIPath" ],
+            "targetINIs": [ "Bethini.ini" ],
+            "targetSections": [ "Directories" ],
+            "tooltip": "Specifies the location to the ModOrganizer.ini file (required to find the location of MO profiles).",
+            "type": "Dropdown"
+          },
+          "INI Path": {
+            "browse": [ "directory", "Skyrim.ini", "file" ],
+            "choices": "FUNCINIPath",
+            "customWidth": "18",
+            "forceSelect": "1",
+            "settings": [ "sSkyrim Special EditionINIPath" ],
+            "targetINIs": [ "Bethini.ini" ],
+            "targetSections": [ "Directories" ],
+            "tooltip": "Specifies the path to the INI files.",
+            "type": "Dropdown"
+          },
+          "Restore Backup": {
+            "choices": "FUNCBackups",
+            "customFunction": "RestoreBackup",
+            "customWidth": "18",
+            "tooltip": "Select the backup you wish to restore.",
+            "type": "Dropdown"
+          },
+          "Modify Custom INIs": {
+            "Offvalue": [ [ "0", "" ] ],
+            "Onvalue": [ [ "1" ] ],
+            "settings": [ "bModifyCustomINIs" ],
+            "targetINIs": [ "Bethini.ini" ],
+            "targetSections": [ "General" ],
+            "tooltip": "If enabled, Bethini will modify any custom INI files to reflect changes made. If disabled, Bethini will still automatically backup your custom INI files, but will not actually make any changes to them.",
+            "type": "Checkbutton"
+          }
+        }
+      }
+    },
+    "Preferences": {
+      "NoLabelFrame": {
+        "NumberOfVerticallyStackedSettings": "1",
+        "Settings": {
+          "Note: ": {
+            "Description": "These changes require a restart to take effect.",
+            "type": "description"
+          }
+        }
+      },
+      "Interface": {
+        "NumberOfVerticallyStackedSettings": "8",
+        "Settings": {
+          "Theme": {
+            "choices": "FUNCThemes",
+            "customWidth": "20",
+            "settings": [ "sTheme" ],
+            "targetINIs": [ "Bethini.ini" ],
+            "targetSections": [ "General" ],
+            "tooltip": "Select the theme.",
+            "type": "Dropdown"
+          },
+          "Font": {
+            "customWidth": "20",
+            "type": "Entry",
+            "settings": [ "sSmallFontName" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Fonts" ],
+            "tooltip": "Sets the font family.",
+            "entryWidth": "20"
+          },
+          "Font Size": {
+            "customWidth": "20",
+            "decimal places": "0",
+            "from": "8",
+            "increment": "1",
+            "settings": [ "iSmallFontSize" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Fonts" ],
+            "to": "36",
+            "tooltip": "Sets the font size.",
+            "type": "Spinbox",
+            "validate": "whole",
+            "width": "7"
+          },
+          "Base Color": {
+            "colorValueType": "hex",
+            "customWidth": "20",
+            "settings": [ "sSubContainerColor" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the base color.",
+            "type": "Color"
+          },
+          "Canvas Color": {
+            "colorValueType": "hex",
+            "customWidth": "20",
+            "settings": [ "sContainerColor" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the background canvas color.",
+            "type": "Color"
+          },
+          "Text Color": {
+            "colorValueType": "hex",
+            "customWidth": "20",
+            "settings": [ "sTextColor" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the text color.",
+            "type": "Color"
+          },
+          "Disabled Text Color": {
+            "colorValueType": "hex",
+            "customWidth": "20",
+            "settings": [ "sTextColorDisabled" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the disabled text color.",
+            "type": "Color"
+          },
+          "Pressed Text Color": {
+            "colorValueType": "hex",
+            "customWidth": "20",
+            "settings": [ "sTextColorPressed" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the pressed text color.",
+            "type": "Color"
+          },
+          "Active Text Color": {
+            "colorValueType": "hex",
+            "customWidth": "25",
+            "settings": [ "sTextColorActive" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the active text color.",
+            "type": "Color"
+          },
+          "Disabled Background Color": {
+            "colorValueType": "hex",
+            "customWidth": "25",
+            "settings": [ "sBackgroundColorDisabled" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the disabled background color.",
+            "type": "Color"
+          },
+          "Pressed Background Color": {
+            "colorValueType": "hex",
+            "customWidth": "25",
+            "settings": [ "sBackgroundColorPressed" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the pressed background color.",
+            "type": "Color"
+          },
+          "Active Background Color": {
+            "colorValueType": "hex",
+            "customWidth": "25",
+            "settings": [ "sBackgroundColorActive" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the active background color.",
+            "type": "Color"
+          },
+          "Tab Color": {
+            "colorValueType": "hex",
+            "customWidth": "25",
+            "settings": [ "sButtonBarColor" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the tab color.",
+            "type": "Color"
+          },
+          "Dropdown Color": {
+            "colorValueType": "hex",
+            "customWidth": "25",
+            "settings": [ "sDropDownColor" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the dropdown color.",
+            "type": "Color"
+          },
+          "Field Color": {
+            "colorValueType": "hex",
+            "customWidth": "25",
+            "settings": [ "sFieldColor" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the field color.",
+            "type": "Color"
+          },
+          "Checkbox Color": {
+            "colorValueType": "hex",
+            "customWidth": "25",
+            "settings": [ "sIndicatorColor" ],
+            "targetINIs": [ "theme.ini" ],
+            "targetSections": [ "Colors" ],
+            "tooltip": "Sets the checkbox color.",
+            "type": "Color"
+          }
+        }
+      },
+      "General": {
+        "NumberOfVerticallyStackedSettings": "6",
+        "Settings": {
+          "Max Backups to Keep": {
+            "decimal places": "0",
+            "from": "0",
+            "increment": "1",
+            "settings": [ "iMaxBackups" ],
+            "targetINIs": [ "Bethini.ini" ],
+            "targetSections": [ "Backups" ],
+            "to": "10",
+            "tooltip": "Select the maximum number of backups to keep.",
+            "type": "Spinbox",
+            "validate": "whole",
+            "width": "7"
+          },
+          "Always Select Game": {
+            "Offvalue": [ [ "0" ] ],
+            "Onvalue": [ [ "1" ] ],
+            "settings": [ "bAlwaysSelectGame" ],
+            "targetINIs": [ "Bethini.ini" ],
+            "targetSections": [ "General" ],
+            "tooltip": "Toggles whether or not you must always select the game at startup.",
+            "type": "Checkbutton"
+          }
+        }
+      }
+    }
+  }
+}

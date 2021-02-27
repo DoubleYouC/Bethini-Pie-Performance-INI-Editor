@@ -1,0 +1,7 @@
+A New Paradigm - A New Name
+
+BethINI is changing to Bethini Pie.
+
+BethINI was originally designed for the optimization of Bethesda game ini configuration files, and left virtually no room for growth into other games. Bethini Pie completely redefines the application, as it intends to become a configuration editor capable of modifying the configuration settings of any game that utilizes INI files. While out-of-the-box support for any and all games is not currently intended, it provides the ability to add support for any game through the careful assembly of specially designed JSON files. It may be designed in the future to work with any INI file with limited capabilities, although at this time, such is not the case.
+
+The name change reflects this new paradigm. The addition of "Pie" has multiple connotations. For one, Bethini Pie is written in Python, so "Pie" is a subtle reference to the change in programming language. Additionally, "Pie" doubles as an acronym describing the intended function of the application as a Performance INI Editor. Hence, Bethini Pie - Performance INI Editor. This adds a search engine optimization tweak to the name, so that if a user is looking for increased "performance," or "INI" tweaks, or an "INI Editor", they have a far better chance of finding "Bethini Pie - Performance INI Editor" within their search. Currently, most people find BethINI despite its name. It is hoped that this addition helps people find it more easily. 

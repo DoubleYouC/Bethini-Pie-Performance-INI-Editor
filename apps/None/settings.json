@@ -1,0 +1,22 @@
+{
+  "gameId": "None",
+  "gameName": "None",
+  "iniPaths": [
+    []
+  ],
+  "presetPaths": [
+    []
+  ],
+      "section": "Archive",
+      "type": "string",
+  "iniValues": [
+    {
+      "name": "None",
+      "section": "None",
+      "type": "string",
+      "value": {
+        "default": "None"
+      }
+    }
+  ]
+}
