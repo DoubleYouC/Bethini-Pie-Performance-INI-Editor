@@ -1244,9 +1244,14 @@ class BethiniApp(tk.Tk):
                 if eachSetting == setting:
                     theValueStr += '{}'
                 else:
-                    if self.settingDictionary[eachSetting]['valueSet']:
-                        theValueStr += self.settingDictionary[eachSetting]['TkVar'].get()
-                    else:
+                    try:
+                        if self.settingDictionary[eachSetting]['valueSet']:
+                            theValueStr += self.settingDictionary[eachSetting]['TkVar'].get()
+                        else:
+                            self.sme(f'{eachSetting} is not set yet.')
+                            return
+                    except:
+                        self.sme(f'{eachSetting} is not set yet.', exception=True)
                         return
 
         
