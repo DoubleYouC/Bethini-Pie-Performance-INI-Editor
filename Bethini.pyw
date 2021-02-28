@@ -1717,8 +1717,11 @@ if __name__ == '__main__':
     logging.basicConfig(filename=MyAppNameLog, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
     appConfig = ModifyINI(MyAppNameConfig)
+    iMaxLogs = appConfig.getValue('General', 'iMaxLogs', '5')
+    appConfig.assignINIValue('General', 'iMaxLogs', iMaxLogs)
+    removeExcessDirFiles(f'{cwd}\\logs', int(iMaxLogs), ['log.log'])
 
-    removeExcessDirFiles(f'{cwd}\\logs', int(appConfig.getValue('General', 'iMaxLogs', '5')), ['log.log'])
+    appConfig.assignINIValue('General', 'iMaxBackups', appConfig.getValue('General', 'iMaxBackups', '5'))
 
     #get the initial values and then add to it by assignment upon changing.
     loadTheme()
