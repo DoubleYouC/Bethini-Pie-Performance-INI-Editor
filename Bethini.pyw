@@ -25,26 +25,6 @@ from lib.tooltips import CreateToolTip
 from lib.ModifyINI import ModifyINI
 from lib.customFunctions import customFunctions, sm, browseToLocation, RGBToHex, HexToRGB, HexToDecimal, DecimalToRGB
 
-cwd = os.getcwd()
-
-operatorDict = {
-    'greater-than': gt,
-    'greater-or-equal-than': ge,
-    'less-than': lt,
-    'less-or-equal-than': le,
-    'not-equal': ne,
-    'equal': eq
-    }
-
-MyAppName = "Bethini Pie"
-MyAppShortName = "Bethini"
-
-today = datetime.now()
-logDirectoryDate = today.strftime("%Y %b %d %a - %H.%M.%S")
-MyAppNameLogDirectory = f'logs\\{logDirectoryDate}'
-MyAppNameLog = f'{MyAppNameLogDirectory}\\log.log'
-MyAppNameConfig = f'{MyAppShortName}.ini'
-
 def loadTheme():
     #This loads the theme as specified in the Bethini.ini file to the relative
     #theme\<theme-name>\theme.ini file.
@@ -498,6 +478,7 @@ class BethiniApp(tk.Tk):
                 if messagebox.askyesno(f"Save {INI}", f"Do you want to save {thisLocation}{INI}?"):
                     #we need to make a backup of each save before actually saving.
                     if INI != 'theme.ini':
+                        firstTimeBackup = removeExcessDirFiles(f'{thisLocation}{MyAppName} backups', int(appConfig.getValue('General', 'iMaxBackups', '5')), ['log.log', INI])
                         theBackupDirectory = f'{thisLocation}\\{MyAppName} backups\\{logDirectoryDate}\\'
                         if not os.path.isdir(theBackupDirectory):
                             os.makedirs(theBackupDirectory)
@@ -1681,12 +1662,63 @@ def onClosing():
             window.SaveINIFiles()
         window.quit()
 
+def removeExcessDirFiles(dir, maxToKeep, filesToRemove):
+    try:
+        sub = os.listdir(dir)
+    except OSError as e:
+        sm("Error: %s : %s" % (dir, e.strerror))
+        return True
+    sub.sort(reverse=True)
+    if maxToKeep > -1:
+        for n in range(len(sub)):
+            if n < maxToKeep:
+                sm(sub[n] + ' will be kept.')
+            else:
+                dir_path = f'{dir}\\' + sub[n]
+                try:
+                    for file in filesToRemove:
+                        try:
+                            os.remove(f'{dir_path}\\{file}')
+                        except OSError as e:
+                            sm(f'Error: {dir_path}\\{file} : {e.strerror}')
+                    os.rmdir(dir_path)
+                    sm(sub[n] + ' was removed.')
+                except OSError as e:
+                    sm("Error: %s : %s" % (dir_path, e.strerror))
+    return False
+
+
+
+cwd = os.getcwd()
+
+operatorDict = {
+    'greater-than': gt,
+    'greater-or-equal-than': ge,
+    'less-than': lt,
+    'less-or-equal-than': le,
+    'not-equal': ne,
+    'equal': eq
+    }
+
+MyAppName = "Bethini Pie"
+MyAppShortName = "Bethini"
+
+today = datetime.now()
+logDirectoryDate = today.strftime("%Y %b %d %a - %H.%M.%S")
+MyAppNameLogDirectory = f'logs\\{logDirectoryDate}'
+MyAppNameLog = f'{MyAppNameLogDirectory}\\log.log'
+MyAppNameConfig = f'{MyAppShortName}.ini'
+
+
+
 if __name__ == '__main__':
     os.makedirs(MyAppNameLogDirectory)
 
     logging.basicConfig(filename=MyAppNameLog, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
     appConfig = ModifyINI(MyAppNameConfig)
+
+    removeExcessDirFiles(f'{cwd}\\logs', int(appConfig.getValue('General', 'iMaxLogs', '5')), ['log.log'])
 
     #get the initial values and then add to it by assignment upon changing.
     loadTheme()
