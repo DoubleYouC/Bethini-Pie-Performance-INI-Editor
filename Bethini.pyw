@@ -445,11 +445,11 @@ class BethiniApp(tk.Tk):
         AboutFrame = ttk.Frame(AboutWindow)
         AboutFrameReal = ttk.Frame(AboutFrame)
 
-        AboutLabel = ttk.Label(AboutFrameReal, text='About')
+        AboutLabel = ttk.Label(AboutFrameReal, text=f'About {MyAppName}\n\n{MyAppName} was created by DoubleYou.\n\nLicensing is CC by-NC-SA.', justify=tk.CENTER)
 
         AboutFrame.pack(fill=tk.BOTH, expand=True)
         AboutFrameReal.pack(anchor=tk.CENTER, expand=True)
-        AboutLabel.pack(anchor=tk.CENTER)
+        AboutLabel.pack(anchor=tk.CENTER, padx='10', pady='10')
 
     def showSetup(self):
         self.withdraw()
