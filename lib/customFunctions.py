@@ -172,10 +172,10 @@ class customFunctions:
             defaultINILocation = Info.getDocumentsDirectory() + f'\\My Games\\{gameDocumentsName}\\'
         else:
             defaultINILocation = ''
-        INIPath = ModifyINI("BethINI.ini").getValue("Directories", "s" + gameName + "INIPath", default=defaultINILocation)
+        INIPath = ModifyINI("Bethini.ini").getValue("Directories", "s" + gameName + "INIPath", default=defaultINILocation)
         instance = os.path.split(os.path.split(INIPath)[0])[1]
         #backup_directory = f"cache\\{gameName}\\{instance}\\{choice}\\"
-        backup_directory = f'{INIPath}BethINI backups\\{choice}\\'
+        backup_directory = f'{INIPath}Bethini Pie backups\\{choice}\\'
 
         INIFilesWithLocation = {}
         for INI in INIFiles:
@@ -188,7 +188,7 @@ class customFunctions:
                 if INI == 'theme.ini':
                     continue
                 else:
-                    INILocation = ModifyINI("BethINI.ini").getValue('Directories', BethINIKey, defaultINILocation)
+                    INILocation = ModifyINI("Bethini.ini").getValue('Directories', BethINIKey, defaultINILocation)
             INIFilesWithLocation[INI] = INILocation
 
         filesToReplace = {}
@@ -214,10 +214,10 @@ class customFunctions:
             defaultINILocation = Info.getDocumentsDirectory() + f'\\My Games\\{gameDocumentsName}\\'
         else:
             defaultINILocation = ''
-        INIPath = ModifyINI("BethINI.ini").getValue("Directories", "s" + gameName + "INIPath", default=defaultINILocation)
+        INIPath = ModifyINI("Bethini.ini").getValue("Directories", "s" + gameName + "INIPath", default=defaultINILocation)
         #instance = os.path.split(os.path.split(INIPath)[0])[1]
         
-        backup_directory = f'{INIPath}/BethINI backups'
+        backup_directory = f'{INIPath}/Bethini Pie backups'
 
         #backup_directory = f"cache/{gameName}/{instance}/"
 
@@ -272,7 +272,7 @@ class customFunctions:
     def getMODirectory(gameName):
         #This custom function is used to detect the location of Mod Organizer
 
-        ModOrganizerINILocationFromConfig = ModifyINI("BethINI.ini").getValue("Directories", "s" + gameName + "ModOrganizerINIPath", default="Not Detected")
+        ModOrganizerINILocationFromConfig = ModifyINI("Bethini.ini").getValue("Directories", "s" + gameName + "ModOrganizerINIPath", default="Not Detected")
 
         pathValue = "Not Detected"
         gameReg = Info.nxmhandlerGameReference(gameName)
