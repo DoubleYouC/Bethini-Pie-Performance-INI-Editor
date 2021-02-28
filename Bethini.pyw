@@ -55,7 +55,7 @@ def loadTheme():
         sm(f'The theme called \"{theme}\" exists.')
     else:
         theme = 'Default'
-    appConfig.writeValue('General', 'sTheme', theme) #if there is no value set in Bethini.ini for sTheme:General, write it.
+    appConfig.assignINIValue('General', 'sTheme', theme) #if there is no value set in Bethini.ini for sTheme:General
     global ThemeConfig
     ThemeConfig = ModifyINI('theme\\' + str(theme) + '\\theme.ini') #set the theme.ini file to be the INI file to modify for the ThemeConfig variable                                                          
 
@@ -372,7 +372,7 @@ class BethiniApp(tk.Tk):
                 raise Exception("App/Game specified in " + MyAppNameConfig + " differs from the game chosen, so it will be changed to the one you chose.")
         except:
             self.sme('Change of game/application', exception=1)
-            appConfig.writeValue('General','sAppName', game)
+            appConfig.assignINIValue('General','sAppName', game)
             fromChooseGameWindow = True
 
         tk.Tk.wm_title(self, MyAppName + " - " + game)
