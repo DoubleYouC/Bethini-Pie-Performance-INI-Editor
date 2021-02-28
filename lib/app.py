@@ -1,4 +1,9 @@
-import json #This allows us to read the app/game json files
+#
+#This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+#To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+#
+
+import json
 
 class appName:
     #This class handles the different apps/games supported, which are placed in
@@ -207,3 +212,5 @@ class appName:
         return self.Bethini['displayTabs'][tab][labelFrame]['Settings'][setting]
 
     
+if __name__ == '__main__':
+    print('This is the app.appName class module.')

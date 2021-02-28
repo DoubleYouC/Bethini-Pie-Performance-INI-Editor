@@ -133,3 +133,6 @@ class customConfigParser(configparser.RawConfigParser):
         # if any parsing errors occurred, raise an exception
         if e:
             raise e
+
+if __name__ == '__main__':
+    print('This is the customConfigParser module.')
