@@ -306,8 +306,9 @@
         "NumberOfVerticallyStackedSettings": "6",
         "Settings": {
           "Max Backups to Keep": {
+            "customWidth": "20",
             "decimal places": "0",
-            "from": "0",
+            "from": "-1",
             "increment": "1",
             "settings": [ "iMaxBackups" ],
             "targetINIs": [ "Bethini.ini" ],
@@ -319,6 +320,7 @@
             "width": "7"
           },
           "Max Logs to Keep": {
+            "customWidth": "20",
             "decimal places": "0",
             "from": "-1",
             "increment": "1",
