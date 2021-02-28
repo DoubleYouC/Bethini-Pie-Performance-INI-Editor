@@ -469,6 +469,9 @@ class BethiniApp(tk.Tk):
         firstTimeBackup = False
         self.removeInvalidSettings()
         TheOpenedINIs = self.openINIs
+        INIList = list(TheOpenedINIs.keys())
+        filesToRemove = INIList[2:]
+        filesToRemove.append('log.log')
         for INI in TheOpenedINIs:
             locationList = list(TheOpenedINIs[INI]['located'].keys())
             for n in range(len(locationList)):
@@ -479,7 +482,7 @@ class BethiniApp(tk.Tk):
                 if messagebox.askyesno(f"Save {INI}", f"Do you want to save {thisLocation}{INI}?"):
                     #we need to make a backup of each save before actually saving.
                     if INI != 'theme.ini':
-                        firstTimeBackupTrigger = removeExcessDirFiles(f'{thisLocation}{MyAppName} backups', int(appConfig.getValue('General', 'iMaxBackups', '5')) + 1, ['log.log', INI])
+                        firstTimeBackupTrigger = removeExcessDirFiles(f'{thisLocation}{MyAppName} backups', int(appConfig.getValue('General', 'iMaxBackups', '5')) + 1, filesToRemove)
                         if firstTimeBackupTrigger:
                             firstTimeBackup = True
                         if firstTimeBackup:
