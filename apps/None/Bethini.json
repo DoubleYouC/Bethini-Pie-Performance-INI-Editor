@@ -238,11 +238,24 @@
             "increment": "1",
             "settings": [ "iMaxBackups" ],
             "targetINIs": [ "Bethini.ini" ],
-            "targetSections": [ "Backups" ],
+            "targetSections": [ "General" ],
             "to": "10",
-            "tooltip": "Select the maximum number of backups to keep.",
+            "tooltip": "Select the maximum number of backups to be kept.",
             "type": "Spinbox",
             "validate": "whole",
+            "width": "7"
+          },
+          "Max Logs to Keep": {
+            "decimal places": "0",
+            "from": "-1",
+            "increment": "1",
+            "settings": [ "iMaxLogs" ],
+            "targetINIs": [ "Bethini.ini" ],
+            "targetSections": [ "General" ],
+            "to": "10",
+            "tooltip": "Select the maximum number of log files to be kept.",
+            "type": "Spinbox",
+            "validate": "integer",
             "width": "7"
           },
           "Always Select Game": {
