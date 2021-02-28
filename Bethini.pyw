@@ -466,6 +466,7 @@ class BethiniApp(tk.Tk):
         #            }
         #        }
         #    }
+        firstTimeBackup = False
         self.removeInvalidSettings()
         TheOpenedINIs = self.openINIs
         for INI in TheOpenedINIs:
@@ -478,7 +479,18 @@ class BethiniApp(tk.Tk):
                 if messagebox.askyesno(f"Save {INI}", f"Do you want to save {thisLocation}{INI}?"):
                     #we need to make a backup of each save before actually saving.
                     if INI != 'theme.ini':
-                        firstTimeBackup = removeExcessDirFiles(f'{thisLocation}{MyAppName} backups', int(appConfig.getValue('General', 'iMaxBackups', '5')), ['log.log', INI])
+                        firstTimeBackupTrigger = removeExcessDirFiles(f'{thisLocation}{MyAppName} backups', int(appConfig.getValue('General', 'iMaxBackups', '5')) + 1, ['log.log', INI])
+                        if firstTimeBackupTrigger:
+                            firstTimeBackup = True
+                        if firstTimeBackup:
+                            theBackupDirectory = f'{thisLocation}\\{MyAppName} backups\\First-Time-Backup\\'
+                            if not os.path.isdir(theBackupDirectory):
+                                os.makedirs(theBackupDirectory)
+                            if os.path.exists(f"{theBackupDirectory}{INI}"):
+                                self.sme(f'{theBackupDirectory}{INI} exists, so it will not be overwritten.')
+                            else:
+                                copyfile(f"{thisLocation}{INI}", f"{theBackupDirectory}{INI}")
+                            copyfile(MyAppNameLog, f"{theBackupDirectory}log.log")
                         theBackupDirectory = f'{thisLocation}\\{MyAppName} backups\\{logDirectoryDate}\\'
                         if not os.path.isdir(theBackupDirectory):
                             os.makedirs(theBackupDirectory)
@@ -1672,6 +1684,8 @@ def removeExcessDirFiles(dir, maxToKeep, filesToRemove):
     if maxToKeep > -1:
         for n in range(len(sub)):
             if n < maxToKeep:
+                sm(sub[n] + ' will be kept.')
+            elif sub[n] == 'First-Time-Backup':
                 sm(sub[n] + ' will be kept.')
             else:
                 dir_path = f'{dir}\\' + sub[n]
