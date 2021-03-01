@@ -472,6 +472,7 @@ class BethiniApp(tk.Tk):
         #        }
         #    }
         firstTimeBackup = False
+        filesSaved = False
         self.removeInvalidSettings()
         TheOpenedINIs = self.openINIs
         INIList = list(TheOpenedINIs.keys())
@@ -483,6 +484,9 @@ class BethiniApp(tk.Tk):
                 thisLocation = TheOpenedINIs[INI]['located'][str(n+1)].get('at')
                 thisINIObject = TheOpenedINIs[INI]['located'][str(n+1)].get('object')
                 if INI == MyAppNameConfig:
+                    continue
+                if not thisINIObject.HasBeenModified:
+                    self.sme(f'{INI} has not been modified, so there is no reason to resave it.')
                     continue
                 if messagebox.askyesno(f"Save {INI}", f"Do you want to save {thisLocation}{INI}?"):
                     #we need to make a backup of each save before actually saving.
@@ -508,7 +512,10 @@ class BethiniApp(tk.Tk):
                             copyfile(f"{thisLocation}{INI}", f"{theBackupDirectory}{INI}")
                         copyfile(MyAppNameLog, f"{theBackupDirectory}log.log")
                     thisINIObject.writeINI(1)
-                    self.sme(f"{thisLocation}{INI} saved.")   
+                    filesSaved = True
+                    self.sme(f"{thisLocation}{INI} saved.")
+        if not filesSaved:
+            self.sme('No files were modified.')
                         
     def setPreset(self, presetid):
         self.startProgress()
@@ -1679,8 +1686,7 @@ def onClosing():
     if messagebox.askyesno("Quit?", "Do you want to quit?"):
         if appConfig.HasBeenModified:
             appConfig.writeINI(1)
-        if messagebox.askyesno("Save Files?", "Do you want to save any files you changed?"):
-            window.SaveINIFiles()
+        window.SaveINIFiles()
         window.quit()
 
 def removeExcessDirFiles(dir, maxToKeep, filesToRemove):
