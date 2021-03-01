@@ -125,15 +125,6 @@
             "customWidth": "18",
             "tooltip": "Select the backup you wish to restore.",
             "type": "Dropdown"
-          },
-          "Modify Custom INIs": {
-            "Offvalue": [ [ "0", "" ] ],
-            "Onvalue": [ [ "1" ] ],
-            "settings": [ "bModifyCustomINIs" ],
-            "targetINIs": [ "Bethini.ini" ],
-            "targetSections": [ "General" ],
-            "tooltip": "If enabled, Bethini will modify any custom INI files to reflect changes made. If disabled, Bethini will still automatically backup your custom INI files, but will not actually make any changes to them.",
-            "type": "Checkbutton"
           }
         }
       }
