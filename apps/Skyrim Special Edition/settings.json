@@ -12184,10 +12184,10 @@
         "Vanilla High": 0.03,
         "Vanilla Ultra": 0.03,
         "Bethini Poor": 0.03,
-        "Bethini Low": 0.8,
-        "Bethini Medium": 0.15,
-        "Bethini High": 0.4,
-        "Bethini Ultra": 1.0
+        "Bethini Low": 0.15,
+        "Bethini Medium": 0.3,
+        "Bethini High": 0.6,
+        "Bethini Ultra": 1.1
       }
     },
     {
