@@ -203,13 +203,29 @@ class customFunctions:
             filesToReplace[INI] = {"InitialFile": fileToReplace,
                                  "NewFile": backupFile}
 
-        if choice == "Choose..." or "None found":
+        if choice == "Choose..." or choice == "None found":
             return
         else:
-            print(filesToReplace)
             #TODO: This will need to be programmed to actually restore the
-            #backup.  We need to program the creation of backups first!
-            
+            #backup. 
+            #{
+            #    'Skyrim.ini':
+            #        {
+            #            'InitialFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Skyrim.ini',
+            #            'NewFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\Skyrim.ini'
+            #        },
+            #    'SkyrimPrefs.ini': 
+            #        {
+            #            'InitialFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\SkyrimPrefs.ini', 
+            #            'NewFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\SkyrimPrefs.ini'
+            #        }
+            #}
+
+            for file in filesToReplace:
+                InitialFile = filesToReplace[file].get('InitialFile')
+                NewFile = filesToReplace[file].get('NewFile')
+                shutil.copyfile(f"{NewFile}", f"{InitialFile}")
+                sm(f'{InitialFile} was replaced with backup from {NewFile}.')
         
         return filesToReplace
 

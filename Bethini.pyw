@@ -487,7 +487,7 @@ class BethiniApp(tk.Tk):
                 if messagebox.askyesno(f"Save {INI}", f"Do you want to save {thisLocation}{INI}?"):
                     #we need to make a backup of each save before actually saving.
                     if INI != 'theme.ini':
-                        firstTimeBackupTrigger = removeExcessDirFiles(f'{thisLocation}{MyAppName} backups', int(appConfig.getValue('General', 'iMaxBackups', '5')) + 1, filesToRemove)
+                        firstTimeBackupTrigger = removeExcessDirFiles(f'{thisLocation}{MyAppName} backups', int(appConfig.getValue('General', 'iMaxBackups', '-1')), filesToRemove)
                         if firstTimeBackupTrigger:
                             firstTimeBackup = True
                         if firstTimeBackup:
@@ -1689,11 +1689,11 @@ def removeExcessDirFiles(dir, maxToKeep, filesToRemove):
         sm("Error: %s : %s" % (dir, e.strerror))
         return True
     sub.sort(reverse=True)
+    if 'First-Time-Backup' in sub:
+        sub.remove('First-Time-Backup')
     if maxToKeep > -1:
         for n in range(len(sub)):
             if n < maxToKeep:
-                sm(sub[n] + ' will be kept.')
-            elif sub[n] == 'First-Time-Backup':
                 sm(sub[n] + ' will be kept.')
             else:
                 dir_path = f'{dir}\\' + sub[n]
