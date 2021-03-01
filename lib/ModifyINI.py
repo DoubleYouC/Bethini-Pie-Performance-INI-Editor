@@ -23,6 +23,8 @@ class ModifyINI:
         self.caseInsensitiveConfig = customConfigParser()
         self.caseInsensitiveConfig.read(self.INItoModify)
 
+        self.HasBeenModified = False
+
     def getValue(self, section, setting, default='Does Not Exist'):
         if section in self.caseInsensitiveConfig:
             return self.caseInsensitiveConfig[section].get(setting, default)
@@ -54,21 +56,25 @@ class ModifyINI:
                     self.config.remove_option(section, eachSetting)
             self.config[section][setting] = value
             self.caseInsensitiveConfig[section][setting] = value
+            self.HasBeenModified = True
             return True
         else:
             return False
 
     def removeSetting(self, section, setting):
         self.config.remove_option(section, setting)
+        self.HasBeenModified = True
 
     def removeSection(self, section):
         self.config.remove_section(section)
+        self.HasBeenModified = True
 
     def writeValue(self, section, setting, value):
         #writes the specified value to the specified setting only if the value
         #is different from what is already there.
         if self.assignINIValue(section, setting, value):
             self.writeINI()
+            self.HasBeenModified = False
 
     def doesSettingExist(self, section, setting):
         #returns boolean for if the setting exists.
@@ -81,6 +87,7 @@ class ModifyINI:
         for section in self.config._sections:
             self.config._sections[section] = OrderedDict(sorted(self.config._sections[section].items(), key=lambda t: t[0]))
         self.config._sections = OrderedDict(sorted(self.config._sections.items(), key=lambda t: t[0]))
+        self.HasBeenModified = True
 
     def writeINI(self, sort=False):
         #writes the file.
@@ -88,6 +95,7 @@ class ModifyINI:
             self.sort()
         with open(self.INItoModify, 'w') as configfile:
             self.config.write(configfile, space_around_delimiters = False)
+        self.HasBeenModified = False
 
 if __name__ == '__main__':
     print('This is the ModifyINI class module.')
