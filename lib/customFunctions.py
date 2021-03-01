@@ -206,8 +206,7 @@ class customFunctions:
         if choice == "Choose..." or choice == "None found":
             return
         else:
-            #TODO: This will need to be programmed to actually restore the
-            #backup. 
+            #An example of filesToReplace
             #{
             #    'Skyrim.ini':
             #        {
