@@ -307,7 +307,7 @@
             "to": "10",
             "tooltip": "Select the maximum number of backups to be kept.",
             "type": "Spinbox",
-            "validate": "whole",
+            "validate": "integer",
             "width": "7"
           },
           "Max Logs to Keep": {
