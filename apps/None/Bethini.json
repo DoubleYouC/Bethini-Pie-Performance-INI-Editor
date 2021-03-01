@@ -7,61 +7,15 @@
     "theme.ini": "sTheme"
   },
   "customFunctions": {
+    "FUNCThemes": "{}",
+    "FUNCThemesFormat": "getThemes"
   },
   "displayTabs": {
     "Setup": {
       "NoLabelFrame": {
         "NumberOfVerticallyStackedSettings": "6",
         "Settings": {
-          "Game Path": {
-            "browse": [ "directory", "SkyrimSE.exe", "file" ],
-            "choices": [ "FUNCGamePath", "Browse...", "Manual..." ],
-            "customWidth": "18",
-            "forceSelect": "1",
-            "settings": [ "sSkyrim Special EditionPath" ],
-            "targetINIs": [ "Bethini.ini" ],
-            "targetSections": [ "Directories" ],
-            "tooltip": "Specifies the path to the game directory.",
-            "type": "Dropdown"
-          },
-          "ModOrganizer.ini": {
-            "browse": [ "directory", "ModOrganizer.ini", "file" ],
-            "choices": "FUNCgetMODirectory",
-            "customWidth": "18",
-            "forceSelect": "1",
-            "settings": [ "sSkyrim Special EditionModOrganizerINIPath" ],
-            "targetINIs": [ "Bethini.ini" ],
-            "targetSections": [ "Directories" ],
-            "tooltip": "Specifies the location to the ModOrganizer.ini file (required to find the location of MO profiles).",
-            "type": "Dropdown"
-          },
-          "INI Path": {
-            "browse": [ "directory", "Skyrim.ini", "file" ],
-            "choices": "FUNCINIPath",
-            "customWidth": "18",
-            "forceSelect": "1",
-            "settings": [ "sSkyrim Special EditionINIPath" ],
-            "targetINIs": [ "Bethini.ini" ],
-            "targetSections": [ "Directories" ],
-            "tooltip": "Specifies the path to the INI files.",
-            "type": "Dropdown"
-          },
-          "Restore Backup": {
-            "choices": "FUNCBackups",
-            "customFunction": "RestoreBackup",
-            "customWidth": "18",
-            "tooltip": "Select the backup you wish to restore.",
-            "type": "Dropdown"
-          },
-          "Modify Custom INIs": {
-            "Offvalue": [ [ "0", "" ] ],
-            "Onvalue": [ [ "1" ] ],
-            "settings": [ "bModifyCustomINIs" ],
-            "targetINIs": [ "Bethini.ini" ],
-            "targetSections": [ "General" ],
-            "tooltip": "If enabled, Bethini will modify any custom INI files to reflect changes made. If disabled, Bethini will still automatically backup your custom INI files, but will not actually make any changes to them.",
-            "type": "Checkbutton"
-          }
+          "": ""
         }
       }
     },
@@ -243,7 +197,7 @@
             "to": "10",
             "tooltip": "Select the maximum number of backups to be kept.",
             "type": "Spinbox",
-            "validate": "whole",
+            "validate": "integer",
             "width": "7"
           },
           "Max Logs to Keep": {
@@ -269,6 +223,14 @@
             "tooltip": "Toggles whether or not you must always select the game at startup.",
             "type": "Checkbutton"
           }
+        }
+      }
+    },
+    "Placeholder": {
+      "NoLabelFrame": {
+        "NumberOfVerticallyStackedSettings": "6",
+        "Settings": {
+          "": ""
         }
       }
     }
