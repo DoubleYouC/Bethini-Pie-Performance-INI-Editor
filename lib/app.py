@@ -15,7 +15,10 @@ class appName:
             self.Bethini = json.load(Bethini)
 
         self.INIFiles = list(self.Bethini["INIs"].keys())
-        self.defaultINI = self.INIFiles[2]
+        try:
+            self.defaultINI = self.INIFiles[2]
+        except:
+            self.defaultINI = None
         self.iniValues = self.data["iniValues"]
         self.iniSectionSettingDict = self.getIniSectionSettingDict()
         self.settingValues = self.settingValues()
