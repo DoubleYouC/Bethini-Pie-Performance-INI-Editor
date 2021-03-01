@@ -1677,7 +1677,8 @@ class BethiniApp(tk.Tk):
 
 def onClosing():
     if messagebox.askyesno("Quit?", "Do you want to quit?"):
-        appConfig.writeINI(1)
+        if appConfig.HasBeenModified:
+            appConfig.writeINI(1)
         if messagebox.askyesno("Save Files?", "Do you want to save any files you changed?"):
             window.SaveINIFiles()
         window.quit()
