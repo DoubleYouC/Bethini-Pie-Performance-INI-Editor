@@ -15,9 +15,7 @@ from datetime import datetime
 from fractions import Fraction
 from operator import *
 from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE #This is for changing file read-only access via os.chmod(filename, S_IREAD,
-                                                                       #S_IRGRP, #S_IROTH) Not currently used.
-
-                                                                       
+                                                                       #S_IRGRP, #S_IROTH) Not currently used.                                                     
 import tkinter as tk 
 from tkinter import ttk
 from tkinter import colorchooser
