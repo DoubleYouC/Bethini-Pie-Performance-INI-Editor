@@ -1,0 +1,3 @@
+[submodule "apps/Fallout 4"]
+	path = apps/Fallout 4
+	url = https://github.com/DoubleYouC/Bethini-Pie-Fallout-4-Plugin.git
