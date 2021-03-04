@@ -952,7 +952,8 @@ class BethiniApp(tk.Tk):
         self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
         stuffToAddToSettingDictionary = {
             'TkVar': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
-            'colorValueType': colorValueType
+            'colorValueType': colorValueType,
+            'rgbType': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("rgbType")
             }
         self.settingDictionary[setting].update(stuffToAddToSettingDictionary)
 
@@ -1121,6 +1122,7 @@ class BethiniApp(tk.Tk):
         settingValue = self.getSettingValues(self.settingDictionary[setting].get('targetINIs'),
                                              self.settingDictionary[setting].get('targetSections'),
                                              self.settingDictionary[setting].get('settings'))
+        
         if settingValue != [] and 'Does Not Exist' not in settingValue:
             colorValueType = self.settingDictionary[setting].get("colorValueType")
             if colorValueType == 'hex':
@@ -1131,11 +1133,18 @@ class BethiniApp(tk.Tk):
                 #convert decimal value to hex
                 newColor = RGBToHex(DecimalToRGB(settingValue[0]))
             elif colorValueType == 'rgb':
-                thisValue = '('
-                for n in range(len(settingValue)):
-                    thisValue += settingValue[n]
-                thisValue += ')'
-                newColor = RGBToHex(ast.literal_eval(thisValue))
+                rgbType = self.settingDictionary[setting].get("rgbType")
+                if rgbType == 'multiple settings':
+                    thisValue = tuple(int(i) for i in settingValue)
+                    newColor = RGBToHex(thisValue)
+                    thisValue = str(thisValue)
+                else:
+                    thisValue = '('
+                    for n in range(len(settingValue)):
+                        thisValue += settingValue[n]
+                    thisValue += ')'
+                    print(thisValue)
+                    newColor = RGBToHex(ast.literal_eval(thisValue))
             self.settingDictionary[setting]['TkVar'].set(thisValue)
             TkWidget = self.settingDictionary[setting].get("TkWidget")
             RGB = HexToRGB(newColor)
@@ -1413,8 +1422,9 @@ class BethiniApp(tk.Tk):
                     self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + thisValue)
                 elif colorValueType == 'rgb':
                     if len(theSettings) > 1:
-                        theTargetINI.assignINIValue(targetSections[n], theSettings[n], thisValue[n])
-                        self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + thisValue[n])
+                        theValue = str(ast.literal_eval(thisValue)[n])
+                        theTargetINI.assignINIValue(targetSections[n], theSettings[n], theValue)
+                        self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + theValue)
                     else:
                         thisValue = thisValue.lstrip('(').rstrip(')')
                         theTargetINI.assignINIValue(targetSections[n], theSettings[n], thisValue)
