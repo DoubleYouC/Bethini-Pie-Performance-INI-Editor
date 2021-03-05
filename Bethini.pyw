@@ -296,8 +296,13 @@ class BethiniApp(tk.Tk):
         oldColor = buttonToModify.var.get()
         if colorValueType == 'rgb':
             oldColor = RGBToHex(ast.literal_eval(oldColor))
+        elif colorValueType == 'rgb 1':
+            #"(1.0000, 1.0000, 1.0000)"
+            #(255, 255, 255)
+            oldColor = tuple(int(float(i)*255) for i in ast.literal_eval(oldColor))
         elif colorValueType == 'decimal':
             oldColor = RGBToHex(DecimalToRGB(oldColor))
+
         try:
             newColor = tk.colorchooser.askcolor(color = oldColor)[1].upper()
         except:
@@ -313,6 +318,11 @@ class BethiniApp(tk.Tk):
         buttonToModify.configure(bg=newColor, activebackground=newColor, fg=textColor)
         if colorValueType == 'rgb':
             buttonToModify.var.set(str(HexToRGB(newColor)).replace(' ',''))
+        elif colorValueType == 'rgb 1':
+            #(255, 255, 255)
+            #"(1.0000, 1.0000, 1.0000)"
+            theRGB = str(tuple(round(i/255,4) for i in HexToRGB(newColor)))
+            buttonToModify.var.set(theRGB)
         elif colorValueType == 'decimal':
             buttonToModify.var.set(HexToDecimal(newColor))
         else:
@@ -938,6 +948,8 @@ class BethiniApp(tk.Tk):
             self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('#FFFFFF')
         elif colorValueType == 'rgb':
             self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('(255, 255, 255)')
+        elif colorValueType == 'rgb 1':
+            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('(1.0000, 1.0000, 1.0000)')
         elif colorValueType == 'decimal':
             self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('16777215')
         self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = tk.Button(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
@@ -1145,6 +1157,12 @@ class BethiniApp(tk.Tk):
                     thisValue += ')'
                     print(thisValue)
                     newColor = RGBToHex(ast.literal_eval(thisValue))
+            elif colorValueType == 'rgb 1':
+                rgbType = self.settingDictionary[setting].get("rgbType")
+                if rgbType == 'multiple settings':
+                    thisValue = tuple(round(float(i),4) for i in settingValue)
+                    newColor = RGBToHex(tuple(int(float(i)*255) for i in settingValue))
+                    thisValue = str(thisValue)
             self.settingDictionary[setting]['TkVar'].set(thisValue)
             TkWidget = self.settingDictionary[setting].get("TkWidget")
             RGB = HexToRGB(newColor)
@@ -1420,7 +1438,7 @@ class BethiniApp(tk.Tk):
                 elif colorValueType == 'decimal':
                     theTargetINI.assignINIValue(targetSections[n], theSettings[n], thisValue)
                     self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + thisValue)
-                elif colorValueType == 'rgb':
+                elif colorValueType == 'rgb' or colorValueType == 'rgb 1':
                     if len(theSettings) > 1:
                         theValue = str(ast.literal_eval(thisValue)[n])
                         theTargetINI.assignINIValue(targetSections[n], theSettings[n], theValue)
