@@ -17,7 +17,6 @@ from operator import gt, ge, lt, le, ne, eq
 import tkinter as tk 
 from tkinter import ttk
 from tkinter import colorchooser
-from tkinter import simpledialog
 from tkinter import messagebox
 
 from lib.app import appName
