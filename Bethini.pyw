@@ -7,14 +7,12 @@ import ast
 import os
 import math
 import logging
-import sys
-import time
 import webbrowser
 from shutil import copyfile
 from datetime import datetime
 from fractions import Fraction
-from operator import *
-from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE #This is for changing file read-only access via os.chmod(filename, S_IREAD,
+from operator import gt, ge, lt, le, ne, eq
+#from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE #This is for changing file read-only access via os.chmod(filename, S_IREAD,
                                                                        #S_IRGRP, #S_IROTH) Not currently used.                                                     
 import tkinter as tk 
 from tkinter import ttk
@@ -304,7 +302,7 @@ class BethiniApp(tk.Tk):
             oldColor = RGBToHex(DecimalToRGB(oldColor))
 
         try:
-            newColor = tk.colorchooser.askcolor(color = oldColor)[1].upper()
+            newColor = colorchooser.askcolor(color = oldColor)[1].upper()
         except:
             #self.sme('Cancelled change of color.', exception=1)
             newColor = oldColor
@@ -361,7 +359,7 @@ class BethiniApp(tk.Tk):
         try:
             self.chooseGameVar = appConfig.getValue('General','sAppName')
             if self.chooseGameVar != game:
-                self.sme(f'Change of game from {chooseGameVar} to {game}')
+                self.sme(f'Change of game from {self.chooseGameVar} to {game}')
                 raise Exception("App/Game specified in " + MyAppNameConfig + " differs from the game chosen, so it will be changed to the one you chose.")
         except:
             self.sme('Change of game/application', exception=1)
