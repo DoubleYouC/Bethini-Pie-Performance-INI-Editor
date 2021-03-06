@@ -35,7 +35,7 @@ class ModifyINI:
 
     def getSettings(self, section):
         settings = []
-        for item in self.config.items(section):
+        for item in self.caseInsensitiveConfig.items(section):
             settings.append(item[0])
         return settings
 
@@ -63,10 +63,12 @@ class ModifyINI:
 
     def removeSetting(self, section, setting):
         self.config.remove_option(section, setting)
+        self.caseInsensitiveConfig.remove_option(section, setting)
         self.HasBeenModified = True
 
     def removeSection(self, section):
         self.config.remove_section(section)
+        self.caseInsensitiveConfig.remove_section(section)
         self.HasBeenModified = True
 
     def writeValue(self, section, setting, value):
@@ -80,7 +82,10 @@ class ModifyINI:
         #returns boolean for if the setting exists.
         if setting in self.caseInsensitiveConfig[section]:
             return True
-        return False
+        elif '=' not in setting:
+            return True
+        else:
+            return False
 
     def sort(self):
         #sorts all sections and settings.
