@@ -565,7 +565,9 @@ class BethiniApp(tk.Tk):
                             self.sme(f'{section} was removed because it was empty.')
                         else:
                             for setting in settings:
-                                if not app.doesSettingExist(INI, section, setting):
+                                if ';' in setting:
+                                    self.sme(f'{setting}:{section} will be preserved, as it is a comment.')
+                                elif not app.doesSettingExist(INI, section, setting):
                                     thisINIObject.removeSetting(section, setting)
                                     self.sme(f'{setting}:{section} was removed because it is not recognized.')                       
 
