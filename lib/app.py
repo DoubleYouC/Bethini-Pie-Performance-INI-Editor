@@ -164,7 +164,7 @@ class appName:
         iteration = -1
         for setting in self.settings:
             iteration += 1
-            SomethingSomethingDictionary[setting] = SomethingSomethings[iteration]
+            SomethingSomethingsDictionary[setting] = SomethingSomethings[iteration]
         return SomethingSomethingsDictionary
 
     def settingSectionDictionary(self):
