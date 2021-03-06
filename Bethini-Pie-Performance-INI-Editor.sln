@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31025.194
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Bethini-Pie-Performance-INI-Editor", "Bethini-Pie-Performance-INI-Editor.pyproj", "{21A397B2-4031-43AE-B811-B5804731BDD0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{21A397B2-4031-43AE-B811-B5804731BDD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21A397B2-4031-43AE-B811-B5804731BDD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5F07800D-C675-47D6-9A00-4C658108BE05}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{21a397b2-4031-43ae-b811-b5804731bdd0}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>Bethini.pyw</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Bethini.pyw" />
+    <Compile Include="lib\app.py" />
+    <Compile Include="lib\AutoScrollbar.py" />
+    <Compile Include="lib\customConfigParser.py" />
+    <Compile Include="lib\customFunctions.py" />
+    <Compile Include="lib\ModifyINI.py" />
+    <Compile Include="lib\tooltips.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include=".vs\ProjectSettings.json" />
+    <Content Include=".vs\VSWorkspaceState.json" />
+    <Content Include="apps\Fallout 4\.vs\ProjectSettings.json" />
+    <Content Include="apps\Fallout 4\.vs\VSWorkspaceState.json" />
+    <Content Include="apps\Fallout 4\Bethini.json" />
+    <Content Include="apps\Fallout 4\settings.json" />
+    <Content Include="apps\None\Bethini.json" />
+    <Content Include="apps\None\settings.json" />
+    <Content Include="apps\Skyrim Special Edition\.vs\ProjectSettings.json" />
+    <Content Include="apps\Skyrim Special Edition\.vs\VSWorkspaceState.json" />
+    <Content Include="apps\Skyrim Special Edition\Bethini.json" />
+    <Content Include="apps\Skyrim Special Edition\settings.json" />
+    <Content Include="Bethini.ini" />
+    <Content Include="Bethini.spec" />
+    <Content Include="Icon.ico" />
+    <Content Include="theme\Dark Blue\Basic.png" />
+    <Content Include="theme\Dark Blue\Blank.png" />
+    <Content Include="theme\Dark Blue\General.png" />
+    <Content Include="theme\Dark Blue\Interface.png" />
+    <Content Include="theme\Dark Blue\theme.ini" />
+    <Content Include="theme\Dark Blue\View Distance.png" />
+    <Content Include="theme\Dark Blue\Visuals.png" />
+    <Content Include="theme\Dark Brown\Basic.png" />
+    <Content Include="theme\Dark Brown\Blank.png" />
+    <Content Include="theme\Dark Brown\General.png" />
+    <Content Include="theme\Dark Brown\Interface.png" />
+    <Content Include="theme\Dark Brown\theme.ini" />
+    <Content Include="theme\Dark Brown\View Distance.png" />
+    <Content Include="theme\Dark Brown\Visuals.png" />
+    <Content Include="theme\Dark\Basic.png" />
+    <Content Include="theme\Dark\Blank.png" />
+    <Content Include="theme\Dark\General.png" />
+    <Content Include="theme\Dark\Interface.png" />
+    <Content Include="theme\Dark\theme.ini" />
+    <Content Include="theme\Dark\View Distance.png" />
+    <Content Include="theme\Dark\Visuals.png" />
+    <Content Include="theme\Default\Basic.png" />
+    <Content Include="theme\Default\Blank.png" />
+    <Content Include="theme\Default\General.png" />
+    <Content Include="theme\Default\Interface.png" />
+    <Content Include="theme\Default\theme.ini" />
+    <Content Include="theme\Default\View Distance.png" />
+    <Content Include="theme\Default\Visuals.png" />
+    <Content Include="theme\No Tab Images\Blank.png" />
+    <Content Include="theme\No Tab Images\theme.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include=".vs" />
+    <Folder Include="apps\" />
+    <Folder Include="apps\Fallout 4" />
+    <Folder Include="apps\Fallout 4\.vs" />
+    <Folder Include="apps\None" />
+    <Folder Include="apps\Skyrim Special Edition" />
+    <Folder Include="apps\Skyrim Special Edition\.vs" />
+    <Folder Include="lib" />
+    <Folder Include="theme\" />
+    <Folder Include="theme\Dark" />
+    <Folder Include="theme\Dark Blue" />
+    <Folder Include="theme\Dark Brown" />
+    <Folder Include="theme\Default" />
+    <Folder Include="theme\No Tab Images" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+</Project>
