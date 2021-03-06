@@ -115,7 +115,7 @@ class appName:
         PresetDict = {}
         for iniSetting in self.iniValues:
             presetValue = iniSetting['value'].get(preset)
-            if presetValue or presetValue == 0:
+            if presetValue or presetValue == 0 or presetValue == '':
                 ini = iniSetting.get('ini', self.defaultINI)
                 PresetDict[iniSetting['name']]={
                     'ini': ini,
