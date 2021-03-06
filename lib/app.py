@@ -82,10 +82,8 @@ class appName:
         iniSectionSettingDict = {}
         for iniSetting in self.iniValues:
             ini = iniSetting.get('ini', self.defaultINI)
-            section = iniSetting.get('section')
-            section.lower()
+            section = iniSetting.get('section').lower()
             setting = iniSetting.get('name')
-            setting.lower()
             if ini not in list(iniSectionSettingDict.keys()):
                 iniSectionSettingDict[ini] = {
                     section: [setting]
@@ -101,9 +99,10 @@ class appName:
         return self.settingValues[setting][type]
 
     def doesSettingExist(self, ini, section, setting):
+        section = section.lower()
         try:
             theSectionList = [x.lower() for x in self.iniSectionSettingDict[ini][section]]
-            #setting = setting.lower()
+            setting = setting.lower()
             if setting in theSectionList:
                 return True
             else:

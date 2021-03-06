@@ -26,9 +26,28 @@ class ModifyINI:
         self.HasBeenModified = False
 
     def getValue(self, section, setting, default='Does Not Exist'):
+        
+        if section in self.caseInsensitiveConfig:
+            return self.caseInsensitiveConfig[section].get(setting, default)
+
+        #if the section is not in the correct case, let's check for that before discounting it
+        section = self.getExistingSection(section)
+
         if section in self.caseInsensitiveConfig:
             return self.caseInsensitiveConfig[section].get(setting, default)
         return default
+
+    def getExistingSection(self, section):
+        #this function looks for an existing case version of the section we are looking for
+        theSection = section
+        section = section.lower()
+        for eachSection in self.getSections():
+            originalSection = eachSection
+            eachSection = eachSection.lower()
+            if eachSection == section:
+                theSection = originalSection
+                break
+        return theSection
 
     def getSections(self):
         return self.caseInsensitiveConfig.sections()
@@ -44,8 +63,11 @@ class ModifyINI:
         #different.  Case sensitive.  Returns true if the value was changed.
 
         if section not in self.config:
-            self.config[section] = {}
-            self.caseInsensitiveConfig[section] = {}
+            #check to make sure it is not in the file as an alternative case
+            section = self.getExistingSection(section)
+            if section not in self.config: #if section still not in self.config, make the section.
+                self.config[section] = {}
+                self.caseInsensitiveConfig[section] = {}
         if self.getValue(section, setting) != value:
             for eachSetting in self.config[section]:
                 #This beautiful for loop prevents duplicate settings if they
@@ -62,11 +84,15 @@ class ModifyINI:
             return False
 
     def removeSetting(self, section, setting):
+        if section not in self.config:
+            section = self.getExistingSection(section)
         self.config.remove_option(section, setting)
         self.caseInsensitiveConfig.remove_option(section, setting)
         self.HasBeenModified = True
 
     def removeSection(self, section):
+        if section not in self.config:
+            section = self.getExistingSection(section)
         self.config.remove_section(section)
         self.caseInsensitiveConfig.remove_section(section)
         self.HasBeenModified = True
@@ -80,6 +106,8 @@ class ModifyINI:
 
     def doesSettingExist(self, section, setting):
         #returns boolean for if the setting exists.
+        if section not in self.config:
+            section = self.getExistingSection(section)
         if setting in self.caseInsensitiveConfig[section]:
             return True
         elif '=' not in setting:
