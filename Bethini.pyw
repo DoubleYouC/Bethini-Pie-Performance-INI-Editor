@@ -25,59 +25,6 @@ from lib.tooltips import CreateToolTip
 from lib.ModifyINI import ModifyINI
 from lib.customFunctions import customFunctions, sm, browseToLocation, RGBToHex, HexToRGB, HexToDecimal, DecimalToRGB
 
-def loadTheme():
-    #This loads the theme as specified in the Bethini.ini file to the relative
-    #theme\<theme-name>\theme.ini file.
-    global theme #theme needs to be global so it can be called later
-    theme = appConfig.getValue('General', 'sTheme', default="Default") #get the theme name form the sTheme:General setting in Bethini.ini. Defaults to 'Default'          
-    
-    if os.path.isfile(f'{cwd}\\theme\\{theme}\\theme.ini'):
-        sm(f'The theme called \"{theme}\" exists.')
-    else:
-        theme = 'Default'
-    appConfig.assignINIValue('General', 'sTheme', theme) #if there is no value set in Bethini.ini for sTheme:General
-    global ThemeConfig
-    ThemeConfig = ModifyINI('theme\\' + str(theme) + '\\theme.ini') #set the theme.ini file to be the INI file to modify for the ThemeConfig variable                                                          
-
-    defaultFontName = "Segoe UI" #set the default font name
-    defaultFontSize = 10 #set the default font size
-
-    #set the font names and sizes
-    global smallFontSize
-    smallFontSize = ThemeConfig.getValue('Fonts','iSmallFontSize', defaultFontSize)
-    global smallFont
-    smallFont = (ThemeConfig.getValue('Fonts','sSmallFontName', defaultFontName), smallFontSize)
-
-    #set the colors
-    global buttonBarColor
-    buttonBarColor = ThemeConfig.getValue('Colors','sButtonBarColor','#969696')
-    global containerColor
-    containerColor = ThemeConfig.getValue('Colors','sContainerColor','#555555')
-    global subContainerColor
-    subContainerColor = ThemeConfig.getValue('Colors','sSubContainerColor','#A5A5A5')
-    global dropdownColor
-    dropdownColor = ThemeConfig.getValue('Colors','sDropDownColor','#BEBEBE')
-    global fieldColor
-    fieldColor = ThemeConfig.getValue('Colors','sFieldColor','#FFFFFF')
-    global indicatorColor
-    indicatorColor = ThemeConfig.getValue('Colors','sIndicatorColor','#FFFFFF')
-    global textColor
-    textColor = ThemeConfig.getValue('Colors','sTextColor','#000000')
-
-    global textColorDisabled
-    textColorDisabled = ThemeConfig.getValue('Colors','sTextColorDisabled','#7F7F7F')
-    global textColorPressed
-    textColorPressed = ThemeConfig.getValue('Colors','sTextColorPressed','#323232')
-    global textColorActive
-    textColorActive = ThemeConfig.getValue('Colors','sTextColorActive','#000000')
-
-    global backgroundColorDisabled
-    backgroundColorDisabled = ThemeConfig.getValue('Colors','sBackgroundColorDisabled','#E1E1E1')
-    global backgroundColorPressed
-    backgroundColorPressed = ThemeConfig.getValue('Colors','sBackgroundColorPressed','#828282')
-    global backgroundColorActive
-    backgroundColorActive = ThemeConfig.getValue('Colors','sBackgroundColorActive','#A5A5A5')
-
 class BethiniApp(tk.Tk):
     #This is the main app, the glue that creates the GUI.
     
@@ -215,7 +162,6 @@ class BethiniApp(tk.Tk):
 
 
         self.subContainer = ttk.Notebook(self.container)
-        self.subContainer.bind("<<NotebookTabChanged>>", self.TabChanged)
         self.subContainer.bind("<Configure>", self.subContainerConfigure)
 
         self.statusbarText = tk.StringVar(self)
@@ -1691,20 +1637,6 @@ class BethiniApp(tk.Tk):
             self.openINIs[INI]['located'][wID]['object'] = ModifyINI(location + INI)
             return self.openINIs[INI]['located'][wID]['object']
 
-    def TabChanged(self, event):
-        return
-        #selectedTab = event.widget.select()
-        #tabName = event.widget.tab(selectedTab, "text")
-        #if len(self.tab) == 0:
-        #    self.tab.insert(0, tabName)
-        #elif len(self.tab) == 1:
-        #    self.tab.insert(1, tabName)
-        #else:
-        #    self.tab[0] = self.tab[1]
-        #    self.tab[1] = tabName
-        #if len(self.tab) > 1 and self.tab[1] != self.tab[0] and self.tab[0] == 'Setup':
-        #    self.updateValues()
-
 def onClosing():
     if messagebox.askyesno("Quit?", "Do you want to quit?"):
         if appConfig.HasBeenModified:
@@ -1739,10 +1671,9 @@ def removeExcessDirFiles(theDir, maxToKeep, filesToRemove):
                     sm("Error: %s : %s" % (dir_path, e.strerror))
     return False
 
-
-
 cwd = os.getcwd()
 
+#This dictionary maps the operator modules to specific text.
 operatorDict = {
     'greater-than': gt,
     'greater-or-equal-than': ge,
@@ -1752,31 +1683,67 @@ operatorDict = {
     'equal': eq
     }
 
+#Specify the name of the application.
 MyAppName = "Bethini Pie"
 MyAppShortName = "Bethini"
 
-today = datetime.now()
-logDirectoryDate = today.strftime("%Y %b %d %a - %H.%M.%S")
-MyAppNameLogDirectory = f'logs\\{logDirectoryDate}'
-MyAppNameLog = f'{MyAppNameLogDirectory}\\log.log'
-MyAppNameConfig = f'{MyAppShortName}.ini'
-
-
-
 if __name__ == '__main__':
+    #Make logs.
+    today = datetime.now()
+    logDirectoryDate = today.strftime("%Y %b %d %a - %H.%M.%S")
+    MyAppNameLogDirectory = f'logs\\{logDirectoryDate}'
+    MyAppNameLog = f'{MyAppNameLogDirectory}\\log.log'
     os.makedirs(MyAppNameLogDirectory)
-
     logging.basicConfig(filename=MyAppNameLog, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
+    #Get app config settings.
+    MyAppNameConfig = f'{MyAppShortName}.ini'
     appConfig = ModifyINI(MyAppNameConfig)
     iMaxLogs = appConfig.getValue('General', 'iMaxLogs', '5')
     appConfig.assignINIValue('General', 'iMaxLogs', iMaxLogs)
+    appConfig.assignINIValue('General', 'iMaxBackups', appConfig.getValue('General', 'iMaxBackups', '5'))
+    
+    theme = appConfig.getValue('General', 'sTheme', default='Default')
+
+    #Remove excess log files.
     removeExcessDirFiles(f'{cwd}\\logs', int(iMaxLogs), ['log.log'])
 
-    appConfig.assignINIValue('General', 'iMaxBackups', appConfig.getValue('General', 'iMaxBackups', '5'))
+    #Check to make sure the theme actually exists.
+    if os.path.isfile(f'{cwd}\\theme\\{theme}\\theme.ini'):
+        sm(f'The theme called \"{theme}\" exists.')
+    else:
+        #If the theme doesn't exist, revert to Default theme.
+        theme = 'Default'
+    #Make sure that the theme is specified in the config file.
+    appConfig.assignINIValue('General', 'sTheme', theme)
 
-    loadTheme()
+    #Open Theme config.
+    ThemeConfig = ModifyINI(f'theme\\{theme}\\theme.ini')
+    defaultFontName = 'Segoe UI' #Set the default font name.
+    defaultFontSize = 10 #Set the default font size.
 
+    #Set the font names and sizes.
+    smallFontSize = ThemeConfig.getValue('Fonts','iSmallFontSize', defaultFontSize)
+    smallFont = (ThemeConfig.getValue('Fonts','sSmallFontName', defaultFontName), smallFontSize)
+
+    #Set the theme colors.
+    buttonBarColor = ThemeConfig.getValue('Colors','sButtonBarColor','#969696')
+    containerColor = ThemeConfig.getValue('Colors','sContainerColor','#555555')
+    subContainerColor = ThemeConfig.getValue('Colors','sSubContainerColor','#A5A5A5')
+    dropdownColor = ThemeConfig.getValue('Colors','sDropDownColor','#BEBEBE')
+    fieldColor = ThemeConfig.getValue('Colors','sFieldColor','#FFFFFF')
+    indicatorColor = ThemeConfig.getValue('Colors','sIndicatorColor','#FFFFFF')
+    textColor = ThemeConfig.getValue('Colors','sTextColor','#000000')
+
+    textColorDisabled = ThemeConfig.getValue('Colors','sTextColorDisabled','#7F7F7F')
+    textColorPressed = ThemeConfig.getValue('Colors','sTextColorPressed','#323232')
+    textColorActive = ThemeConfig.getValue('Colors','sTextColorActive','#000000')
+
+    backgroundColorDisabled = ThemeConfig.getValue('Colors','sBackgroundColorDisabled','#E1E1E1')
+    backgroundColorPressed = ThemeConfig.getValue('Colors','sBackgroundColorPressed','#828282')
+    backgroundColorActive = ThemeConfig.getValue('Colors','sBackgroundColorActive','#A5A5A5')
+
+    #Start the app class
     window = BethiniApp()
     window.protocol("WM_DELETE_WINDOW", onClosing)
     window.mainloop()
