@@ -1648,7 +1648,7 @@ def removeExcessDirFiles(theDir, maxToKeep, filesToRemove):
     try:
         sub = os.listdir(theDir)
     except OSError as e:
-        sm("Error: %s : %s" % (theDir, e.strerror))
+        sm(f"Info: {theDir} : {e.strerror}")
         return True
     sub.sort(reverse=True)
     if 'First-Time-Backup' in sub:
@@ -1668,7 +1668,7 @@ def removeExcessDirFiles(theDir, maxToKeep, filesToRemove):
                     os.rmdir(dir_path)
                     sm(sub[n] + ' was removed.')
                 except OSError as e:
-                    sm("Error: %s : %s" % (dir_path, e.strerror))
+                    sm(f"Error: {dir_path} : {e.strerror}")
     return False
 
 cwd = os.getcwd()
