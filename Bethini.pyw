@@ -309,10 +309,10 @@ class BethiniApp(tk.Tk):
         RGB = HexToRGB(newColor)
         luminance = 0.299*RGB[0] + 0.587*RGB[1] + 0.114*RGB[2]
         if luminance < 128:
-            textColor = '#FFFFFF'
+            theTextColor = '#FFFFFF'
         else:
-            textColor = '#000000'
-        buttonToModify.configure(bg=newColor, activebackground=newColor, fg=textColor)
+            theTextColor = '#000000'
+        buttonToModify.configure(bg=newColor, activebackground=newColor, fg=theTextColor)
         if colorValueType == 'rgb':
             buttonToModify.var.set(str(HexToRGB(newColor)).replace(' ',''))
         elif colorValueType == 'rgb 1':
@@ -763,15 +763,13 @@ class BethiniApp(tk.Tk):
                     valueToInsert = getattr(customFunctions, customFunction)(gameName)
                     OPTIONS = valueToInsert
         else:
-            optionNumber = -1
-            for option in OPTIONS:
-                optionNumber += 1
-                if 'FUNC' in OPTIONS[optionNumber]:
-                    OptionString = app.custom(OPTIONS[optionNumber])
+            for n in range(len(OPTIONS)):
+                if 'FUNC' in OPTIONS[n]:
+                    OptionString = app.custom(OPTIONS[n])
                     if '{}' in OptionString:
-                        customFunction = app.custom(str(OPTIONS[optionNumber]) + 'Format')
+                        customFunction = app.custom(str(OPTIONS[n]) + 'Format')
                         valueToInsert = getattr(customFunctions, customFunction)(gameName)
-                        OPTIONS[optionNumber] = OptionString.format(valueToInsert)
+                        OPTIONS[n] = OptionString.format(valueToInsert)
 
         self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
         self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = ttk.OptionMenu(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
@@ -1167,10 +1165,10 @@ class BethiniApp(tk.Tk):
             RGB = HexToRGB(newColor)
             luminance = 0.299*RGB[0] + 0.587*RGB[1] + 0.114*RGB[2]
             if luminance < 128:
-                textColor = '#FFFFFF'
+                theTextColor = '#FFFFFF'
             else:
-                textColor = '#000000'
-            TkWidget.configure(bg=newColor, activebackground=newColor, fg=textColor)
+                theTextColor = '#000000'
+            TkWidget.configure(bg=newColor, activebackground=newColor, fg=theTextColor)
             self.sme(f"{setting} = {thisValue}")
             self.settingDictionary[setting]['valueSet'] = True
             return thisValue
@@ -1224,9 +1222,9 @@ class BethiniApp(tk.Tk):
         offvalue = self.settingDictionary[setting].get('offvalue')
 
         settingValue = self.getSettingValues(targetINIs, targetSections, theSettings)
-
+        
         try:
-            thisValue = list(eval(thisValue))
+            thisValue = list(ast.literal_eval(thisValue))
             for n in range(len(thisValue)):
                 if type(thisValue[n]) is tuple:
                     thisValue[n] = list(thisValue[n])
@@ -1268,7 +1266,7 @@ class BethiniApp(tk.Tk):
         settingChoices = self.settingDictionary[setting].get('settingChoices')
         delimiter = self.settingDictionary[setting].get('delimiter')
         fileFormat = self.settingDictionary[setting].get('fileFormat')
-        decimalPlaces = self.settingDictionary[setting].get('decimal places')
+        #decimalPlaces = self.settingDictionary[setting].get('decimal places')
         partial = self.settingDictionary[setting].get('partial')
         theValueStr = ''
         if partial:
@@ -1644,23 +1642,23 @@ class BethiniApp(tk.Tk):
                     value = str(targetINI.getValue(currentSection, currentSetting, default=defaultValue))
                     settingValues.append(value)
             if settingValues != []:
-                 #Check to see if the settings correspond with specified
-                 #setting choices.
-                 if settingChoices:
-                     for choice in settingChoices:
-                         if settingChoices[choice] == settingValues:
-                             settingValues = [choice]
+                #Check to see if the settings correspond with specified
+                #setting choices.
+                if settingChoices:
+                   for choice in settingChoices:
+                       if settingChoices[choice] == settingValues:
+                           settingValues = [choice]
 
-                 #Check to see if there are multiple values separated by a
-                 #delimiter
-                 if delimiter:
-                     delimitedValue = ''
-                     for n in range(len(settingValues)):
-                        if n != len(settingValues) - 1:
-                            delimitedValue += settingValues[n] + delimiter
-                        else:
-                            delimitedValue += settingValues[n]
-                     settingValues = [delimitedValue]
+                #Check to see if there are multiple values separated by a
+                #delimiter
+                if delimiter:
+                    delimitedValue = ''
+                    for n in range(len(settingValues)):
+                       if n != len(settingValues) - 1:
+                           delimitedValue += settingValues[n] + delimiter
+                       else:
+                           delimitedValue += settingValues[n]
+                    settingValues = [delimitedValue]
 
         return settingValues
 
@@ -1668,30 +1666,30 @@ class BethiniApp(tk.Tk):
         openINI = self.openINIs.get(INI)
         if openINI:
             openINIlocation = self.openINIs[INI]['located']
-            id = 0
+            wID = 0
             for eachLocation in openINIlocation:
-                id += 1
+                wID += 1
                 if openINIlocation[eachLocation]['at'] == location:
                     return openINIlocation[eachLocation].get('object')
             #if the location is not found, add it
-            id += 1
-            id = str(id)
-            self.openINIs[INI]['located'][id] = {
+            wID += 1
+            wID = str(wID)
+            self.openINIs[INI]['located'][wID] = {
                 'at':location
                 }
-            self.openINIs[INI]['located'][id]['object'] = ModifyINI(location + INI)
-            return self.openINIs[INI]['located'][id]['object']
+            self.openINIs[INI]['located'][wID]['object'] = ModifyINI(location + INI)
+            return self.openINIs[INI]['located'][wID]['object']
         else:
-            id = "1"
+            wID = "1"
             self.openINIs[INI] = {
                 'located': {
-                    id: {
+                    wID: {
                         'at': location
                         }
                     }
                 }
-            self.openINIs[INI]['located'][id]['object'] = ModifyINI(location + INI)
-            return self.openINIs[INI]['located'][id]['object']
+            self.openINIs[INI]['located'][wID]['object'] = ModifyINI(location + INI)
+            return self.openINIs[INI]['located'][wID]['object']
 
     def TabChanged(self, event):
         return
@@ -1714,11 +1712,11 @@ def onClosing():
         window.SaveINIFiles()
         window.quit()
 
-def removeExcessDirFiles(dir, maxToKeep, filesToRemove):
+def removeExcessDirFiles(theDir, maxToKeep, filesToRemove):
     try:
-        sub = os.listdir(dir)
+        sub = os.listdir(theDir)
     except OSError as e:
-        sm("Error: %s : %s" % (dir, e.strerror))
+        sm("Error: %s : %s" % (theDir, e.strerror))
         return True
     sub.sort(reverse=True)
     if 'First-Time-Backup' in sub:
@@ -1728,7 +1726,7 @@ def removeExcessDirFiles(dir, maxToKeep, filesToRemove):
             if n < maxToKeep:
                 sm(sub[n] + ' will be kept.')
             else:
-                dir_path = f'{dir}\\' + sub[n]
+                dir_path = f'{theDir}\\' + sub[n]
                 try:
                     for file in filesToRemove:
                         try:
@@ -1777,12 +1775,9 @@ if __name__ == '__main__':
 
     appConfig.assignINIValue('General', 'iMaxBackups', appConfig.getValue('General', 'iMaxBackups', '5'))
 
-    #get the initial values and then add to it by assignment upon changing.
     loadTheme()
 
     window = BethiniApp()
-    #window.geometry('980x720')
-    #window.minsize(400,35)
     window.protocol("WM_DELETE_WINDOW", onClosing)
     window.mainloop()
 
