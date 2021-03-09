@@ -8,6 +8,7 @@ import os
 import math
 import logging
 import webbrowser
+from simpleeval import simple_eval
 from shutil import copyfile
 from datetime import datetime
 from fractions import Fraction
@@ -1018,7 +1019,7 @@ class BethiniApp(tk.Tk):
             fileFormat = self.settingDictionary[setting].get("fileFormat")
             if formula:
                 decimalPlaces = int(self.settingDictionary[setting].get("decimal places"))
-                thisValue = round(eval(formula.format(settingValue[0])), decimalPlaces)
+                thisValue = round(simple_eval(formula.format(settingValue[0])), decimalPlaces)
                 if decimalPlaces == 0:
                     thisValue = int(thisValue)
             elif fileFormat:
