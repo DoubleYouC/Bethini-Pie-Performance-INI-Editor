@@ -1,27 +1,27 @@
-#
-#This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-#To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
-#
+"""This work is licensed under the
+Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA."""
 
 import json
 
-class appName:
-    #This class handles the different apps/games supported, which are placed in
-    #the apps folder
+class app_name:
+    """This class handles the different apps/games supported, which are placed in
+    the apps folder"""
     def __init__(self, appname):
-        with open('apps\\' + appname + "\\settings.json") as appJSON:
-            self.data = json.load(appJSON)
-        with open('apps\\' + appname + "\\Bethini.json") as Bethini:
-            self.Bethini = json.load(Bethini)
+        with open('apps\\' + appname + "\\settings.json") as app_JSON:
+            self.data = json.load(app_JSON)
+        with open('apps\\' + appname + "\\Bethini.json") as bethini:
+            self.bethini = json.load(bethini)
 
-        self.INIFiles = list(self.Bethini["INIs"].keys())
+        self.ini_files = list(self.bethini["INIs"].keys())
         try:
-            self.defaultINI = self.INIFiles[2]
-        except:
-            self.defaultINI = None
-        self.iniValues = self.data["iniValues"]
-        self.iniSectionSettingDict = self.getIniSectionSettingDict()
-        self.settingValues = self.settingValues()
+            self.default_ini = self.ini_files[2]
+        except IndexError:
+            self.default_ini = None
+        self.ini_values = self.data["iniValues"]
+        self.ini_section_setting_dict = self.getIniSectionSettingDict()
+        self.setting_values = self.setting_values()
         self.settings = self.settings()
         self.sections = self.sections()
 
@@ -29,13 +29,13 @@ class appName:
         return self.data["gameName"]
 
     def presetsIgnoreTheseSettings(self):
-        return self.Bethini["presetsIgnoreTheseSettings"]
+        return self.bethini["presetsIgnoreTheseSettings"]
 
     def custom(self, customVariable):
-        return self.Bethini["customFunctions"][customVariable]
+        return self.bethini["customFunctions"][customVariable]
 
     def WhatINIFilesAreUsed(self):
-        TheINIsDict = self.Bethini["INIs"]
+        TheINIsDict = self.bethini["INIs"]
         INIFiles = []
         for INI in TheINIsDict:
             if INI != "Bethini.ini":
@@ -47,41 +47,41 @@ class appName:
             if INI == '':
                 INILocation = ''
             else:
-                INILocation = self.Bethini["INIs"][INI]
+                INILocation = self.bethini["INIs"][INI]
             return INILocation
-        except:
+        except KeyError:
             return False
     
     def settings(self):
         INISettings = []
-        for iniSetting in self.iniValues:
+        for iniSetting in self.ini_values:
             INISettings.append(iniSetting['name'])
         return INISettings
 
     def sections(self):
         INISections = []
-        for iniSetting in self.iniValues:
+        for iniSetting in self.ini_values:
             if iniSetting['section'] not in INISections:
                 INISections.append(iniSetting['section'])
         INISections.sort()
         return INISections
 
-    def settingValues(self):
+    def setting_values(self):
         settingValues = {}
-        for iniSetting in self.iniValues:
+        for iniSetting in self.ini_values:
             settingValues[iniSetting['name']] = {}
-            valueTypes = self.Bethini['valueTypes']
+            valueTypes = self.bethini['valueTypes']
             for valueType in valueTypes:
                 try:
                     settingValues[iniSetting['name']][valueType] = iniSetting['value'][valueType]
-                except:
+                except KeyError:
                     continue
         return settingValues
     
     def getIniSectionSettingDict(self):
         iniSectionSettingDict = {}
-        for iniSetting in self.iniValues:
-            ini = iniSetting.get('ini', self.defaultINI)
+        for iniSetting in self.ini_values:
+            ini = iniSetting.get('ini', self.default_ini)
             section = iniSetting.get('section').lower()
             setting = iniSetting.get('name')
             if ini not in list(iniSectionSettingDict.keys()):
@@ -95,27 +95,27 @@ class appName:
         
         return iniSectionSettingDict
 
-    def getValue(self, setting, type):
-        return self.settingValues[setting][type]
+    def getValue(self, setting, value_type):
+        return self.setting_values[setting][value_type]
 
     def doesSettingExist(self, ini, section, setting):
         section = section.lower()
         try:
-            theSectionList = [x.lower() for x in self.iniSectionSettingDict[ini][section]]
+            theSectionList = [x.lower() for x in self.ini_section_setting_dict[ini][section]]
             setting = setting.lower()
             if setting in theSectionList:
                 return True
             else:
                 return False
-        except:
+        except KeyError:
             return False
 
     def presetValues(self, preset):
         PresetDict = {}
-        for iniSetting in self.iniValues:
+        for iniSetting in self.ini_values:
             presetValue = iniSetting['value'].get(preset)
             if presetValue or presetValue == 0 or presetValue == '':
-                ini = iniSetting.get('ini', self.defaultINI)
+                ini = iniSetting.get('ini', self.default_ini)
                 PresetDict[iniSetting['name']]={
                     'ini': ini,
                     'section': iniSetting['section'],
@@ -125,10 +125,10 @@ class appName:
 
     def alwaysPrint(self):
         alwaysPrint = {}
-        for iniSetting in self.iniValues:
+        for iniSetting in self.ini_values:
             alwaysPrint = iniSetting.get('alwaysPrint')
             if alwaysPrint:
-                ini = iniSetting.get('ini', self.defaultINI)
+                ini = iniSetting.get('ini', self.default_ini)
 
                 theValue = str(iniSetting['value'].get('fixedDefault', iniSetting['value'].get('default')))
 
@@ -141,10 +141,10 @@ class appName:
 
     def canRemove(self):
         canRemove = {}
-        for iniSetting in self.iniValues:
+        for iniSetting in self.ini_values:
             alwaysPrint = iniSetting.get('alwaysPrint')
             if not alwaysPrint:
-                ini = iniSetting.get('ini', self.defaultINI)
+                ini = iniSetting.get('ini', self.default_ini)
 
                 theValue = str(iniSetting['value'].get('default'))
 
@@ -157,7 +157,7 @@ class appName:
 
     def settingSomethingDictionary(self, something):
         SomethingSomethings = []
-        for iniSetting in self.iniValues:
+        for iniSetting in self.ini_values:
             SomethingSomethings.append(iniSetting[something])
 
         SomethingSomethingsDictionary = {}
@@ -169,7 +169,7 @@ class appName:
 
     def settingSectionDictionary(self):
         INISections = []
-        for iniSetting in self.iniValues:
+        for iniSetting in self.ini_values:
             INISections.append(iniSetting['section'])
 
         settingSectionDictionary = {}
@@ -184,10 +184,10 @@ class appName:
         return settingSectionDictionary[setting]
 
     def tabs(self):
-        return self.iteritemslist(self.Bethini["displayTabs"])
+        return self.iteritemslist(self.bethini["displayTabs"])
 
     def labelFramesInTab(self, tab):
-        return self.iteritemslist(self.Bethini['displayTabs'][tab])
+        return self.iteritemslist(self.bethini['displayTabs'][tab])
 
     def fieldsInSetting(self, tab, labelFrame, setting):
         return self.iteritemslist(self.getAllFieldsForSetting(tab, labelFrame, setting))
@@ -199,21 +199,21 @@ class appName:
         return itemlist
 
     def settingsInLabelFrame(self, tab, labelFrame):
-        return self.iteritemslist(self.Bethini['displayTabs'][tab][labelFrame]['Settings'])
+        return self.iteritemslist(self.bethini['displayTabs'][tab][labelFrame]['Settings'])
 
     def NumberOfVerticallyStackedSettings(self, tab, labelFrame):
-        return self.Bethini['displayTabs'][tab][labelFrame]['NumberOfVerticallyStackedSettings']
+        return self.bethini['displayTabs'][tab][labelFrame]['NumberOfVerticallyStackedSettings']
 
     def settingField(self, tab, labelFrame, setting, field, default='No Default'):
         try:
-            return self.Bethini['displayTabs'][tab][labelFrame]['Settings'][setting][field]
-        except:
+            return self.bethini['displayTabs'][tab][labelFrame]['Settings'][setting][field]
+        except KeyError:
             if default != 'No Default':
                 return default
             return
 
     def getAllFieldsForSetting(self, tab, labelFrame, setting):
-        return self.Bethini['displayTabs'][tab][labelFrame]['Settings'][setting]
+        return self.bethini['displayTabs'][tab][labelFrame]['Settings'][setting]
 
     
 if __name__ == '__main__':

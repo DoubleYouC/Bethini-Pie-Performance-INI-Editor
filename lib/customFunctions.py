@@ -13,7 +13,7 @@ from tkinter import filedialog
 from tkinter import simpledialog
 from winreg import QueryValue, QueryValueEx, OpenKey, ConnectRegistry, HKEY_CLASSES_ROOT, HKEY_LOCAL_MACHINE
 
-from lib.app import appName
+from lib.app import app_name
 from lib.ModifyINI import ModifyINI
 
 def copyFileNoOverwrite(src, dest):
@@ -169,7 +169,7 @@ class Info:
 class customFunctions:
 
     def RestoreBackup(gameName, choice):
-        app = appName(gameName)
+        app = app_name(gameName)
         INIFiles = app.WhatINIFilesAreUsed()
 
         gameDocumentsName = Info.gameDocumentsName(gameName)

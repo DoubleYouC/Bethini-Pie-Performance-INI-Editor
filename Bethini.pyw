@@ -20,7 +20,7 @@ from tkinter import ttk
 from tkinter import colorchooser
 from tkinter import messagebox
 
-from lib.app import appName
+from lib.app import app_name
 from lib.AutoScrollbar import AutoScrollbar
 from lib.tooltips import CreateToolTip
 from lib.ModifyINI import ModifyINI
@@ -319,7 +319,7 @@ class BethiniApp(tk.Tk):
         ##############
 
         global app
-        app = appName(game)
+        app = app_name(game)
         global gameName
         gameName = app.gameName()
         self.sme(f'Application/game is {gameName}')
@@ -1238,9 +1238,14 @@ class BethiniApp(tk.Tk):
                 INILocation = self.getINILocation(targetINIs[n])
                 theTargetINI = self.openINI(str(INILocation), str(targetINIs[n]))
                 #1280x720
-                if delimiter:
+                if thisValue == 'Manual...' or thisValue == 'Browse...':
+                    theValue = ''
+                elif delimiter:
                     listOfValues = thisValue.split(delimiter)
-                    theValue = listOfValues[n]
+                    try:
+                        theValue = listOfValues[n]
+                    except IndexError:
+                        theValue = ''
                 elif settingChoices:
                     if thisValue not in settingChoices:
                         return
@@ -1257,7 +1262,7 @@ class BethiniApp(tk.Tk):
                 if partial:
                     theValue = theValueStr.format(thisValue)
                 theTargetINI.assignINIValue(targetSections[n], theSettings[n], theValue)
-                self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + theValue)
+                self.sme(f'{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}')
 
     def comboboxAssignValue(self, setting):
         targetINIs = self.settingDictionary[setting].get('targetINIs')
