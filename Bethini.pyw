@@ -1316,7 +1316,7 @@ class BethiniApp(tk.Tk):
                 if formula:
                     formulaValue = formula.format(thisValue)
                     try:
-                        thisValue = str(round(float(sum(Fraction(s) for s in formulaValue.split())),8))
+                        thisValue = str(round(simple_eval(formulaValue),8))
                     except:
                         thisValue = thisValue
                 #if decimalPlaces:
