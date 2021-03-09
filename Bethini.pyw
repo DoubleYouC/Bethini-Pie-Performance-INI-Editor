@@ -20,7 +20,7 @@ from tkinter import ttk
 from tkinter import colorchooser
 from tkinter import messagebox
 
-from lib.app import app_name
+from lib.app import AppName
 from lib.AutoScrollbar import AutoScrollbar
 from lib.tooltips import CreateToolTip
 from lib.ModifyINI import ModifyINI
@@ -319,9 +319,9 @@ class BethiniApp(tk.Tk):
         ##############
 
         global app
-        app = app_name(game)
+        app = AppName(game)
         global gameName
-        gameName = app.gameName()
+        gameName = app.game_name()
         self.sme(f'Application/game is {gameName}')
 
         #######
@@ -472,17 +472,17 @@ class BethiniApp(tk.Tk):
     def setPreset(self, presetid):
         self.startProgress()
         if presetid == "Default":
-            self.applyINIDict(app.presetValues('default'))
-            self.removeINIDict(app.canRemove())
-            self.applyINIDict(app.presetValues('fixedDefault'))
+            self.applyINIDict(app.preset_values('default'))
+            self.removeINIDict(app.can_remove())
+            self.applyINIDict(app.preset_values('fixedDefault'))
             presetVar = ""
         elif presetid == "recommended":
-            presetDict = app.presetValues(f'{presetid}')
+            presetDict = app.preset_values(f'{presetid}')
             self.applyINIDict(presetDict)
             presetVar = ""
         else:
             presetVar = self.presetVar.get()
-            presetDict = app.presetValues(f'{presetVar} {presetid}')
+            presetDict = app.preset_values(f'{presetVar} {presetid}')
             self.applyINIDict(presetDict)
         self.stopProgress()
         self.updateValues()
@@ -494,7 +494,7 @@ class BethiniApp(tk.Tk):
         for INI in TheOpenedINIs:
             if INI == MyAppNameConfig or INI == 'theme.ini':
                 continue
-            elif app.INIs(INI):
+            elif app.inis(INI):
                 locationList = list(TheOpenedINIs[INI]['located'].keys())
                 for n in range(len(locationList)):
                     thisLocation = TheOpenedINIs[INI]['located'][str(n+1)].get('at')
@@ -511,12 +511,12 @@ class BethiniApp(tk.Tk):
                             for setting in settings:
                                 if ';' in setting:
                                     self.sme(f'{setting}:{section} will be preserved, as it is a comment.')
-                                elif not app.doesSettingExist(INI, section, setting):
+                                elif not app.does_setting_exist(INI, section, setting):
                                     thisINIObject.removeSetting(section, setting)
                                     self.sme(f'{setting}:{section} was removed because it is not recognized.')                       
 
     def applyINIDict(self, INIDict):
-        presetsIgnoreTheseSettings = app.presetsIgnoreTheseSettings()
+        presetsIgnoreTheseSettings = app.presets_ignore_these_settings()
         for eachSetting in INIDict:
             if eachSetting in presetsIgnoreTheseSettings:
                 continue
@@ -524,7 +524,7 @@ class BethiniApp(tk.Tk):
             targetSection = INIDict[eachSetting]['section']
             thisValue = str(INIDict[eachSetting]['value'])
 
-            INILocation = app.INIs(targetINI)
+            INILocation = app.inis(targetINI)
             if INILocation != '':
                 INILocation = appConfig.getValue('Directories', INILocation)
             theTargetINI = self.openINI(str(INILocation), str(targetINI))
@@ -538,7 +538,7 @@ class BethiniApp(tk.Tk):
             targetSection = INIDict[eachSetting]['section']
             thisValue = str(INIDict[eachSetting]['value'])
 
-            INILocation = app.INIs(targetINI)
+            INILocation = app.inis(targetINI)
             if INILocation != '':
                 INILocation = appConfig.getValue('Directories', INILocation)
             theTargetINI = self.openINI(str(INILocation), str(targetINI))
@@ -1548,7 +1548,7 @@ class BethiniApp(tk.Tk):
             return True
 
     def getINILocation(self, ini):
-        INILocation = app.INIs(ini)
+        INILocation = app.inis(ini)
         if INILocation == '':
             INILocation == ''
         elif INILocation == 'sTheme':
@@ -1586,7 +1586,7 @@ class BethiniApp(tk.Tk):
                     if INI == MyAppNameConfig or INI == 'theme.ini':
                         defaultValue = "Does Not Exist"
                     else:
-                        defaultValue = app.getValue(currentSetting, "default")
+                        defaultValue = app.get_value(currentSetting, "default")
 
                     #targetINI = ModifyINI(str(INILocation) + str(INI))
 

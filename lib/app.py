@@ -5,167 +5,168 @@ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 import json
 
-class app_name:
+class AppName:
     """This class handles the different apps/games supported, which are placed in
     the apps folder"""
+    # pylint: disable=too-many-instance-attributes
     def __init__(self, appname):
-        with open('apps\\' + appname + "\\settings.json") as app_JSON:
-            self.data = json.load(app_JSON)
+        with open('apps\\' + appname + "\\settings.json") as app_json:
+            self.data = json.load(app_json)
         with open('apps\\' + appname + "\\Bethini.json") as bethini:
             self.bethini = json.load(bethini)
 
-        self.ini_files = list(self.bethini["INIs"].keys())
+        ini_files = list(self.bethini["INIs"].keys())
         try:
-            self.default_ini = self.ini_files[2]
+            self.default_ini = ini_files[2]
         except IndexError:
             self.default_ini = None
         self.ini_values = self.data["iniValues"]
-        self.ini_section_setting_dict = self.getIniSectionSettingDict()
+        self.ini_section_setting_dict = self.get_ini_section_setting_dict()
         self.setting_values = self.setting_values()
         self.settings = self.settings()
         self.sections = self.sections()
 
-    def gameName(self):
+    def game_name(self):
         return self.data["gameName"]
 
-    def presetsIgnoreTheseSettings(self):
+    def presets_ignore_these_settings(self):
         return self.bethini["presetsIgnoreTheseSettings"]
 
-    def custom(self, customVariable):
-        return self.bethini["customFunctions"][customVariable]
+    def custom(self, custom_variable):
+        return self.bethini["customFunctions"][custom_variable]
 
-    def WhatINIFilesAreUsed(self):
-        TheINIsDict = self.bethini["INIs"]
-        INIFiles = []
-        for INI in TheINIsDict:
-            if INI != "Bethini.ini":
-                INIFiles.append(INI)
-        return INIFiles
+    def what_ini_files_are_used(self):
+        the_inis_dict = self.bethini["INIs"]
+        ini_files = []
+        for ini in the_inis_dict:
+            if ini != "Bethini.ini":
+                ini_files.append(ini)
+        return ini_files
 
-    def INIs(self, INI):
+    def inis(self, ini):
         try:
-            if INI == '':
-                INILocation = ''
+            if ini == '':
+                ini_location = ''
             else:
-                INILocation = self.bethini["INIs"][INI]
-            return INILocation
+                ini_location = self.bethini["INIs"][ini]
+            return ini_location
         except KeyError:
             return False
     
     def settings(self):
-        INISettings = []
-        for iniSetting in self.ini_values:
-            INISettings.append(iniSetting['name'])
-        return INISettings
+        ini_settings = []
+        for ini_setting in self.ini_values:
+            ini_settings.append(ini_setting['name'])
+        return ini_settings
 
     def sections(self):
-        INISections = []
-        for iniSetting in self.ini_values:
-            if iniSetting['section'] not in INISections:
-                INISections.append(iniSetting['section'])
-        INISections.sort()
-        return INISections
+        ini_sections = []
+        for ini_setting in self.ini_values:
+            if ini_setting['section'] not in ini_sections:
+                ini_sections.append(ini_setting['section'])
+        ini_sections.sort()
+        return ini_sections
 
     def setting_values(self):
-        settingValues = {}
-        for iniSetting in self.ini_values:
-            settingValues[iniSetting['name']] = {}
-            valueTypes = self.bethini['valueTypes']
-            for valueType in valueTypes:
+        setting_values = {}
+        for ini_setting in self.ini_values:
+            setting_values[ini_setting['name']] = {}
+            value_types = self.bethini['valueTypes']
+            for value_type in value_types:
                 try:
-                    settingValues[iniSetting['name']][valueType] = iniSetting['value'][valueType]
+                    setting_values[ini_setting['name']][value_type] = ini_setting['value'][value_type]
                 except KeyError:
                     continue
-        return settingValues
+        return setting_values
     
-    def getIniSectionSettingDict(self):
-        iniSectionSettingDict = {}
-        for iniSetting in self.ini_values:
-            ini = iniSetting.get('ini', self.default_ini)
-            section = iniSetting.get('section').lower()
-            setting = iniSetting.get('name')
-            if ini not in list(iniSectionSettingDict.keys()):
-                iniSectionSettingDict[ini] = {
+    def get_ini_section_setting_dict(self):
+        ini_section_setting_dict = {}
+        for ini_setting in self.ini_values:
+            ini = ini_setting.get('ini', self.default_ini)
+            section = ini_setting.get('section').lower()
+            setting = ini_setting.get('name')
+            if ini not in list(ini_section_setting_dict.keys()):
+                ini_section_setting_dict[ini] = {
                     section: [setting]
                     }
-            elif section not in list(iniSectionSettingDict[ini].keys()):
-                iniSectionSettingDict[ini][section] = [setting]
+            elif section not in list(ini_section_setting_dict[ini].keys()):
+                ini_section_setting_dict[ini][section] = [setting]
             else:
-                iniSectionSettingDict[ini][section].append(setting)
+                ini_section_setting_dict[ini][section].append(setting)
         
-        return iniSectionSettingDict
+        return ini_section_setting_dict
 
-    def getValue(self, setting, value_type):
+    def get_value(self, setting, value_type):
         return self.setting_values[setting][value_type]
 
-    def doesSettingExist(self, ini, section, setting):
+    def does_setting_exist(self, ini, section, setting):
         section = section.lower()
         try:
-            theSectionList = [x.lower() for x in self.ini_section_setting_dict[ini][section]]
+            the_section_list = [x.lower() for x in self.ini_section_setting_dict[ini][section]]
             setting = setting.lower()
-            if setting in theSectionList:
+            if setting in the_section_list:
                 return True
             else:
                 return False
         except KeyError:
             return False
 
-    def presetValues(self, preset):
-        PresetDict = {}
-        for iniSetting in self.ini_values:
-            presetValue = iniSetting['value'].get(preset)
-            if presetValue or presetValue == 0 or presetValue == '':
-                ini = iniSetting.get('ini', self.default_ini)
-                PresetDict[iniSetting['name']]={
+    def preset_values(self, preset):
+        preset_dict = {}
+        for ini_setting in self.ini_values:
+            preset_value = ini_setting['value'].get(preset)
+            if preset_value or preset_value == 0 or preset_value == '':
+                ini = ini_setting.get('ini', self.default_ini)
+                preset_dict[ini_setting['name']]={
                     'ini': ini,
-                    'section': iniSetting['section'],
-                    'value': str(presetValue)
+                    'section': ini_setting['section'],
+                    'value': str(preset_value)
                     }
-        return PresetDict
+        return preset_dict
 
-    def alwaysPrint(self):
-        alwaysPrint = {}
-        for iniSetting in self.ini_values:
-            alwaysPrint = iniSetting.get('alwaysPrint')
-            if alwaysPrint:
-                ini = iniSetting.get('ini', self.default_ini)
+    def always_print(self):
+        always_print = {}
+        for ini_setting in self.ini_values:
+            always_print = ini_setting.get('alwaysPrint')
+            if always_print:
+                ini = ini_setting.get('ini', self.default_ini)
 
-                theValue = str(iniSetting['value'].get('fixedDefault', iniSetting['value'].get('default')))
+                the_value = str(ini_setting['value'].get('fixedDefault', ini_setting['value'].get('default')))
 
-                alwaysPrint[iniSetting['name']]={
+                always_print[ini_setting['name']]={
                     'ini': ini,
-                    'section': iniSetting['section'],
-                    'value': theValue
+                    'section': ini_setting['section'],
+                    'value': the_value
                     }
-        return alwaysPrint
+        return always_print
 
-    def canRemove(self):
-        canRemove = {}
-        for iniSetting in self.ini_values:
-            alwaysPrint = iniSetting.get('alwaysPrint')
-            if not alwaysPrint:
-                ini = iniSetting.get('ini', self.default_ini)
+    def can_remove(self):
+        can_remove = {}
+        for ini_setting in self.ini_values:
+            always_print = ini_setting.get('alwaysPrint')
+            if not always_print:
+                ini = ini_setting.get('ini', self.default_ini)
 
-                theValue = str(iniSetting['value'].get('default'))
+                the_value = str(ini_setting['value'].get('default'))
 
-                canRemove[iniSetting['name']] = {
+                can_remove[ini_setting['name']] = {
                     'ini': ini,
-                    'section': iniSetting['section'],
-                    'value': theValue
+                    'section': ini_setting['section'],
+                    'value': the_value
                     }
-        return canRemove
+        return can_remove
 
-    def settingSomethingDictionary(self, something):
-        SomethingSomethings = []
-        for iniSetting in self.ini_values:
-            SomethingSomethings.append(iniSetting[something])
+    def setting_something_dictionary(self, something):
+        something_somethings = []
+        for ini_setting in self.ini_values:
+            something_somethings.append(ini_setting[something])
 
-        SomethingSomethingsDictionary = {}
+        something_somethings_dictionary = {}
         iteration = -1
         for setting in self.settings:
             iteration += 1
-            SomethingSomethingsDictionary[setting] = SomethingSomethings[iteration]
-        return SomethingSomethingsDictionary
+            something_somethings_dictionary[setting] = something_somethings[iteration]
+        return something_somethings_dictionary
 
     def settingSectionDictionary(self):
         INISections = []
