@@ -1,6 +1,8 @@
 #
-#This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-#To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+#This work is licensed under the
+#Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+#To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+#or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 #
 
 import os
@@ -16,19 +18,6 @@ from winreg import QueryValue, QueryValueEx, OpenKey, ConnectRegistry, HKEY_CLAS
 from lib.app import AppName
 from lib.ModifyINI import ModifyINI
 
-def copyFileNoOverwrite(src, dest):
-    # Open the file and raise an exception if it exists
-    try:
-        fd = os.open(dest, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-    except:
-        sm(f'{dest} already exists, so it will not be overwritten.',debug=True, exception=True)
-        return
-
-    # Copy the file and automatically close files at the end
-    with os.fdopen(fd) as f:
-        with open(src) as sf:
-            shutil.copyfileobj(sf, f)
-
 def sm(message, debug=False, exception=False):
     if not exception:
         logging.info(message)
@@ -36,12 +25,11 @@ def sm(message, debug=False, exception=False):
     elif exception:
         logging.debug(message, exc_info=True)
         print(message)
-    return
 
-def RGBToHex(rgb):
+def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % rgb
 
-def HexToRGB(value):
+def hex_to_rgb(value):
     value = value.lstrip('#')
     lv = len(value)
     if lv == 1:
@@ -51,10 +39,10 @@ def HexToRGB(value):
         return tuple(int(value[i:i + 1], 16)*17 for i in range(0, 3))
     return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
-def HexToDecimal(x):
-    return str(int(str(x).lstrip('#'),16))
+def hex_to_decimal(hex):
+    return str(int(str(hex).lstrip('#'),16))
 
-def DecimalToRGB(decimal):
+def decimal_to_rgb(decimal):
     decimal = int(decimal)
     blue = decimal & 255
     green = (decimal >> 8) & 255
@@ -63,7 +51,7 @@ def DecimalToRGB(decimal):
 
 
 
-def browseToLocation(choice, browse, function, gameName):
+def browse_to_location(choice, browse, function, game_name):
     if choice == 'Browse...':
         if browse[2] == 'directory':
             location = filedialog.askdirectory()
@@ -90,37 +78,38 @@ def browseToLocation(choice, browse, function, gameName):
         return choice
     else:
         if function:
-            returnValueOfCustomFunction = getattr(customFunctions, function)(gameName,choice)
-            sm(f"Return value of {function}: {returnValueOfCustomFunction}")
+            return_value_of_custom_function = getattr(CustomFunctions, function)(game_name,choice)
+            sm(f"Return value of {function}: {return_value_of_custom_function}")
         return choice
 
 class Info:
-    def getDocumentsDirectory():
+    def get_documents_directory():
         CSIDL_PERSONAL = 5       # My Documents
         SHGFP_TYPE_CURRENT = 0   # Get current, not default value
 
         buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
         ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
 
-        documentsDirectory = buf.value
-        sm(f'User documents location: {documentsDirectory}')
+        documents_directory = buf.value
+        sm(f'User documents location: {documents_directory}')
 
-        return documentsDirectory
+        return documents_directory
 
-    def getMOProfiles(gameName):
-        ModOrganizerINILocation = customFunctions.getMODirectory(gameName)[0] + 'ModOrganizer.ini'
+    def get_mo_profiles(game_name):
+        mod_organizer_ini_location = CustomFunctions.getMODirectory(game_name)[0] + 'ModOrganizer.ini'
         profiles = []
         profiles_directory = ""
-        if 'Not Detected' not in ModOrganizerINILocation:
-            ModOrganizerINI = ModifyINI(ModOrganizerINILocation)
-            base_directory = ModOrganizerINI.getValue('Settings','base_directory', default=lambda: os.path.split(ModOrganizerINILocation)[0]).replace('\\\\','\\').replace('/','\\')
-            profiles_directory = ModOrganizerINI.getValue('Settings','profiles_directory', default=f'{base_directory}\\profiles').replace('\\\\','\\').replace('/','\\')
-            
+        if 'Not Detected' not in mod_organizer_ini_location:
+            mod_organizer_ini = ModifyINI(mod_organizer_ini_location)
+            base_directory = mod_organizer_ini.getValue('Settings','base_directory',
+                                                        default=lambda: os.path.split(mod_organizer_ini_location)[0]).replace('\\\\','\\').replace('/','\\')
+            profiles_directory = mod_organizer_ini.getValue('Settings','profiles_directory',
+                                                            default=f'{base_directory}\\profiles').replace('\\\\','\\').replace('/','\\')
             profiles = os.listdir(profiles_directory)
         return [profiles_directory, profiles]
 
-    def gameDocumentsName(gameName):
-        gameNameDocumentsLocationDict = {"Skyrim Special Edition": "Skyrim Special Edition",
+    def game_documents_name(game_name):
+        game_name_documents_location_dict = {"Skyrim Special Edition": "Skyrim Special Edition",
                                          "Skyrim": "Skyrim",
                                          "Fallout 3": "Fallout3",
                                          "Fallout New Vegas": "FalloutNV",
@@ -128,15 +117,15 @@ class Info:
                                          "Enderal": "Enderal",
                                          "Oblivion": "Oblivion"}
         try:
-            gameDocumentsName = gameNameDocumentsLocationDict[gameName]
-            sm(f'{gameName} Documents\My Games folder is {gameDocumentsName}.')
-        except Exception as e:
-            sm(f'{gameName} not in the list of known Documents\My Games folders.', exception=1)
-            gameDocumentsName = ''
-        return gameDocumentsName
+            game_documents_name = game_name_documents_location_dict[game_name]
+            sm(f'{game_name} Documents\\My Games folder is {game_documents_name}.')
+        except:
+            sm(f'{game_name} not in the list of known Documents\\My Games folders.', exception=1)
+            game_documents_name = ''
+        return game_documents_name
 
-    def gameReg(gameName):
-        gameNameRegistryDict = {"Skyrim Special Edition": "Skyrim Special Edition",
+    def game_reg(game_name):
+        game_name_registry_dict = {"Skyrim Special Edition": "Skyrim Special Edition",
                                 "Skyrim": "skyrim",
                                 "Fallout 3": "fallout3",
                                 "Fallout New Vegas": "falloutnv",
@@ -144,14 +133,14 @@ class Info:
                                 "Enderal": "skyrim",
                                 "Oblivion": "oblivion"}
         try:
-            gameReg = gameNameRegistryDict[gameName]
-        except Exception as e:
-            sm(f'{gameName} not in the list of known registry locations.', exception=1)
-            gameReg = ''
-        return gameReg
+            game_reg = game_name_registry_dict[game_name]
+        except:
+            sm(f'{game_name} not in the list of known registry locations.', exception=1)
+            game_reg = ''
+        return game_reg
 
-    def nxmhandlerGameReference(gameName):
-        gameNameDict = {"Skyrim Special Edition": "skyrimse",
+    def nxmhandler_game_reference(game_name):
+        game_name_dict = {"Skyrim Special Edition": "skyrimse",
                         "Skyrim": "skyrim",
                         "Fallout 3": "fallout3",
                         "Fallout New Vegas": "falloutnv",
@@ -159,49 +148,50 @@ class Info:
                         "Enderal": "enderal",
                         "Oblivion": "oblivion"}
         try:
-            gameReg = gameNameDict[gameName]
-            sm(f'{gameName} is in the gameNameDict as {gameReg}.')
-        except Exception as e:
-            sm(f'{gameName} not in the gameNameDict', exception=1)
-            gameReg = ''
-        return gameReg
+            game_reg = game_name_dict[game_name]
+            sm(f'{game_name} is in the gameNameDict as {game_reg}.')
+        except:
+            sm(f'{game_name} not in the gameNameDict', exception=1)
+            game_reg = ''
+        return game_reg
 
-class customFunctions:
+class CustomFunctions:
 
-    def RestoreBackup(gameName, choice):
-        app = AppName(gameName)
-        INIFiles = app.what_ini_files_are_used()
+    def restore_backup(game_name, choice):
+        app = AppName(game_name)
+        ini_files = app.what_ini_files_are_used()
 
-        gameDocumentsName = Info.gameDocumentsName(gameName)
-        if gameDocumentsName != '':
-            defaultINILocation = Info.getDocumentsDirectory() + f'\\My Games\\{gameDocumentsName}\\'
+        game_documents_name = Info.game_documents_name(game_name)
+        if game_documents_name != '':
+            default_ini_location = Info.get_documents_directory() + f'\\My Games\\{game_documents_name}\\'
         else:
-            defaultINILocation = ''
-        INIPath = ModifyINI("Bethini.ini").getValue("Directories", "s" + gameName + "INIPath", default=defaultINILocation)
-        instance = os.path.split(os.path.split(INIPath)[0])[1]
-        #backup_directory = f"cache\\{gameName}\\{instance}\\{choice}\\"
-        backup_directory = f'{INIPath}Bethini Pie backups\\{choice}\\'
+            default_ini_location = ''
+        ini_path = ModifyINI("Bethini.ini").getValue("Directories",
+                                                    "s" + game_name + "INIPath",
+                                                    default=default_ini_location)
+        backup_directory = f'{ini_path}Bethini Pie backups\\{choice}\\'
 
-        INIFilesWithLocation = {}
-        for INI in INIFiles:
-            BethINIKey = app.inis(INI)
-            if BethINIKey == '':
+        ini_files_with_location = {}
+        for ini in ini_files:
+            bethini_key = app.inis(ini)
+            if bethini_key == '':
                 #if the location is the working directory
-                INILocation = ''
+                ini_location = ''
             else:
                 #if the location is specified in the BethINI.ini file.
-                if INI == 'theme.ini':
+                if ini == 'theme.ini':
                     continue
                 else:
-                    INILocation = ModifyINI("Bethini.ini").getValue('Directories', BethINIKey, defaultINILocation)
-            INIFilesWithLocation[INI] = INILocation
+                    ini_location = ModifyINI("Bethini.ini").getValue('Directories',
+                                                                     bethini_key, default_ini_location)
+            ini_files_with_location[ini] = ini_location
 
-        filesToReplace = {}
-        for INI in INIFilesWithLocation:
-            fileToReplace = INIFilesWithLocation[INI] + INI
-            backupFile = backup_directory + INI
-            filesToReplace[INI] = {"InitialFile": fileToReplace,
-                                 "NewFile": backupFile}
+        files_to_replace = {}
+        for ini in ini_files_with_location:
+            file_to_replace = ini_files_with_location[ini] + ini
+            backup_file = backup_directory + ini
+            files_to_replace[ini] = {"InitialFile": file_to_replace,
+                                 "NewFile": backup_file}
 
         if choice == "Choose..." or choice == "None found":
             return
@@ -219,31 +209,21 @@ class customFunctions:
             #            'NewFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\SkyrimPrefs.ini'
             #        }
             #}
+            for file in files_to_replace:
+                initial_file = files_to_replace[file].get('InitialFile')
+                new_file = files_to_replace[file].get('NewFile')
+                shutil.copyfile(f"{new_file}", f"{initial_file}")
+                sm(f'{initial_file} was replaced with backup from {new_file}.')
+        return
 
-            for file in filesToReplace:
-                InitialFile = filesToReplace[file].get('InitialFile')
-                NewFile = filesToReplace[file].get('NewFile')
-                shutil.copyfile(f"{NewFile}", f"{InitialFile}")
-                sm(f'{InitialFile} was replaced with backup from {NewFile}.')
-        
-        return filesToReplace
-
-    def getBackups(gameName):
-        gameDocumentsName = Info.gameDocumentsName(gameName)
+    def getBackups(game_name):
+        gameDocumentsName = Info.game_documents_name(game_name)
         if gameDocumentsName != '':
-            defaultINILocation = Info.getDocumentsDirectory() + f'\\My Games\\{gameDocumentsName}\\'
+            defaultINILocation = Info.get_documents_directory() + f'\\My Games\\{gameDocumentsName}\\'
         else:
             defaultINILocation = ''
-        INIPath = ModifyINI("Bethini.ini").getValue("Directories", "s" + gameName + "INIPath", default=defaultINILocation)
-        #instance = os.path.split(os.path.split(INIPath)[0])[1]
-        
+        INIPath = ModifyINI("Bethini.ini").getValue("Directories", "s" + game_name + "INIPath", default=defaultINILocation)
         backup_directory = f'{INIPath}/Bethini Pie backups'
-
-        #backup_directory = f"cache/{gameName}/{instance}/"
-
-        #working_directory = os.getcwd()
-        #print(backup_directory)
-        #backups = os.listdir(backup_directory)
         try:
             backups = os.listdir(backup_directory)
         except:
@@ -264,7 +244,7 @@ class customFunctions:
 
     def getBethesdaGameFolder(gameName):
         gameFolder = 'Not Detected'
-        gameReg = Info.gameReg(gameName)
+        gameReg = Info.game_reg(gameName)
 
         try:
             gameFolder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\Bethesda Softworks\\{gameReg}'),"installed path")[0]
@@ -279,9 +259,9 @@ class customFunctions:
         return gameFolder
 
     def getINILocations(gameName):
-        gameDocumentsLocation = Info.gameDocumentsName(gameName)
-        INILocation = [Info.getDocumentsDirectory() + f'\\My Games\\{gameDocumentsLocation}\\']
-        getProfiles = Info.getMOProfiles(gameName)
+        gameDocumentsLocation = Info.game_documents_name(gameName)
+        INILocation = [Info.get_documents_directory() + f'\\My Games\\{gameDocumentsLocation}\\']
+        getProfiles = Info.get_mo_profiles(gameName)
         profiles = getProfiles[1]
         profiles_directory = getProfiles[0]
         for profile in profiles:
@@ -295,7 +275,7 @@ class customFunctions:
         ModOrganizerINILocationFromConfig = ModifyINI("Bethini.ini").getValue("Directories", "s" + gameName + "ModOrganizerINIPath", default="Not Detected")
 
         pathValue = "Not Detected"
-        gameReg = Info.nxmhandlerGameReference(gameName)
+        gameReg = Info.nxmhandler_game_reference(gameName)
 
         #Look up the nxm link (download with mod manager links on the
         #NexusMods.com sites) handler to find Mod Organizer location

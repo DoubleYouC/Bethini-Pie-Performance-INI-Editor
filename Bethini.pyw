@@ -24,7 +24,7 @@ from lib.app import AppName
 from lib.AutoScrollbar import AutoScrollbar
 from lib.tooltips import CreateToolTip
 from lib.ModifyINI import ModifyINI
-from lib.customFunctions import customFunctions, sm, browseToLocation, RGBToHex, HexToRGB, HexToDecimal, DecimalToRGB
+from lib.customFunctions import CustomFunctions, sm, browse_to_location, rgb_to_hex, hex_to_rgb, hex_to_decimal, decimal_to_rgb
 
 class BethiniApp(tk.Tk):
     #This is the main app, the glue that creates the GUI.
@@ -239,13 +239,13 @@ class BethiniApp(tk.Tk):
         #window modify a button
         oldColor = buttonToModify.var.get()
         if colorValueType == 'rgb':
-            oldColor = RGBToHex(ast.literal_eval(oldColor))
+            oldColor = rgb_to_hex(ast.literal_eval(oldColor))
         elif colorValueType == 'rgb 1':
             #"(1.0000, 1.0000, 1.0000)"
             #(255, 255, 255)
             oldColor = tuple(int(float(i)*255) for i in ast.literal_eval(oldColor))
         elif colorValueType == 'decimal':
-            oldColor = RGBToHex(DecimalToRGB(oldColor))
+            oldColor = rgb_to_hex(decimal_to_rgb(oldColor))
 
         try:
             newColor = colorchooser.askcolor(color = oldColor)[1].upper()
@@ -253,7 +253,7 @@ class BethiniApp(tk.Tk):
             #self.sme('Cancelled change of color.', exception=1)
             newColor = oldColor
 
-        RGB = HexToRGB(newColor)
+        RGB = hex_to_rgb(newColor)
         luminance = 0.299*RGB[0] + 0.587*RGB[1] + 0.114*RGB[2]
         if luminance < 128:
             theTextColor = '#FFFFFF'
@@ -261,14 +261,14 @@ class BethiniApp(tk.Tk):
             theTextColor = '#000000'
         buttonToModify.configure(bg=newColor, activebackground=newColor, fg=theTextColor)
         if colorValueType == 'rgb':
-            buttonToModify.var.set(str(HexToRGB(newColor)).replace(' ',''))
+            buttonToModify.var.set(str(hex_to_rgb(newColor)).replace(' ',''))
         elif colorValueType == 'rgb 1':
             #(255, 255, 255)
             #"(1.0000, 1.0000, 1.0000)"
-            theRGB = str(tuple(round(i/255,4) for i in HexToRGB(newColor)))
+            theRGB = str(tuple(round(i/255,4) for i in hex_to_rgb(newColor)))
             buttonToModify.var.set(theRGB)
         elif colorValueType == 'decimal':
-            buttonToModify.var.set(HexToDecimal(newColor))
+            buttonToModify.var.set(hex_to_decimal(newColor))
         else:
             buttonToModify.var.set(newColor)
         preferencesWindow.lift()
@@ -560,7 +560,7 @@ class BethiniApp(tk.Tk):
         theDict = self.tabDictionary[eachTab]
         theDict["LabelFrames"] = {}
         labelFrameNumber=0
-        for labelFrame in app.labelFramesInTab(theDict["Name"]):
+        for labelFrame in app.label_frames_in_tab(theDict["Name"]):
             labelFrameNumber += 1
             TheLabelFrame="LabelFrame"+str(labelFrameNumber)
             theDict["LabelFrames"][TheLabelFrame] = {"Name":labelFrame}
@@ -576,9 +576,9 @@ class BethiniApp(tk.Tk):
 
     def settingFramesForLabelFrame(self, eachTab, labelFrame, TheLabelFrame):
         self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"] = {}
-        NumberOfVerticallyStackedSettings = int(app.NumberOfVerticallyStackedSettings(self.tabDictionary[eachTab]["Name"], labelFrame))
+        NumberOfVerticallyStackedSettings = int(app.number_of_vertically_stacked_settings(self.tabDictionary[eachTab]["Name"], labelFrame))
         settingNumber = 0
-        for setting in app.settingsInLabelFrame(self.tabDictionary[eachTab]["Name"], labelFrame):
+        for setting in app.settings_in_label_frame(self.tabDictionary[eachTab]["Name"], labelFrame):
             settingNumber += 1
             onFrame = "SettingFrame" + str(math.ceil(settingNumber / NumberOfVerticallyStackedSettings) - 1)
             if onFrame not in self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"]:
@@ -590,7 +590,7 @@ class BethiniApp(tk.Tk):
             self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"] = ttk.Frame(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame]["TkSettingFrame"])
             self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"].pack(anchor='w', padx='5', pady='2')
             if 'Placeholder' not in setting:
-                self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].update(app.getAllFieldsForSetting(self.tabDictionary[eachTab]["Name"], labelFrame, setting))
+                self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].update(app.get_all_fields_for_setting(self.tabDictionary[eachTab]["Name"], labelFrame, setting))
                 self.settingLabel(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting)
 
     def settingLabel(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting):
@@ -707,7 +707,7 @@ class BethiniApp(tk.Tk):
                 OptionString = app.custom(OPTIONS)
                 if '{}' in OptionString:
                     customFunction = app.custom(f'{OPTIONS}Format')
-                    valueToInsert = getattr(customFunctions, customFunction)(gameName)
+                    valueToInsert = getattr(CustomFunctions, customFunction)(gameName)
                     OPTIONS = valueToInsert
         else:
             for n in range(len(OPTIONS)):
@@ -715,7 +715,7 @@ class BethiniApp(tk.Tk):
                     OptionString = app.custom(OPTIONS[n])
                     if '{}' in OptionString:
                         customFunction = app.custom(str(OPTIONS[n]) + 'Format')
-                        valueToInsert = getattr(customFunctions, customFunction)(gameName)
+                        valueToInsert = getattr(CustomFunctions, customFunction)(gameName)
                         OPTIONS[n] = OptionString.format(valueToInsert)
 
         self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
@@ -725,7 +725,7 @@ class BethiniApp(tk.Tk):
                                                                                                                              command=lambda c,var=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
                                                                                                                              browse=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("browse"),
                                                                                                                              function=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("customFunction"):
-                                                                                                                             var.set(browseToLocation(c, browse, function, gameName)))
+                                                                                                                             var.set(browse_to_location(c, browse, function, gameName)))
         self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].var = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"]
         self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
@@ -1087,12 +1087,12 @@ class BethiniApp(tk.Tk):
             elif colorValueType == 'decimal':
                 thisValue = settingValue[0]
                 #convert decimal value to hex
-                newColor = RGBToHex(DecimalToRGB(settingValue[0]))
+                newColor = rgb_to_hex(decimal_to_rgb(settingValue[0]))
             elif colorValueType == 'rgb':
                 rgbType = self.settingDictionary[setting].get("rgbType")
                 if rgbType == 'multiple settings':
                     thisValue = tuple(int(i) for i in settingValue)
-                    newColor = RGBToHex(thisValue)
+                    newColor = rgb_to_hex(thisValue)
                     thisValue = str(thisValue)
                 else:
                     thisValue = '('
@@ -1100,16 +1100,16 @@ class BethiniApp(tk.Tk):
                         thisValue += settingValue[n]
                     thisValue += ')'
                     print(thisValue)
-                    newColor = RGBToHex(ast.literal_eval(thisValue))
+                    newColor = rgb_to_hex(ast.literal_eval(thisValue))
             elif colorValueType == 'rgb 1':
                 rgbType = self.settingDictionary[setting].get("rgbType")
                 if rgbType == 'multiple settings':
                     thisValue = tuple(round(float(i),4) for i in settingValue)
-                    newColor = RGBToHex(tuple(int(float(i)*255) for i in settingValue))
+                    newColor = rgb_to_hex(tuple(int(float(i)*255) for i in settingValue))
                     thisValue = str(thisValue)
             self.settingDictionary[setting]['TkVar'].set(thisValue)
             TkWidget = self.settingDictionary[setting].get("TkWidget")
-            RGB = HexToRGB(newColor)
+            RGB = hex_to_rgb(newColor)
             luminance = 0.299*RGB[0] + 0.587*RGB[1] + 0.114*RGB[2]
             if luminance < 128:
                 theTextColor = '#FFFFFF'

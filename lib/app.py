@@ -52,7 +52,7 @@ class AppName:
             return ini_location
         except KeyError:
             return False
-    
+
     def settings(self):
         ini_settings = []
         for ini_setting in self.ini_values:
@@ -78,7 +78,7 @@ class AppName:
                 except KeyError:
                     continue
         return setting_values
-    
+
     def get_ini_section_setting_dict(self):
         ini_section_setting_dict = {}
         for ini_setting in self.ini_values:
@@ -93,7 +93,7 @@ class AppName:
                 ini_section_setting_dict[ini][section] = [setting]
             else:
                 ini_section_setting_dict[ini][section].append(setting)
-        
+
         return ini_section_setting_dict
 
     def get_value(self, setting, value_type):
@@ -131,7 +131,8 @@ class AppName:
             if always_print:
                 ini = ini_setting.get('ini', self.default_ini)
 
-                the_value = str(ini_setting['value'].get('fixedDefault', ini_setting['value'].get('default')))
+                the_value = str(ini_setting['value'].get('fixedDefault',
+                                                         ini_setting['value'].get('default')))
 
                 always_print[ini_setting['name']]={
                     'ini': ini,
@@ -156,66 +157,26 @@ class AppName:
                     }
         return can_remove
 
-    def setting_something_dictionary(self, something):
-        something_somethings = []
-        for ini_setting in self.ini_values:
-            something_somethings.append(ini_setting[something])
-
-        something_somethings_dictionary = {}
-        iteration = -1
-        for setting in self.settings:
-            iteration += 1
-            something_somethings_dictionary[setting] = something_somethings[iteration]
-        return something_somethings_dictionary
-
-    def settingSectionDictionary(self):
-        INISections = []
-        for iniSetting in self.ini_values:
-            INISections.append(iniSetting['section'])
-
-        settingSectionDictionary = {}
-        iteration = -1
-        for setting in self.settings:
-            iteration += 1
-            settingSectionDictionary[setting] = INISections[iteration]
-        return settingSectionDictionary
-
-    def getSettingSection(self, setting):
-        settingSectionDictionary = self.settingSectionDictionary()
-        return settingSectionDictionary[setting]
-
     def tabs(self):
-        return self.iteritemslist(self.bethini["displayTabs"])
+        return self.iter_items_list(self.bethini["displayTabs"])
 
-    def labelFramesInTab(self, tab):
-        return self.iteritemslist(self.bethini['displayTabs'][tab])
+    def label_frames_in_tab(self, tab):
+        return self.iter_items_list(self.bethini['displayTabs'][tab])
 
-    def fieldsInSetting(self, tab, labelFrame, setting):
-        return self.iteritemslist(self.getAllFieldsForSetting(tab, labelFrame, setting))
-
-    def iteritemslist(self, items):
-        itemlist = []
+    def iter_items_list(self, items):
+        item_list = []
         for item in items:
-            itemlist.append(item)
-        return itemlist
+            item_list.append(item)
+        return item_list
 
-    def settingsInLabelFrame(self, tab, labelFrame):
-        return self.iteritemslist(self.bethini['displayTabs'][tab][labelFrame]['Settings'])
+    def settings_in_label_frame(self, tab, label_frame):
+        return self.iter_items_list(self.bethini['displayTabs'][tab][label_frame]['Settings'])
 
-    def NumberOfVerticallyStackedSettings(self, tab, labelFrame):
-        return self.bethini['displayTabs'][tab][labelFrame]['NumberOfVerticallyStackedSettings']
+    def number_of_vertically_stacked_settings(self, tab, label_frame):
+        return self.bethini['displayTabs'][tab][label_frame]['NumberOfVerticallyStackedSettings']
 
-    def settingField(self, tab, labelFrame, setting, field, default='No Default'):
-        try:
-            return self.bethini['displayTabs'][tab][labelFrame]['Settings'][setting][field]
-        except KeyError:
-            if default != 'No Default':
-                return default
-            return
+    def get_all_fields_for_setting(self, tab, label_frame, setting):
+        return self.bethini['displayTabs'][tab][label_frame]['Settings'][setting]
 
-    def getAllFieldsForSetting(self, tab, labelFrame, setting):
-        return self.bethini['displayTabs'][tab][labelFrame]['Settings'][setting]
-
-    
 if __name__ == '__main__':
     print('This is the app.appName class module.')
