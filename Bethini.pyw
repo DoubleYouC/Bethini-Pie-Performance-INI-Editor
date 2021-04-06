@@ -1,6 +1,8 @@
 #
-#This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-#To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+#This work is licensed under the
+#Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+#To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+#or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 #
 
 import ast
@@ -8,17 +10,19 @@ import os
 import math
 import logging
 import webbrowser
-from simpleeval import simple_eval
 from shutil import copyfile
 from datetime import datetime
-from fractions import Fraction
 from operator import gt, ge, lt, le, ne, eq
-#from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE #This is for changing file read-only access via os.chmod(filename, S_IREAD,
-                                                                       #S_IRGRP, #S_IROTH) Not currently used.                                                     
-import tkinter as tk 
+#from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
+#This is for changing file read-only access via os.chmod(filename, S_IREAD,
+#S_IRGRP, #S_IROTH) Not currently used.
+
+import tkinter as tk
 from tkinter import ttk
 from tkinter import colorchooser
 from tkinter import messagebox
+
+from simpleeval import simple_eval
 
 from lib.app import AppName
 from lib.AutoScrollbar import AutoScrollbar
@@ -28,7 +32,7 @@ from lib.customFunctions import CustomFunctions, sm, browse_to_location, rgb_to_
 
 class BethiniApp(tk.Tk):
     #This is the main app, the glue that creates the GUI.
-    
+
     def __init__(self, *args, **kwargs):
         #You need args for lists and kwargs for dictionaries passed to tkinter
         tk.Tk.__init__(self, *args, **kwargs)
@@ -37,15 +41,15 @@ class BethiniApp(tk.Tk):
         tk.Tk.iconbitmap(self,default='Icon.ico') #sets the app icon
 
         #variables
-        self.setupDictionary = {}
-        self.tabDictionary = {}
-        self.settingDictionary = {}
-        self.dependentSettingsDictionary = {}
-        self.settingsThatSettingsDependOn = {}
+        self.setup_dictionary = {}
+        self.tab_dictionary = {}
+        self.setting_dictionary = {}
+        self.dependent_settings_dictionary = {}
+        self.settings_that_settings_depend_on = {}
         self.tab = []
 
-        self.widgetTypeFunction = {
-            'Checkbutton': self.checkbox, 
+        self.widget_type_function = {
+            'Checkbutton': self.checkbox,
             'preset': self.preset,
             'Dropdown': self.dropdown,
             'Entry': self.entry,
@@ -56,8 +60,8 @@ class BethiniApp(tk.Tk):
             'radioPreset': self.radioPreset
             }
 
-        self.widgetTypeValue = {
-            'TkCheckbutton': self.checkboxValue, 
+        self.widget_type_value = {
+            'TkCheckbutton': self.checkboxValue,
             'TkOptionMenu': self.dropdownValue,
             'TkEntry': self.entryValue,
             'TkSpinbox': self.spinboxValue,
@@ -67,8 +71,8 @@ class BethiniApp(tk.Tk):
             'TkRadioPreset': self.radioPresetValue
             }
 
-        self.widgetTypeAssignValue = {
-            'TkCheckbutton': self.checkboxAssignValue, 
+        self.widget_type_assign_value = {
+            'TkCheckbutton': self.checkboxAssignValue,
             'TkOptionMenu': self.dropdownAssignValue,
             'TkEntry': self.entryAssignValue,
             'TkSpinbox': self.spinboxAssignValue,
@@ -77,13 +81,13 @@ class BethiniApp(tk.Tk):
             'TkSlider': self.sliderAssignValue
             }
 
-        self.typesWithoutLabel = ['Checkbutton', 'preset', 'radioPreset', 'description']
-        self.typesPackedLeft = ['Dropdown', 'Combobox', 'Entry', 'Spinbox', 'Slider', 'Color']
+        self.types_without_label = ['Checkbutton', 'preset', 'radioPreset', 'description']
+        self.types_packed_left = ['Dropdown', 'Combobox', 'Entry', 'Spinbox', 'Slider', 'Color']
 
-        
+
         theme_dir = appConfig.getValue('General', 'sTheme', 'Default')
 
-        self.openINIs = {
+        self.open_inis = {
             MyAppNameConfig : {
                 'located': {
                     '1': {
@@ -105,7 +109,8 @@ class BethiniApp(tk.Tk):
         # ttk style overrides
         self.s = ttk.Style()
         self.s.theme_use('alt')
-        self.s.configure(".", background=subContainerColor, font=smallFont, foreground=textColor, fieldbackground=fieldColor, arrowcolor=textColor)
+        self.s.configure(".", background=subContainerColor, font=smallFont,
+                         foreground=textColor, fieldbackground=fieldColor, arrowcolor=textColor)
         self.s.map('.',
                    foreground=[('disabled', textColorDisabled),
                                ('pressed', textColorPressed),
@@ -113,12 +118,12 @@ class BethiniApp(tk.Tk):
                    background=[('disabled', backgroundColorDisabled),
                                ('pressed', '!focus', backgroundColorPressed),
                                ('active', backgroundColorActive)])
-        
-        arrowSize = int(round(int(smallFontSize)*1.33,0))
+
+        arrow_size = int(round(int(smallFontSize)*1.33,0))
 
         self.s.configure('TCheckbutton', indicatorcolor=indicatorColor)
-        self.s.configure('TCombobox', arrowsize=arrowSize)
-        self.s.configure('TSpinbox', arrowsize=arrowSize, background=dropdownColor)
+        self.s.configure('TCombobox', arrowsize=arrow_size)
+        self.s.configure('TSpinbox', arrowsize=arrow_size, background=dropdownColor)
         self.s.configure('TMenubutton', background=dropdownColor)
         self.s.configure('TCombobox', background=dropdownColor)
         self.s.configure('TNotebook', background=containerColor)
@@ -139,84 +144,83 @@ class BethiniApp(tk.Tk):
         #self.closeButton = ttk.Button(self.titleBar, text='✕', command=onClosing)
 
 
-        
-        self.theCanvas = tk.Canvas(self, borderwidth=0, background=containerColor, height=0, highlightthickness=0)
+        self.the_canvas = tk.Canvas(self, borderwidth=0, background=containerColor,
+                                   height=0, highlightthickness=0)
         self.hsbframeholder = ttk.Frame(self)
 
-        self.vsb = AutoScrollbar(self, orient='vertical', command=self.theCanvas.yview)
-        self.hsb = AutoScrollbar(self.hsbframeholder, orient='horizontal', command=self.theCanvas.xview)
-        self.theCanvas.configure(yscrollcommand=self.vsb.set, xscrollcommand=self.hsb.set)
-        
-        self.container = ttk.Frame(self.theCanvas)
+        self.vsb = AutoScrollbar(self, orient='vertical',
+                                 command=self.the_canvas.yview)
+        self.hsb = AutoScrollbar(self.hsbframeholder, orient='horizontal',
+                                 command=self.the_canvas.xview)
+        self.the_canvas.configure(yscrollcommand=self.vsb.set, xscrollcommand=self.hsb.set)
+
+        self.container = ttk.Frame(self.the_canvas)
 
         #self.titleBar.pack(expand=False, fill=tk.X)
         #self.closeButton.pack(side=tk.RIGHT)
         self.hsbframeholder.pack(side=tk.BOTTOM, fill=tk.X)
         self.vsb.pack(side=tk.RIGHT, fill=tk.Y)
         self.hsb.pack(side=tk.BOTTOM, fill=tk.X)
-        self.theCanvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        
-        self.canvas_frame = self.theCanvas.create_window((4,4), window=self.container, tags='self.container')
-        
+        self.the_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.canvas_frame = self.the_canvas.create_window((4,4),
+                                                          window=self.container,
+                                                          tags='self.container')
+        self.container.bind('<Configure>', self.on_frame_configure)
+        self.sub_container = ttk.Notebook(self.container)
+        self.sub_container.bind("<Configure>", self.sub_container_configure)
 
-        self.container.bind('<Configure>', self.onFrameConfigure)
-
-
-        self.subContainer = ttk.Notebook(self.container)
-        self.subContainer.bind("<Configure>", self.subContainerConfigure)
-
-        self.statusbarText = tk.StringVar(self)
-        self.statusbar = ttk.Entry(self.hsbframeholder, textvariable=self.statusbarText)
+        self.statusbar_text = tk.StringVar(self)
+        self.statusbar = ttk.Entry(self.hsbframeholder, textvariable=self.statusbar_text)
 
         self.pw = ttk.Label(self.hsbframeholder, text='Loading... Please Wait... ')
         self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode='indeterminate')
-        self.startProgress()
-        self.showStatusBar()
+        self.start_progress()
+        self.show_status_bar()
         #upon initialization of the BethiniApp class, self.chooseGame() is
         #called first, so we select or return to the game/app we want to work with
 
+        self.choose_game_window = tk.Toplevel(self)
+        self.choose_game_window.title('Choose Game')
 
+        self.choose_game_frame = ttk.Frame(self.choose_game_window)
 
-        self.chooseGameWindow = tk.Toplevel(self)
-        self.chooseGameWindow.title('Choose Game')
+        self.choose_game_frame_2 = ttk.Frame(self.choose_game_frame)
 
-        self.chooseGameFrame = ttk.Frame(self.chooseGameWindow)
+        self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Game/Application")
 
-        self.chooseGameFrame2 = ttk.Frame(self.chooseGameFrame)
+        options = os.listdir('apps/')
+        self.choose_game_var = tk.StringVar(self)
+        self.choose_game_dropdown = ttk.OptionMenu(self.choose_game_frame_2,
+                                                 self.choose_game_var, "None", *options,
+                                                 command= lambda g: self.choose_game_done(g, True))
+        self.choose_game_dropdown.var = self.choose_game_var
 
-        self.chooseGameLabel = ttk.Label(self.chooseGameFrame2, text="Game/Application")
+        self.choose_game_frame.pack(fill=tk.BOTH, expand=True)
+        self.choose_game_frame_2.pack(anchor=tk.CENTER, expand=True)
+        self.choose_game_label.pack(side=tk.LEFT, anchor=tk.CENTER, padx=5, pady=5)
+        self.choose_game_dropdown.pack(anchor=tk.CENTER, padx=5, pady=5)
+        self.choose_game_window.protocol("WM_DELETE_WINDOW", onClosing)
+        self.choose_game_window.minsize(300,35)
 
-        OPTIONS = os.listdir('apps/')
-        self.chooseGameVar = tk.StringVar(self)
-        self.chooseGameDropdown = ttk.OptionMenu(self.chooseGameFrame2, self.chooseGameVar, "None", *OPTIONS, command= lambda g: self.chooseGameDone(g, True))
-        self.chooseGameDropdown.var = self.chooseGameVar
+        self.preset_var = tk.StringVar(self)
+        self.preset_var.set('Bethini')
 
-        self.chooseGameFrame.pack(fill=tk.BOTH, expand=True)
-        self.chooseGameFrame2.pack(anchor=tk.CENTER, expand=True)
-        self.chooseGameLabel.pack(side=tk.LEFT, anchor=tk.CENTER, padx=5, pady=5)
-        self.chooseGameDropdown.pack(anchor=tk.CENTER, padx=5, pady=5)
-        self.chooseGameWindow.protocol("WM_DELETE_WINDOW", onClosing)
-        self.chooseGameWindow.minsize(300,35)
+        self.choose_game()
 
-        self.presetVar = tk.StringVar(self)
-        self.presetVar.set('Bethini')
+    def on_frame_configure(self, event):
+        self.the_canvas.configure(scrollregion=self.the_canvas.bbox('all'))
 
-        self.chooseGame()
+    def sub_container_configure(self, event):
+        the_width = event.width + 17# + 35
+        the_height = event.height + 21# + 65
+        self.geometry(f'{the_width}x{the_height}')
 
-    def onFrameConfigure(self, event):
-        self.theCanvas.configure(scrollregion=self.theCanvas.bbox('all'))
-
-    def subContainerConfigure(self, event):
-        theWidth = event.width + 17# + 35
-        theHeight = event.height + 21# + 65
-        self.geometry(f'{theWidth}x{theHeight}')
-
-    def startProgress(self):
+    def start_progress(self):
         self.pw.pack(side=tk.LEFT, anchor=tk.S)
         self.p.pack(expand=True, fill=tk.X, anchor=tk.S)
         self.p.start()
 
-    def stopProgress(self):
+    def stop_progress(self):
         self.pw.destroy()
         self.p.stop()
         self.p.destroy()
@@ -225,92 +229,93 @@ class BethiniApp(tk.Tk):
 
     def sme(self, message, exception=False):
         sm(message, exception)
-        self.statusbarText.set(message)
+        self.statusbar_text.set(message)
         self.update()
 
-    def showSubContainer(self):
-        self.subContainer.pack(fill=tk.BOTH, expand=True)
+    def show_sub_container(self):
+        self.sub_container.pack(fill=tk.BOTH, expand=True)
 
-    def showStatusBar(self):
+    def show_status_bar(self):
         self.statusbar.pack(anchor='w', side=tk.BOTTOM, fill=tk.X)
 
-    def chooseColor(self, buttonToModify, colorValueType='hex'):
+    def choose_color(self, button_to_modify, color_value_type='hex'):
         #This allows us to have our very convenient tkinter colorchooser dialog
         #window modify a button
-        oldColor = buttonToModify.var.get()
-        if colorValueType == 'rgb':
-            oldColor = rgb_to_hex(ast.literal_eval(oldColor))
-        elif colorValueType == 'rgb 1':
+        old_color = button_to_modify.var.get()
+        if color_value_type == 'rgb':
+            old_color = rgb_to_hex(ast.literal_eval(old_color))
+        elif color_value_type == 'rgb 1':
             #"(1.0000, 1.0000, 1.0000)"
             #(255, 255, 255)
-            oldColor = tuple(int(float(i)*255) for i in ast.literal_eval(oldColor))
-        elif colorValueType == 'decimal':
-            oldColor = rgb_to_hex(decimal_to_rgb(oldColor))
+            old_color = tuple(int(float(i)*255) for i in ast.literal_eval(old_color))
+        elif color_value_type == 'decimal':
+            old_color = rgb_to_hex(decimal_to_rgb(old_color))
 
         try:
-            newColor = colorchooser.askcolor(color = oldColor)[1].upper()
+            new_color = colorchooser.askcolor(color = old_color)[1].upper()
         except:
             #self.sme('Cancelled change of color.', exception=1)
-            newColor = oldColor
+            new_color = old_color
 
-        RGB = hex_to_rgb(newColor)
-        luminance = 0.299*RGB[0] + 0.587*RGB[1] + 0.114*RGB[2]
+        rgb = hex_to_rgb(new_color)
+        luminance = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2]
         if luminance < 128:
-            theTextColor = '#FFFFFF'
+            the_text_color = '#FFFFFF'
         else:
-            theTextColor = '#000000'
-        buttonToModify.configure(bg=newColor, activebackground=newColor, fg=theTextColor)
-        if colorValueType == 'rgb':
-            buttonToModify.var.set(str(hex_to_rgb(newColor)).replace(' ',''))
-        elif colorValueType == 'rgb 1':
+            the_text_color = '#000000'
+        button_to_modify.configure(bg=new_color, activebackground=new_color, fg=the_text_color)
+        if color_value_type == 'rgb':
+            button_to_modify.var.set(str(hex_to_rgb(new_color)).replace(' ',''))
+        elif color_value_type == 'rgb 1':
             #(255, 255, 255)
             #"(1.0000, 1.0000, 1.0000)"
-            theRGB = str(tuple(round(i/255,4) for i in hex_to_rgb(newColor)))
-            buttonToModify.var.set(theRGB)
-        elif colorValueType == 'decimal':
-            buttonToModify.var.set(hex_to_decimal(newColor))
+            the_rgb = str(tuple(round(i/255,4) for i in hex_to_rgb(new_color)))
+            button_to_modify.var.set(the_rgb)
+        elif color_value_type == 'decimal':
+            button_to_modify.var.set(hex_to_decimal(new_color))
         else:
-            buttonToModify.var.set(newColor)
+            button_to_modify.var.set(new_color)
         preferencesWindow.lift()
-        return newColor
+        return new_color
 
-    def tooltip(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id):
-        CreateToolTip(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id],
-                      self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["tooltip"])
+    def tooltip(self, each_tab, label_frame, the_label_frame, on_frame, setting, the_setting, id_):
+        CreateToolTip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_],
+                      self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tooltip"])
 
-    def chooseGame(self, forced=0):
+    def choose_game(self, forced=0):
         self.withdraw()
         # The Choose App/Game dialog window.  The window is skipped here if
         # sAppName is already set in the Bethini.ini file.
         try:
-            chooseGameVar = appConfig.getValue('General','sAppName')
+            choose_game_var = appConfig.getValue('General','sAppName')
             if forced == 1:
                 self.sme('Force choose game/application.')
                 raise Exception("Forcing you to choose")
             if appConfig.getValue('General', 'bAlwaysSelectGame', '0') == '1':
                 self.sme('Force choose game/application at startup.')
-                gameName #By calling the global variable gameName before it has been created, we raise
+                GAME_NAME #By calling the global variable GAME_NAME before it has been created,
+                         #we raise
                          #an exception to force the app/game to be chosen only
-                                                 #at startup.
+                         #at startup.
             #raise Exception("Forcing you to choose")
-            self.chooseGameDone(chooseGameVar)
+            self.choose_game_done(choose_game_var)
         except:
             self.sme('Choose game/application.', exception=1)
-            self.chooseGameWindow.deiconify()
+            self.choose_game_window.deiconify()
 
-    def chooseGameDone(self, game, fromChooseGameWindow=False):
-        self.chooseGameWindow.withdraw()
-        
+    def choose_game_done(self, game, from_choose_game_window=False):
+        self.choose_game_window.withdraw()
+
         # Once the app/game is selected, this loads it.
         try:
-            self.chooseGameVar = appConfig.getValue('General','sAppName')
-            if self.chooseGameVar != game:
+            self.choose_game_var = appConfig.getValue('General','sAppName')
+            if self.choose_game_var != game:
                 self.sme(f'Change of game from {self.chooseGameVar} to {game}')
                 raise Exception("App/Game specified in " + MyAppNameConfig + " differs from the game chosen, so it will be changed to the one you chose.")
         except:
             self.sme('Change of game/application', exception=1)
             appConfig.assignINIValue('General','sAppName', game)
-            fromChooseGameWindow = True
+            from_choose_game_window = True
 
         tk.Tk.wm_title(self, MyAppName + " - " + game)
 
@@ -318,89 +323,92 @@ class BethiniApp(tk.Tk):
         # app globals
         ##############
 
-        global app
-        app = AppName(game)
-        global gameName
-        gameName = app.game_name()
-        self.sme(f'Application/game is {gameName}')
+        global APP
+        APP = AppName(game)
+        global GAME_NAME
+        GAME_NAME = APP.game_name()
+        self.sme(f'Application/game is {GAME_NAME}')
 
         #######
         # Tabs
         #######
 
-        tabs = app.tabs()
-
-        #The self.tabDictionary lists all the tabs, which
+        tabs = APP.tabs()
+        #The self.tab_dictionary lists all the tabs, which
         #is variable, based upon the tabs listed in the associated Bethini.json
-        
-        for tab in self.tabDictionary:
-            if self.tabDictionary[tab]['Name'] == 'Setup':
+
+        for tab in self.tab_dictionary:
+            if self.tab_dictionary[tab]['Name'] == 'Setup':
                 try:
-                    self.tabDictionary[tab]['SetupWindow'].destroy()
+                    self.tab_dictionary[tab]['SetupWindow'].destroy()
                 except:
-                    TkFrame = self.tabDictionary[tab].get('TkFrameForTab')
-                    if TkFrame:
-                        TkFrame.destroy()
+                    tk_frame = self.tab_dictionary[tab].get('TkFrameForTab')
+                    if tk_frame:
+                        tk_frame.destroy()
             else:
-                TkFrame = self.tabDictionary[tab].get('TkFrameForTab')
-                if TkFrame:
-                    TkFrame.destroy()
+                tk_frame = self.tab_dictionary[tab].get('TkFrameForTab')
+                if tk_frame:
+                    tk_frame.destroy()
 
-        self.tabDictionary = {}
-        tabNumber = 0
+        self.tab_dictionary = {}
+        tab_number = 0
         for tab in tabs:
-            tabNumber += 1
-            self.tabDictionary["Page" + str(tabNumber)] = {"Name":tab}
+            tab_number += 1
+            self.tab_dictionary["Page" + str(tab_number)] = {"Name":tab}
 
-        
-        self.setupDictionary = {}
-        self.settingDictionary = {}
-        self.dependentSettingsDictionary = {}
-        self.settingsThatSettingsDependOn = {}
+
+        self.setup_dictionary = {}
+        self.setting_dictionary = {}
+        self.dependent_settings_dictionary = {}
+        self.settings_that_settings_depend_on = {}
         self.tab = []
 
         self.menu()
-        if not fromChooseGameWindow:
+        if not from_choose_game_window:
             self.deiconify()
-        self.createTabs(fromChooseGameWindow)
+        self.createTabs(from_choose_game_window)
 
     def menu(self):
         menubar = tk.Menu(self)
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label="Save", command = self.SaveINIFiles)
         filemenu.add_separator()
-        filemenu.add_command(label="Choose game", command = lambda: self.chooseGame(forced=1))
+        filemenu.add_command(label="Choose game", command = lambda: self.choose_game(forced=1))
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=onClosing)
         editmenu = tk.Menu(menubar, tearoff=0)
-        editmenu.add_command(label="Preferences", command = self.showPreferences)
+        editmenu.add_command(label="Preferences", command = self.show_preferences)
         editmenu.add_command(label="Setup", command = self.showSetup)
         helpmenu = tk.Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="Visit Web Page", command = lambda: webbrowser.open_new_tab('http://www.nexusmods.com/skyrimspecialedition/mods/4875/'))
-        helpmenu.add_command(label="Get Support", command = lambda: webbrowser.open_new_tab('https://stepmodifications.org/forum/forum/200-Bethini-support/'))
-        helpmenu.add_command(label="About", command = self.About)
+        helpmenu.add_command(label="Visit Web Page",
+                             command = lambda: webbrowser.open_new_tab('http://www.nexusmods.com/skyrimspecialedition/mods/4875/'))
+        helpmenu.add_command(label="Get Support",
+                             command = lambda: webbrowser.open_new_tab('https://stepmodifications.org/forum/forum/200-Bethini-support/'))
+        helpmenu.add_command(label="About", command = self.about)
         menubar.add_cascade(label="File", menu=filemenu)
         menubar.add_cascade(label="Edit", menu=editmenu)
         menubar.add_cascade(label="Help", menu=helpmenu)
         tk.Tk.config(self, menu=menubar)
 
-    def showPreferences(self):
+    def show_preferences(self):
         preferencesWindow.deiconify()
 
-    def withdrawPreferences(self):
+    def withdraw_preferences(self):
         preferencesWindow.withdraw()
 
-    def About(self):
-        AboutWindow = tk.Toplevel(self)
-        AboutWindow.title('About')
+    def about(self):
+        about_window = tk.Toplevel(self)
+        about_window.title('About')
 
-        AboutFrame = ttk.Frame(AboutWindow)
-        AboutFrameReal = ttk.Frame(AboutFrame)
+        about_frame = ttk.Frame(about_window)
+        about_frame_real = ttk.Frame(about_frame)
 
-        AboutLabel = ttk.Label(AboutFrameReal, text=f'About {MyAppName}\n\n{MyAppName} was created by DoubleYou.\n\nLicensing is CC by-NC-SA.', justify=tk.CENTER)
+        AboutLabel = ttk.Label(about_frame_real,
+                               text=f'About {MyAppName}\n\n{MyAppName} was created by DoubleYou.\n\nLicensing is CC by-NC-SA.',
+                               justify=tk.CENTER)
 
-        AboutFrame.pack(fill=tk.BOTH, expand=True)
-        AboutFrameReal.pack(anchor=tk.CENTER, expand=True)
+        about_frame.pack(fill=tk.BOTH, expand=True)
+        about_frame_real.pack(anchor=tk.CENTER, expand=True)
         AboutLabel.pack(anchor=tk.CENTER, padx='10', pady='10')
 
     def showSetup(self):
@@ -426,7 +434,7 @@ class BethiniApp(tk.Tk):
         firstTimeBackup = False
         filesSaved = False
         self.removeInvalidSettings()
-        TheOpenedINIs = self.openINIs
+        TheOpenedINIs = self.open_inis
         INIList = list(TheOpenedINIs.keys())
         filesToRemove = INIList[2:]
         filesToRemove.append('log.log')
@@ -470,34 +478,34 @@ class BethiniApp(tk.Tk):
             self.sme('No files were modified.')
                         
     def setPreset(self, presetid):
-        self.startProgress()
+        self.start_progress()
         if presetid == "Default":
-            self.applyINIDict(app.preset_values('default'))
-            self.removeINIDict(app.can_remove())
-            self.applyINIDict(app.preset_values('fixedDefault'))
+            self.applyINIDict(APP.preset_values('default'))
+            self.removeINIDict(APP.can_remove())
+            self.applyINIDict(APP.preset_values('fixedDefault'))
             presetVar = ""
         elif presetid == "recommended":
-            presetDict = app.preset_values(f'{presetid}')
+            presetDict = APP.preset_values(f'{presetid}')
             self.applyINIDict(presetDict)
             presetVar = ""
         else:
-            presetVar = self.presetVar.get()
-            presetDict = app.preset_values(f'{presetVar} {presetid}')
+            presetVar = self.preset_var.get()
+            presetDict = APP.preset_values(f'{presetVar} {presetid}')
             self.applyINIDict(presetDict)
-        self.stopProgress()
+        self.stop_progress()
         self.updateValues()
         self.sme(f"Preset {presetVar} {presetid} applied.")
 
     def removeInvalidSettings(self):
-        TheOpenedINIs = self.openINIs
+        TheOpenedINIs = self.open_inis
         
         for INI in TheOpenedINIs:
             if INI == MyAppNameConfig or INI == 'theme.ini':
                 continue
-            elif app.inis(INI):
+            elif APP.inis(INI):
                 locationList = list(TheOpenedINIs[INI]['located'].keys())
                 for n in range(len(locationList)):
-                    thisLocation = TheOpenedINIs[INI]['located'][str(n+1)].get('at')
+                    #thisLocation = TheOpenedINIs[INI]['located'][str(n+1)].get('at')
                     thisINIObject = TheOpenedINIs[INI]['located'][str(n+1)].get('object')
 
                     sections = thisINIObject.getSections()
@@ -511,12 +519,12 @@ class BethiniApp(tk.Tk):
                             for setting in settings:
                                 if ';' in setting:
                                     self.sme(f'{setting}:{section} will be preserved, as it is a comment.')
-                                elif not app.does_setting_exist(INI, section, setting):
+                                elif not APP.does_setting_exist(INI, section, setting):
                                     thisINIObject.removeSetting(section, setting)
                                     self.sme(f'{setting}:{section} was removed because it is not recognized.')                       
 
     def applyINIDict(self, INIDict):
-        presetsIgnoreTheseSettings = app.presets_ignore_these_settings()
+        presetsIgnoreTheseSettings = APP.presets_ignore_these_settings()
         for eachSetting in INIDict:
             if eachSetting in presetsIgnoreTheseSettings:
                 continue
@@ -524,7 +532,7 @@ class BethiniApp(tk.Tk):
             targetSection = INIDict[eachSetting]['section']
             thisValue = str(INIDict[eachSetting]['value'])
 
-            INILocation = app.inis(targetINI)
+            INILocation = APP.inis(targetINI)
             if INILocation != '':
                 INILocation = appConfig.getValue('Directories', INILocation)
             theTargetINI = self.openINI(str(INILocation), str(targetINI))
@@ -538,7 +546,7 @@ class BethiniApp(tk.Tk):
             targetSection = INIDict[eachSetting]['section']
             thisValue = str(INIDict[eachSetting]['value'])
 
-            INILocation = app.inis(targetINI)
+            INILocation = APP.inis(targetINI)
             if INILocation != '':
                 INILocation = appConfig.getValue('Directories', INILocation)
             theTargetINI = self.openINI(str(INILocation), str(targetINI))
@@ -551,16 +559,16 @@ class BethiniApp(tk.Tk):
 
     def createTabImage(self, eachTab):
         try:
-            self.tabDictionary[eachTab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "theme\\" + theme + "\\" + self.tabDictionary[eachTab]["Name"] + ".png")
+            self.tab_dictionary[eachTab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "theme\\" + theme + "\\" + self.tab_dictionary[eachTab]["Name"] + ".png")
         except:
             self.sme('No theme image for tab.', exception=1)
-            self.tabDictionary[eachTab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "theme\\" + theme + "\\Blank.png")
+            self.tab_dictionary[eachTab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "theme\\" + theme + "\\Blank.png")
 
     def labelFramesForTab(self, eachTab):
-        theDict = self.tabDictionary[eachTab]
+        theDict = self.tab_dictionary[eachTab]
         theDict["LabelFrames"] = {}
         labelFrameNumber=0
-        for labelFrame in app.label_frames_in_tab(theDict["Name"]):
+        for labelFrame in APP.label_frames_in_tab(theDict["Name"]):
             labelFrameNumber += 1
             TheLabelFrame="LabelFrame"+str(labelFrameNumber)
             theDict["LabelFrames"][TheLabelFrame] = {"Name":labelFrame}
@@ -575,57 +583,57 @@ class BethiniApp(tk.Tk):
             self.settingFramesForLabelFrame(eachTab, labelFrame, TheLabelFrame)
 
     def settingFramesForLabelFrame(self, eachTab, labelFrame, TheLabelFrame):
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"] = {}
-        NumberOfVerticallyStackedSettings = int(app.number_of_vertically_stacked_settings(self.tabDictionary[eachTab]["Name"], labelFrame))
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"] = {}
+        NumberOfVerticallyStackedSettings = int(APP.number_of_vertically_stacked_settings(self.tab_dictionary[eachTab]["Name"], labelFrame))
         settingNumber = 0
-        for setting in app.settings_in_label_frame(self.tabDictionary[eachTab]["Name"], labelFrame):
+        for setting in APP.settings_in_label_frame(self.tab_dictionary[eachTab]["Name"], labelFrame):
             settingNumber += 1
             onFrame = "SettingFrame" + str(math.ceil(settingNumber / NumberOfVerticallyStackedSettings) - 1)
-            if onFrame not in self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"]:
-                self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame] = {}
-                self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame]["TkSettingFrame"] = ttk.Frame(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["TkLabelFrame"])
-                self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame]["TkSettingFrame"].pack(side=tk.LEFT, anchor='nw')
+            if onFrame not in self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"]:
+                self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame] = {}
+                self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame]["TkSettingFrame"] = ttk.Frame(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["TkLabelFrame"])
+                self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame]["TkSettingFrame"].pack(side=tk.LEFT, anchor='nw')
             TheSetting = "Setting" + str(settingNumber)
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting] = {"Name":setting}
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"] = ttk.Frame(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame]["TkSettingFrame"])
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"].pack(anchor='w', padx='5', pady='2')
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting] = {"Name":setting}
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"] = ttk.Frame(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame]["TkSettingFrame"])
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"].pack(anchor='w', padx='5', pady='2')
             if 'Placeholder' not in setting:
-                self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].update(app.get_all_fields_for_setting(self.tabDictionary[eachTab]["Name"], labelFrame, setting))
+                self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].update(APP.get_all_fields_for_setting(self.tab_dictionary[eachTab]["Name"], labelFrame, setting))
                 self.settingLabel(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting)
 
     def settingLabel(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting):
-        settingType = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("type")
-        if settingType not in self.typesWithoutLabel:
+        settingType = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("type")
+        if settingType not in self.types_without_label:
             if settingType:
                 settingLabel = setting
             else:
                 settingLabel = ''
-            settingLabelWidth = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("customWidth")
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkLabel"] = ttk.Label(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+            settingLabelWidth = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("customWidth")
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkLabel"] = ttk.Label(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
                                                                                                                                    text=settingLabel, font=smallFont, width=settingLabelWidth, anchor=tk.E)
-            if settingType in self.typesPackedLeft:
-                self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkLabel"].pack(anchor=tk.CENTER, side=tk.LEFT, padx=5, pady=5)
+            if settingType in self.types_packed_left:
+                self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkLabel"].pack(anchor=tk.CENTER, side=tk.LEFT, padx=5, pady=5)
             else:
-                self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkLabel"].pack(anchor=tk.CENTER, padx=5, pady=5)
-        settingDescription = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("Description")
+                self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkLabel"].pack(anchor=tk.CENTER, padx=5, pady=5)
+        settingDescription = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("Description")
         if settingDescription:
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkDescriptionLabel"] = ttk.Label(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkDescriptionLabel"] = ttk.Label(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
                                                                                                                                               text=settingDescription, font=smallFont, justify="left", wraplength=900)
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkDescriptionLabel"].pack(anchor=tk.N)
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkDescriptionLabel"].pack(anchor=tk.N)
         self.settingTypeSwitcher(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, settingType)
 
     def settingTypeSwitcher(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, settingType):
-        func = self.widgetTypeFunction.get(settingType, "Invalid")
+        func = self.widget_type_function.get(settingType, "Invalid")
         if func != "Invalid":
             func(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting)
 
     def widgetTypeSwitcher(self, setting):
-        id = self.settingDictionary[setting].get('id')
-        func = self.widgetTypeValue.get(id, "Invalid")
+        id_ = self.setting_dictionary[setting].get('id')
+        func = self.widget_type_value.get(id_, "Invalid")
         if func != "Invalid":
             return func(setting)
 
-    def addToSettingDictionary(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id):
+    def addToSettingDictionary(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_):
         stuffToAddToSettingDictionary = {
             setting : {
                 'eachTab': eachTab,
@@ -633,303 +641,303 @@ class BethiniApp(tk.Tk):
                 'TheLabelFrame': TheLabelFrame,
                 'onFrame': onFrame,
                 'TheSetting': TheSetting,
-                'id': id,
-                'TkWidget': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id],
-                'targetINIs': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('targetINIs'),
-                'settings': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('settings'),
-                'targetSections': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('targetSections')
+                'id': id_,
+                'TkWidget': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_],
+                'targetINIs': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('targetINIs'),
+                'settings': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('settings'),
+                'targetSections': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('targetSections')
                 }
             }
 
-        self.settingDictionary.update(stuffToAddToSettingDictionary)
+        self.setting_dictionary.update(stuffToAddToSettingDictionary)
 
-        dependentSettings = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('dependentSettings')
+        dependentSettings = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('dependentSettings')
         if dependentSettings:
-            self.dependentSettingsDictionary[setting] = dependentSettings
+            self.dependent_settings_dictionary[setting] = dependentSettings
 
     def checkbox(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting):
         #creates the Checkbutton widget
-        id = "TkCheckbutton"
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
-        onValue = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("Onvalue")
-        offValue = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("Offvalue")
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = ttk.Checkbutton(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
-                                                                                                                              text=setting, variable=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+        id_ = "TkCheckbutton"
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
+        onValue = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("Onvalue")
+        offValue = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("Offvalue")
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = ttk.Checkbutton(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+                                                                                                                              text=setting, variable=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
                                                                                                                               onvalue=onValue, offvalue=offValue)
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].var = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"]
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].pack(anchor='w', padx=5, pady=3.5)
-        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
-        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].var = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"]
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].pack(anchor='w', padx=5, pady=3.5)
+        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
+        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
         stuffToAddToSettingDictionary = {
-            'TkVar': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+            'TkVar': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
             'onvalue': onValue,
             'offvalue': offValue
             }
-        self.settingDictionary[setting].update(stuffToAddToSettingDictionary)
+        self.setting_dictionary[setting].update(stuffToAddToSettingDictionary)
 
     def preset(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting):
         #creates a preset button
-        id = "TkPresetButton"
+        id_ = "TkPresetButton"
 
-        presetid = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("preset id")
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = ttk.Button(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+        presetid = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("preset id")
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = ttk.Button(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
                                                                                                                          text=setting, command=lambda: self.setPreset(presetid))
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].pack(anchor=tk.CENTER, padx=5, pady=2)
-        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
-        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].pack(anchor=tk.CENTER, padx=5, pady=2)
+        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
+        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
 
     def radioPreset(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting):
         #creates the radio preset button
-        id = 'TkRadioPreset'
-        value = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('value')
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = ttk.Radiobutton(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+        id_ = 'TkRadioPreset'
+        value = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('value')
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = ttk.Radiobutton(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
                                                                                                                               text=setting,
-                                                                                                                              variable=self.presetVar, value=value)
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].pack(anchor=tk.CENTER, padx=5, pady=4)
-        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
-        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+                                                                                                                              variable=self.preset_var, value=value)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].pack(anchor=tk.CENTER, padx=5, pady=4)
+        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
+        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
         stuffToAddToSettingDictionary = {
-            'TkVar': self.presetVar
+            'TkVar': self.preset_var
             }
-        self.settingDictionary[setting].update(stuffToAddToSettingDictionary)
+        self.setting_dictionary[setting].update(stuffToAddToSettingDictionary)
 
     def dropdown(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting):
         #creates the OptionMenu widget
-        id = "TkOptionMenu"
+        id_ = "TkOptionMenu"
 
-        OPTIONS = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("choices")
+        OPTIONS = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("choices")
                         
         #custom functions allow us to auto-detect certain
         #predefined options that can then easily be selected.
 
         if type(OPTIONS) == str:
             if 'FUNC' in OPTIONS:
-                OptionString = app.custom(OPTIONS)
+                OptionString = APP.custom(OPTIONS)
                 if '{}' in OptionString:
-                    customFunction = app.custom(f'{OPTIONS}Format')
-                    valueToInsert = getattr(CustomFunctions, customFunction)(gameName)
+                    customFunction = APP.custom(f'{OPTIONS}Format')
+                    valueToInsert = getattr(CustomFunctions, customFunction)(GAME_NAME)
                     OPTIONS = valueToInsert
         else:
             for n in range(len(OPTIONS)):
                 if 'FUNC' in OPTIONS[n]:
-                    OptionString = app.custom(OPTIONS[n])
+                    OptionString = APP.custom(OPTIONS[n])
                     if '{}' in OptionString:
-                        customFunction = app.custom(str(OPTIONS[n]) + 'Format')
-                        valueToInsert = getattr(CustomFunctions, customFunction)(gameName)
+                        customFunction = APP.custom(str(OPTIONS[n]) + 'Format')
+                        valueToInsert = getattr(CustomFunctions, customFunction)(GAME_NAME)
                         OPTIONS[n] = OptionString.format(valueToInsert)
 
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = ttk.OptionMenu(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
-                                                                                                                             self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = ttk.OptionMenu(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+                                                                                                                             self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
                                                                                                                              OPTIONS[0], *OPTIONS,
-                                                                                                                             command=lambda c,var=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
-                                                                                                                             browse=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("browse"),
-                                                                                                                             function=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("customFunction"):
-                                                                                                                             var.set(browse_to_location(c, browse, function, gameName)))
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].var = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"]
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+                                                                                                                             command=lambda c,var=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+                                                                                                                             browse=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("browse"),
+                                                                                                                             function=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("customFunction"):
+                                                                                                                             var.set(browse_to_location(c, browse, function, GAME_NAME)))
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].var = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"]
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
 
-        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
         stuffToAddToSettingDictionary = {
-            'TkVar': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+            'TkVar': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
             'OPTIONS': OPTIONS,
-            'settingChoices': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('settingChoices'),
-            'delimiter': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('delimiter'),
-            'decimal places': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('decimal places'),
-            'fileFormat': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('fileFormat'),
-            'forceSelect': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('forceSelect'),
-            'partial': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('partial')
+            'settingChoices': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('settingChoices'),
+            'delimiter': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('delimiter'),
+            'decimal places': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('decimal places'),
+            'fileFormat': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('fileFormat'),
+            'forceSelect': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('forceSelect'),
+            'partial': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('partial')
             }
-        self.settingDictionary[setting].update(stuffToAddToSettingDictionary)
+        self.setting_dictionary[setting].update(stuffToAddToSettingDictionary)
 
     def combobox(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting):
-        id = 'TkCombobox'
-        OPTIONS = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("choices")
-        width = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("width")
-        validate = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("validate")
+        id_ = 'TkCombobox'
+        OPTIONS = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("choices")
+        width = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("width")
+        validate = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("validate")
 
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
         
         if validate:
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"] = self.register(self.validate)
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = ttk.Combobox(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
-                                                                                                                           textvariable=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
-                                                                                                                           width=width, values=OPTIONS, validate='key', validatecommand=(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"],'%P','%s',validate))
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"] = self.register(self.validate)
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = ttk.Combobox(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+                                                                                                                           textvariable=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+                                                                                                                           width=width, values=OPTIONS, validate='key', validatecommand=(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"],'%P','%s',validate))
         else:
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = ttk.Combobox(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
-                                                                                                                           textvariable=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = ttk.Combobox(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+                                                                                                                           textvariable=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
                                                                                                                            width=width, values=OPTIONS)
         
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
-        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
+        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
         stuffToAddToSettingDictionary = {
-            'TkVar': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+            'TkVar': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
             'OPTIONS': OPTIONS,
-            'decimal places': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('decimal places')
+            'decimal places': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get('decimal places')
             }
-        self.settingDictionary[setting].update(stuffToAddToSettingDictionary)
+        self.setting_dictionary[setting].update(stuffToAddToSettingDictionary)
 
     def entry(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting):
         #creates the Entry widget
-        id = "TkEntry"
-        entryWidth = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("entryWidth")
-        validate = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("validate")
+        id_ = "TkEntry"
+        entryWidth = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("entryWidth")
+        validate = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("validate")
 
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
 
         if validate:
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"] = self.register(self.validate)
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = ttk.Entry(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"] = self.register(self.validate)
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = ttk.Entry(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
                                                                                                                         width=entryWidth, validate='key', font=smallFont,
-                                                                                                                        validatecommand=(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"],'%P','%s',validate),
-                                                                                                                        textvariable=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
+                                                                                                                        validatecommand=(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"],'%P','%s',validate),
+                                                                                                                        textvariable=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
         else:
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = ttk.Entry(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = ttk.Entry(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
                                                                                                                         width=entryWidth, font=smallFont,
-                                                                                                                        textvariable=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+                                                                                                                        textvariable=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
 
-        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
         stuffToAddToSettingDictionary = {
-            'TkVar': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
-            'formula': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("formula"),
-            'decimal places': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("decimal places"),
-            'partial': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("partial"),
-            'fileFormat': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("fileFormat")
+            'TkVar': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+            'formula': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("formula"),
+            'decimal places': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("decimal places"),
+            'partial': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("partial"),
+            'fileFormat': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("fileFormat")
             }
-        self.settingDictionary[setting].update(stuffToAddToSettingDictionary)
+        self.setting_dictionary[setting].update(stuffToAddToSettingDictionary)
 
     def slider(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting):
-        id = "TkSlider"
-        fromV = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("from")
-        toV = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("to")
-        resolutionV = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("resolution")
-        digitsV = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("digits")
-        lengthV = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("length")
+        id_ = "TkSlider"
+        fromV = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("from")
+        toV = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("to")
+        resolutionV = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("resolution")
+        digitsV = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("digits")
+        lengthV = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("length")
 
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
 
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = tk.Scale(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = tk.Scale(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
                                                                                                                         from_=fromV, to=toV, resolution=resolutionV, showvalue=0, digits=digitsV, orient=tk.HORIZONTAL, relief=tk.FLAT,
                                                                                                                         highlightthickness=0, bg=subContainerColor, length=lengthV, font=smallFont, activebackground=backgroundColorActive,
                                                                                                                         troughcolor=fieldColor,
-                                                                                                                        variable=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
+                                                                                                                        variable=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
 
-        width = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("width")
-        validate = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("validate")
-        incrementV = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("increment")
+        width = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("width")
+        validate = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("validate")
+        incrementV = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("increment")
 
-        reversed = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("reversed")
-        if reversed:
-            fromV = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("to")
-            toV = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("from")
+        reversed_ = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("reversed")
+        if reversed_:
+            fromV = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("to")
+            toV = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("from")
 
         if validate:
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"] = self.register(self.validate)
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkWidgetTwo"] = ttk.Spinbox(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"] = self.register(self.validate)
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkWidgetTwo"] = ttk.Spinbox(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
                                                                                                                         width=width, validate='key', increment=incrementV, from_=fromV, to=toV, font=smallFont,
-                                                                                                                        validatecommand=(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"],'%P','%s',validate),
-                                                                                                                        textvariable=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
+                                                                                                                        validatecommand=(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"],'%P','%s',validate),
+                                                                                                                        textvariable=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
         else:
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkWidgetTwo"] = ttk.Spinbox(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkWidgetTwo"] = ttk.Spinbox(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
                                                                                                                         width=width, increment=incrementV, from_=fromV, to=toV, font=smallFont,
-                                                                                                                        textvariable=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
+                                                                                                                        textvariable=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
 
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkWidgetTwo"].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkWidgetTwo"].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         
         self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, "TkWidgetTwo")
-        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
 
-        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
         stuffToAddToSettingDictionary = {
-            'TkVar': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
-            'decimal places': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("decimal places"),
-            'TkWidgetTwo': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkWidgetTwo"]
+            'TkVar': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+            'decimal places': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("decimal places"),
+            'TkWidgetTwo': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkWidgetTwo"]
             }
-        self.settingDictionary[setting].update(stuffToAddToSettingDictionary)
+        self.setting_dictionary[setting].update(stuffToAddToSettingDictionary)
 
     def spinbox(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting):
-        id = "TkSpinbox"
-        fromV = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("from")
-        toV = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("to")
-        increment = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("increment")
-        width = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("width")
-        validate = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("validate")
+        id_ = "TkSpinbox"
+        fromV = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("from")
+        toV = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("to")
+        increment = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("increment")
+        width = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("width")
+        validate = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("validate")
 
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
 
         if validate:
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"] = self.register(self.validate)
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = ttk.Spinbox(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"] = self.register(self.validate)
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = ttk.Spinbox(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
                                                                                                                         from_=fromV, to=toV, increment=increment, width=width, validate='key', font=smallFont,
-                                                                                                                        validatecommand=(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"],'%P','%s',validate),
-                                                                                                                        textvariable=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
+                                                                                                                        validatecommand=(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["validate"],'%P','%s',validate),
+                                                                                                                        textvariable=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
         else:
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = ttk.Spinbox(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = ttk.Spinbox(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
                                                                                                                         from_=fromV, to=toV, increment=increment, width=width, font=smallFont,
-                                                                                                                        textvariable=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+                                                                                                                        textvariable=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"])
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
 
-        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
         stuffToAddToSettingDictionary = {
-            'TkVar': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"]
+            'TkVar': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"]
             }
-        self.settingDictionary[setting].update(stuffToAddToSettingDictionary)
+        self.setting_dictionary[setting].update(stuffToAddToSettingDictionary)
 
     def color(self, eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting):
         #chooseColor(colorToChange, buttonToModify)
-        id = "TkColor"
+        id_ = "TkColor"
 
-        colorValueType = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("colorValueType")
+        colorValueType = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("colorValueType")
 
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"] = tk.StringVar(self)
         if colorValueType == 'hex':
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('#FFFFFF')
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('#FFFFFF')
         elif colorValueType == 'rgb':
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('(255, 255, 255)')
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('(255, 255, 255)')
         elif colorValueType == 'rgb 1':
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('(1.0000, 1.0000, 1.0000)')
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('(1.0000, 1.0000, 1.0000)')
         elif colorValueType == 'decimal':
-            self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('16777215')
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id] = tk.Button(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
-                                                                                                                        textvariable=self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+            self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"].set('16777215')
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = tk.Button(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
+                                                                                                                        textvariable=self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
                                                                                                                         font=smallFont,
-                                                                                                                        command=lambda: self.chooseColor(self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id],
+                                                                                                                        command=lambda: self.choose_color(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_],
                                                                                                                                                          colorValueType))
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].var = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"]
-        self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].var = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"]
+        self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
 
-        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id)
+        self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
         stuffToAddToSettingDictionary = {
-            'TkVar': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
+            'TkVar': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkVar"],
             'colorValueType': colorValueType,
-            'rgbType': self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("rgbType")
+            'rgbType': self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("rgbType")
             }
-        self.settingDictionary[setting].update(stuffToAddToSettingDictionary)
+        self.setting_dictionary[setting].update(stuffToAddToSettingDictionary)
 
     def radioPresetValue(self, setting):
-        return self.presetVar.get()
+        return self.preset_var.get()
 
     def checkboxValue(self, setting):
-        settingValue = self.getSettingValues(self.settingDictionary[setting].get('targetINIs'),
-                                             self.settingDictionary[setting].get('targetSections'),
-                                             self.settingDictionary[setting].get('settings'))
+        settingValue = self.getSettingValues(self.setting_dictionary[setting].get('targetINIs'),
+                                             self.setting_dictionary[setting].get('targetSections'),
+                                             self.setting_dictionary[setting].get('settings'))
         
         if settingValue != [] and 'Does Not Exist' not in settingValue:
-            onvalue = self.settingDictionary[setting].get('onvalue')
-            offvalue = self.settingDictionary[setting].get('offvalue')
+            onvalue = self.setting_dictionary[setting].get('onvalue')
+            offvalue = self.setting_dictionary[setting].get('offvalue')
             if settingValue == onvalue:
                 thisValue = onvalue
-                self.settingDictionary[setting]["TkVar"].set(thisValue)
+                self.setting_dictionary[setting]["TkVar"].set(thisValue)
             elif settingValue == offvalue:
                 thisValue = offvalue
-                self.settingDictionary[setting]["TkVar"].set(thisValue)
+                self.setting_dictionary[setting]["TkVar"].set(thisValue)
             else:
                 thisValue = []
                 for n in range(len(settingValue)):
@@ -942,31 +950,31 @@ class BethiniApp(tk.Tk):
                     thisValue = onvalue
                 else:
                     thisValue = offvalue
-                self.settingDictionary[setting]["TkVar"].set(thisValue)
+                self.setting_dictionary[setting]["TkVar"].set(thisValue)
             try:
                 self.sme(f"{setting} = {thisValue}")
-                self.settingDictionary[setting]['valueSet'] = True
+                self.setting_dictionary[setting]['valueSet'] = True
                 return thisValue
             except:
                 self.sme(f'No value set for checkbox {setting}.')
 
     def dropdownValue(self, setting):
-        settingValue = self.getSettingValues(self.settingDictionary[setting].get('targetINIs'),
-                                             self.settingDictionary[setting].get('targetSections'),
-                                             self.settingDictionary[setting].get('settings'),
-                                             self.settingDictionary[setting].get('settingChoices'), 
-                                             self.settingDictionary[setting].get('delimiter'))
+        settingValue = self.getSettingValues(self.setting_dictionary[setting].get('targetINIs'),
+                                             self.setting_dictionary[setting].get('targetSections'),
+                                             self.setting_dictionary[setting].get('settings'),
+                                             self.setting_dictionary[setting].get('settingChoices'), 
+                                             self.setting_dictionary[setting].get('delimiter'))
 
         if settingValue != [] and 'Does Not Exist' not in settingValue:
-            decimalPlaces = self.settingDictionary[setting].get("decimal places")
+            decimalPlaces = self.setting_dictionary[setting].get("decimal places")
             if decimalPlaces:
                 decimalPlaces = int(decimalPlaces)
                 thisValue = round(float(settingValue[0]), decimalPlaces)
                 if decimalPlaces == 0:
                     thisValue = int(thisValue)
-                self.settingDictionary[setting]["TkVar"].set(thisValue)
+                self.setting_dictionary[setting]["TkVar"].set(thisValue)
             else:
-                fileFormat = self.settingDictionary[setting].get("fileFormat")
+                fileFormat = self.setting_dictionary[setting].get("fileFormat")
                 if fileFormat:
                     thisValue = os.path.split(settingValue[0])
                     if fileFormat == "directory":
@@ -978,47 +986,47 @@ class BethiniApp(tk.Tk):
                             thisValue = thisValue[0]
                     if fileFormat == "file":
                         thisValue = thisValue[1]
-                    self.settingDictionary[setting]["TkVar"].set(thisValue)
+                    self.setting_dictionary[setting]["TkVar"].set(thisValue)
                 else:
-                    settingChoices = self.settingDictionary[setting].get("settingChoices")
+                    settingChoices = self.setting_dictionary[setting].get("settingChoices")
                     if settingChoices and settingValue[0] not in settingChoices:
                         thisValue = "Custom"
-                        self.settingDictionary[setting]["TkVar"].set(thisValue)
+                        self.setting_dictionary[setting]["TkVar"].set(thisValue)
                     else:
                         thisValue = settingValue[0]
-                        self.settingDictionary[setting]["TkVar"].set(thisValue)
+                        self.setting_dictionary[setting]["TkVar"].set(thisValue)
             self.sme(f"{setting} = {thisValue}")
-            self.settingDictionary[setting]['valueSet'] = True
+            self.setting_dictionary[setting]['valueSet'] = True
             return thisValue
 
     def comboboxValue(self, setting):
-        settingValue = self.getSettingValues(self.settingDictionary[setting].get('targetINIs'),
-                                             self.settingDictionary[setting].get('targetSections'),
-                                             self.settingDictionary[setting].get('settings'))
+        settingValue = self.getSettingValues(self.setting_dictionary[setting].get('targetINIs'),
+                                             self.setting_dictionary[setting].get('targetSections'),
+                                             self.setting_dictionary[setting].get('settings'))
         if settingValue != [] and 'Does Not Exist' not in settingValue:
             thisValue = settingValue[0]
 
-            decimalPlaces = self.settingDictionary[setting].get("decimal places")
+            decimalPlaces = self.setting_dictionary[setting].get("decimal places")
             if decimalPlaces:
                 decimalPlaces = int(decimalPlaces)
                 thisValue = round(float(thisValue), decimalPlaces)
                 if decimalPlaces == 0:
                     thisValue = int(thisValue)
             
-            self.settingDictionary[setting]["TkVar"].set(thisValue)
+            self.setting_dictionary[setting]["TkVar"].set(thisValue)
             self.sme(f"{setting} = {thisValue}")
-            self.settingDictionary[setting]['valueSet'] = True
+            self.setting_dictionary[setting]['valueSet'] = True
             return thisValue
 
     def entryValue(self, setting):
-        settingValue = self.getSettingValues(self.settingDictionary[setting].get('targetINIs'),
-                                             self.settingDictionary[setting].get('targetSections'),
-                                             self.settingDictionary[setting].get('settings'))
+        settingValue = self.getSettingValues(self.setting_dictionary[setting].get('targetINIs'),
+                                             self.setting_dictionary[setting].get('targetSections'),
+                                             self.setting_dictionary[setting].get('settings'))
         if settingValue != [] and 'Does Not Exist' not in settingValue:
-            formula = self.settingDictionary[setting].get("formula")
-            fileFormat = self.settingDictionary[setting].get("fileFormat")
+            formula = self.setting_dictionary[setting].get("formula")
+            fileFormat = self.setting_dictionary[setting].get("fileFormat")
             if formula:
-                decimalPlaces = int(self.settingDictionary[setting].get("decimal places"))
+                decimalPlaces = int(self.setting_dictionary[setting].get("decimal places"))
                 thisValue = round(simple_eval(formula.format(settingValue[0])), decimalPlaces)
                 if decimalPlaces == 0:
                     thisValue = int(thisValue)
@@ -1030,22 +1038,22 @@ class BethiniApp(tk.Tk):
             else:
                 thisValue = settingValue[0]
             try:
-                self.settingDictionary[setting]['TkVar'].set(thisValue)
+                self.setting_dictionary[setting]['TkVar'].set(thisValue)
                 self.sme(f"{setting} = {thisValue}")
-                self.settingDictionary[setting]['valueSet'] = True
+                self.setting_dictionary[setting]['valueSet'] = True
                 return thisValue
             except:
                 self.sme(f'No value set for entry {setting}.')
 
     def sliderValue(self, setting):
-        settingValue = self.getSettingValues(self.settingDictionary[setting].get('targetINIs'),
-                                             self.settingDictionary[setting].get('targetSections'),
-                                             self.settingDictionary[setting].get('settings'))
+        settingValue = self.getSettingValues(self.setting_dictionary[setting].get('targetINIs'),
+                                             self.setting_dictionary[setting].get('targetSections'),
+                                             self.setting_dictionary[setting].get('settings'))
 
         if settingValue != [] and 'Does Not Exist' not in settingValue:
             thisValue = settingValue[0]
 
-            decimalPlaces = self.settingDictionary[setting].get("decimal places")
+            decimalPlaces = self.setting_dictionary[setting].get("decimal places")
             if decimalPlaces:
                 decimalPlaces = int(decimalPlaces)
                 thisValue = round(float(thisValue), decimalPlaces)
@@ -1053,34 +1061,34 @@ class BethiniApp(tk.Tk):
                     thisValue = int(thisValue)
             
             try:
-                self.settingDictionary[setting]['TkVar'].set(thisValue)
+                self.setting_dictionary[setting]['TkVar'].set(thisValue)
                 self.sme(f'{setting} = {thisValue}')
-                self.settingDictionary[setting]['valueSet'] = True
+                self.setting_dictionary[setting]['valueSet'] = True
                 return thisValue
             except:
                 self.sme(f'no value set for slider {setting}')
 
     def spinboxValue(self, setting):
-        settingValue = self.getSettingValues(self.settingDictionary[setting].get('targetINIs'),
-                                             self.settingDictionary[setting].get('targetSections'),
-                                             self.settingDictionary[setting].get('settings'))
+        settingValue = self.getSettingValues(self.setting_dictionary[setting].get('targetINIs'),
+                                             self.setting_dictionary[setting].get('targetSections'),
+                                             self.setting_dictionary[setting].get('settings'))
         if settingValue != [] and 'Does Not Exist' not in settingValue:
             thisValue = settingValue[0]
             try:
-                self.settingDictionary[setting]['TkVar'].set(thisValue)
+                self.setting_dictionary[setting]['TkVar'].set(thisValue)
                 self.sme(f'{setting} = {thisValue}')
-                self.settingDictionary[setting]['valueSet'] = True
+                self.setting_dictionary[setting]['valueSet'] = True
                 return thisValue
             except:
                 self.sme(f'no value set for spinbox {setting}')
 
     def colorValue(self, setting):
-        settingValue = self.getSettingValues(self.settingDictionary[setting].get('targetINIs'),
-                                             self.settingDictionary[setting].get('targetSections'),
-                                             self.settingDictionary[setting].get('settings'))
+        settingValue = self.getSettingValues(self.setting_dictionary[setting].get('targetINIs'),
+                                             self.setting_dictionary[setting].get('targetSections'),
+                                             self.setting_dictionary[setting].get('settings'))
         
         if settingValue != [] and 'Does Not Exist' not in settingValue:
-            colorValueType = self.settingDictionary[setting].get("colorValueType")
+            colorValueType = self.setting_dictionary[setting].get("colorValueType")
             if colorValueType == 'hex':
                 thisValue = settingValue[0]
                 newColor = thisValue
@@ -1089,7 +1097,7 @@ class BethiniApp(tk.Tk):
                 #convert decimal value to hex
                 newColor = rgb_to_hex(decimal_to_rgb(settingValue[0]))
             elif colorValueType == 'rgb':
-                rgbType = self.settingDictionary[setting].get("rgbType")
+                rgbType = self.setting_dictionary[setting].get("rgbType")
                 if rgbType == 'multiple settings':
                     thisValue = tuple(int(i) for i in settingValue)
                     newColor = rgb_to_hex(thisValue)
@@ -1102,13 +1110,13 @@ class BethiniApp(tk.Tk):
                     print(thisValue)
                     newColor = rgb_to_hex(ast.literal_eval(thisValue))
             elif colorValueType == 'rgb 1':
-                rgbType = self.settingDictionary[setting].get("rgbType")
+                rgbType = self.setting_dictionary[setting].get("rgbType")
                 if rgbType == 'multiple settings':
                     thisValue = tuple(round(float(i),4) for i in settingValue)
                     newColor = rgb_to_hex(tuple(int(float(i)*255) for i in settingValue))
                     thisValue = str(thisValue)
-            self.settingDictionary[setting]['TkVar'].set(thisValue)
-            TkWidget = self.settingDictionary[setting].get("TkWidget")
+            self.setting_dictionary[setting]['TkVar'].set(thisValue)
+            TkWidget = self.setting_dictionary[setting].get("TkWidget")
             RGB = hex_to_rgb(newColor)
             luminance = 0.299*RGB[0] + 0.587*RGB[1] + 0.114*RGB[2]
             if luminance < 128:
@@ -1117,56 +1125,56 @@ class BethiniApp(tk.Tk):
                 theTextColor = '#000000'
             TkWidget.configure(bg=newColor, activebackground=newColor, fg=theTextColor)
             self.sme(f"{setting} = {thisValue}")
-            self.settingDictionary[setting]['valueSet'] = True
+            self.setting_dictionary[setting]['valueSet'] = True
             return thisValue
 
     def checkDependents(self, setting):
-        for dependentSetting in self.settingsThatSettingsDependOn[setting]:
-            var = self.settingsThatSettingsDependOn[setting][dependentSetting].get('var')
+        for dependentSetting in self.settings_that_settings_depend_on[setting]:
+            var = self.settings_that_settings_depend_on[setting][dependentSetting].get('var')
             
-            theOperator = self.settingsThatSettingsDependOn[setting][dependentSetting].get('theOperator')
-            value = self.settingsThatSettingsDependOn[setting][dependentSetting].get('value')
+            theOperator = self.settings_that_settings_depend_on[setting][dependentSetting].get('theOperator')
+            value = self.settings_that_settings_depend_on[setting][dependentSetting].get('value')
             currentValue = self.widgetTypeSwitcher(setting)
-            TkWidgetTwo = self.settingDictionary[dependentSetting].get('TkWidgetTwo')
+            TkWidgetTwo = self.setting_dictionary[dependentSetting].get('TkWidgetTwo')
             if var == 'float':
                 value = float(value)
                 currentValue = float(currentValue)
             if theOperator(currentValue, value):
-                self.settingDictionary[dependentSetting]['TkWidget'].configure(state='normal')
+                self.setting_dictionary[dependentSetting]['TkWidget'].configure(state='normal')
                 if TkWidgetTwo:
                     TkWidgetTwo.configure(state='normal')
             else:
-                setToOff = self.settingsThatSettingsDependOn[setting][dependentSetting].get('setToOff')
+                setToOff = self.settings_that_settings_depend_on[setting][dependentSetting].get('setToOff')
                 if setToOff:
-                    offvalue = self.settingDictionary[dependentSetting].get('offvalue')
+                    offvalue = self.setting_dictionary[dependentSetting].get('offvalue')
 
-                    self.settingDictionary[dependentSetting]['TkVar'].set(offvalue)
-                self.settingDictionary[dependentSetting]['TkWidget'].configure(state='disabled')
+                    self.setting_dictionary[dependentSetting]['TkVar'].set(offvalue)
+                self.setting_dictionary[dependentSetting]['TkWidget'].configure(state='disabled')
                 if TkWidgetTwo:
                     TkWidgetTwo.configure(state='disabled')
 
     def assignValue(self, var, indx, mode, setting):
-        id = self.settingDictionary[setting].get('id')
-        func = self.widgetTypeAssignValue.get(id, "Invalid")
+        id_ = self.setting_dictionary[setting].get('id')
+        func = self.widget_type_assign_value.get(id_, "Invalid")
         if func != "Invalid":
             func(setting)
         
-        if setting in list(self.settingsThatSettingsDependOn.keys()):
+        if setting in list(self.settings_that_settings_depend_on.keys()):
             self.checkDependents(setting)
 
     def checkboxAssignValue(self, setting):
-        TkVar = self.settingDictionary[setting].get('TkVar')
+        TkVar = self.setting_dictionary[setting].get('TkVar')
         
         thisValue = TkVar.get()
         #thisValue is whatever the state of the onvalue/offvalue is... not a simple boolean
 
 
-        targetINIs = self.settingDictionary[setting].get('targetINIs')
-        targetSections = self.settingDictionary[setting].get('targetSections')
-        theSettings = self.settingDictionary[setting].get('settings')
+        targetINIs = self.setting_dictionary[setting].get('targetINIs')
+        targetSections = self.setting_dictionary[setting].get('targetSections')
+        theSettings = self.setting_dictionary[setting].get('settings')
         
-        onvalue = self.settingDictionary[setting].get('onvalue')
-        offvalue = self.settingDictionary[setting].get('offvalue')
+        onvalue = self.setting_dictionary[setting].get('onvalue')
+        offvalue = self.setting_dictionary[setting].get('offvalue')
 
         settingValue = self.getSettingValues(targetINIs, targetSections, theSettings)
         
@@ -1189,7 +1197,7 @@ class BethiniApp(tk.Tk):
                     if type(thisValue[n]) is list:
                         if settingValue[n] in thisValue[n]:
                             theValue = settingValue[n]
-                        elif thisValue[n][0] in self.settingDictionary:
+                        elif thisValue[n][0] in self.setting_dictionary:
                             self.assignValue(1,2,3, thisValue[n][0])
                             continue
                         else:
@@ -1203,18 +1211,18 @@ class BethiniApp(tk.Tk):
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + thisValue[n])
 
     def dropdownAssignValue(self, setting):
-        TkVar = self.settingDictionary[setting].get('TkVar')
+        TkVar = self.setting_dictionary[setting].get('TkVar')
         thisValue = TkVar.get()
         #print(thisValue)
-        targetINIs = self.settingDictionary[setting].get('targetINIs')
-        targetSections = self.settingDictionary[setting].get('targetSections')
-        theSettings = self.settingDictionary[setting].get('settings')
+        targetINIs = self.setting_dictionary[setting].get('targetINIs')
+        targetSections = self.setting_dictionary[setting].get('targetSections')
+        theSettings = self.setting_dictionary[setting].get('settings')
 
-        settingChoices = self.settingDictionary[setting].get('settingChoices')
-        delimiter = self.settingDictionary[setting].get('delimiter')
-        fileFormat = self.settingDictionary[setting].get('fileFormat')
-        #decimalPlaces = self.settingDictionary[setting].get('decimal places')
-        partial = self.settingDictionary[setting].get('partial')
+        settingChoices = self.setting_dictionary[setting].get('settingChoices')
+        delimiter = self.setting_dictionary[setting].get('delimiter')
+        fileFormat = self.setting_dictionary[setting].get('fileFormat')
+        #decimalPlaces = self.setting_dictionary[setting].get('decimal places')
+        partial = self.setting_dictionary[setting].get('partial')
         theValueStr = ''
         if partial:
             for eachSetting in partial:
@@ -1222,8 +1230,8 @@ class BethiniApp(tk.Tk):
                     theValueStr += '{}'
                 else:
                     try:
-                        if self.settingDictionary[eachSetting]['valueSet']:
-                            theValueStr += self.settingDictionary[eachSetting]['TkVar'].get()
+                        if self.setting_dictionary[eachSetting]['valueSet']:
+                            theValueStr += self.setting_dictionary[eachSetting]['TkVar'].get()
                         else:
                             self.sme(f'{eachSetting} is not set yet.')
                             return
@@ -1265,16 +1273,16 @@ class BethiniApp(tk.Tk):
                 self.sme(f'{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}')
 
     def comboboxAssignValue(self, setting):
-        targetINIs = self.settingDictionary[setting].get('targetINIs')
+        targetINIs = self.setting_dictionary[setting].get('targetINIs')
 
         if targetINIs:
-            TkVar = self.settingDictionary[setting].get('TkVar')
+            TkVar = self.setting_dictionary[setting].get('TkVar')
             thisValue = TkVar.get()
 
-            targetSections = self.settingDictionary[setting].get('targetSections')
-            theSettings = self.settingDictionary[setting].get('settings')
+            targetSections = self.setting_dictionary[setting].get('targetSections')
+            theSettings = self.setting_dictionary[setting].get('settings')
 
-            decimalPlaces = self.settingDictionary[setting].get('decimal places')
+            decimalPlaces = self.setting_dictionary[setting].get('decimal places')
             for n in range(len(targetINIs)):
                 INILocation = self.getINILocation(targetINIs[n])
                 theTargetINI = self.openINI(str(INILocation), str(targetINIs[n]))
@@ -1289,9 +1297,9 @@ class BethiniApp(tk.Tk):
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + thisValue)
 
     def entryAssignValue(self, setting):
-        targetINIs = self.settingDictionary[setting].get('targetINIs')
+        targetINIs = self.setting_dictionary[setting].get('targetINIs')
        
-        partial = self.settingDictionary[setting].get('partial')
+        partial = self.setting_dictionary[setting].get('partial')
         theValueStr = ''
         if partial:
             for eachSetting in partial:
@@ -1299,20 +1307,20 @@ class BethiniApp(tk.Tk):
                     theValueStr += '{}'
                 else:
                     #self.widgetTypeSwitcher(eachSetting)
-                    if self.settingDictionary[eachSetting]['valueSet']:
-                        theValueStr += self.settingDictionary[eachSetting]['TkVar'].get()
+                    if self.setting_dictionary[eachSetting]['valueSet']:
+                        theValueStr += self.setting_dictionary[eachSetting]['TkVar'].get()
                     else:
                         return
 
         if targetINIs:
-            TkVar = self.settingDictionary[setting].get('TkVar')
+            TkVar = self.setting_dictionary[setting].get('TkVar')
             thisValue = TkVar.get()
 
-            targetSections = self.settingDictionary[setting].get('targetSections')
-            theSettings = self.settingDictionary[setting].get('settings')
+            targetSections = self.setting_dictionary[setting].get('targetSections')
+            theSettings = self.setting_dictionary[setting].get('settings')
 
-            formula = self.settingDictionary[setting].get('formula')
-            #decimalPlaces = self.settingDictionary[setting].get('decimal places')
+            formula = self.setting_dictionary[setting].get('formula')
+            #decimalPlaces = self.setting_dictionary[setting].get('decimal places')
 
             for n in range(len(targetINIs)):
                 INILocation = self.getINILocation(targetINIs[n])
@@ -1323,7 +1331,7 @@ class BethiniApp(tk.Tk):
                     try:
                         thisValue = str(round(simple_eval(formulaValue),8))
                     except:
-                        thisValue = thisValue
+                        self.sme('Failed to evaluate formula value for {thisValue}.')
                 #if decimalPlaces:
                 #    thisValue = round(thisValue,int(decimalPlaces))
 
@@ -1333,14 +1341,14 @@ class BethiniApp(tk.Tk):
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + thisValue)
 
     def sliderAssignValue(self, setting):
-        targetINIs = self.settingDictionary[setting].get('targetINIs')
+        targetINIs = self.setting_dictionary[setting].get('targetINIs')
 
         if targetINIs:
-            TkVar = self.settingDictionary[setting].get('TkVar')
+            TkVar = self.setting_dictionary[setting].get('TkVar')
             thisValue = TkVar.get()
 
-            targetSections = self.settingDictionary[setting].get('targetSections')
-            theSettings = self.settingDictionary[setting].get('settings')
+            targetSections = self.setting_dictionary[setting].get('targetSections')
+            theSettings = self.setting_dictionary[setting].get('settings')
 
             for n in range(len(targetINIs)):
                 INILocation = self.getINILocation(targetINIs[n])
@@ -1350,14 +1358,14 @@ class BethiniApp(tk.Tk):
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + thisValue)
 
     def spinboxAssignValue(self, setting):
-        targetINIs = self.settingDictionary[setting].get('targetINIs')
+        targetINIs = self.setting_dictionary[setting].get('targetINIs')
         
         if targetINIs:
-            TkVar = self.settingDictionary[setting].get('TkVar')
+            TkVar = self.setting_dictionary[setting].get('TkVar')
             thisValue = TkVar.get()
 
-            targetSections = self.settingDictionary[setting].get('targetSections')
-            theSettings = self.settingDictionary[setting].get('settings')
+            targetSections = self.setting_dictionary[setting].get('targetSections')
+            theSettings = self.setting_dictionary[setting].get('settings')
 
             for n in range(len(targetINIs)):
                 INILocation = self.getINILocation(targetINIs[n])
@@ -1367,16 +1375,16 @@ class BethiniApp(tk.Tk):
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + thisValue)
 
     def colorAssignValue(self, setting):
-        targetINIs = self.settingDictionary[setting].get('targetINIs')
+        targetINIs = self.setting_dictionary[setting].get('targetINIs')
         
         if targetINIs:
-            TkVar = self.settingDictionary[setting].get('TkVar')
+            TkVar = self.setting_dictionary[setting].get('TkVar')
             thisValue = TkVar.get()
 
-            targetSections = self.settingDictionary[setting].get('targetSections')
-            theSettings = self.settingDictionary[setting].get('settings')
+            targetSections = self.setting_dictionary[setting].get('targetSections')
+            theSettings = self.setting_dictionary[setting].get('settings')
 
-            colorValueType = self.settingDictionary[setting].get("colorValueType")
+            colorValueType = self.setting_dictionary[setting].get("colorValueType")
             for n in range(len(targetINIs)):
                 INILocation = self.getINILocation(targetINIs[n])
                 theTargetINI = self.openINI(str(INILocation), str(targetINIs[n]))
@@ -1399,104 +1407,104 @@ class BethiniApp(tk.Tk):
                 
     def createTabs(self, fromChooseGameWindow=False):
         
-        for eachTab in self.tabDictionary:
+        for eachTab in self.tab_dictionary:
             #eachTab is Page1, Page2, etc.
-            #self.tabDictionary[eachTab]["Name"] is the name of each tab
+            #self.tab_dictionary[eachTab]["Name"] is the name of each tab
 
             self.createTabImage(eachTab)
-            if self.tabDictionary[eachTab]['Name'] == 'Setup':
+            if self.tab_dictionary[eachTab]['Name'] == 'Setup':
                 global setupWindow
-                self.tabDictionary[eachTab]['SetupWindow'] = tk.Toplevel(self)
-                setupWindow = self.tabDictionary[eachTab]['SetupWindow']
+                self.tab_dictionary[eachTab]['SetupWindow'] = tk.Toplevel(self)
+                setupWindow = self.tab_dictionary[eachTab]['SetupWindow']
                 setupWindow.title('Setup')
-                self.tabDictionary[eachTab]["TkFrameForTab"] = ttk.Frame(setupWindow)
-                self.tabDictionary[eachTab]["TkFrameForTab"].pack()
+                self.tab_dictionary[eachTab]["TkFrameForTab"] = ttk.Frame(setupWindow)
+                self.tab_dictionary[eachTab]["TkFrameForTab"].pack()
                 setupWindow.protocol("WM_DELETE_WINDOW", self.withdrawSetup)
                 if not fromChooseGameWindow:
                     setupWindow.withdraw()
-            elif self.tabDictionary[eachTab]['Name'] == 'Preferences':
+            elif self.tab_dictionary[eachTab]['Name'] == 'Preferences':
                 global preferencesWindow
-                self.tabDictionary[eachTab]['PreferencesWindow'] = tk.Toplevel(self)
-                preferencesWindow = self.tabDictionary[eachTab]['PreferencesWindow']
+                self.tab_dictionary[eachTab]['PreferencesWindow'] = tk.Toplevel(self)
+                preferencesWindow = self.tab_dictionary[eachTab]['PreferencesWindow']
                 preferencesWindow.title('Preferences')
-                self.tabDictionary[eachTab]["TkFrameForTab"] = ttk.Frame(preferencesWindow)
-                self.tabDictionary[eachTab]["TkFrameForTab"].pack()
-                preferencesWindow.protocol("WM_DELETE_WINDOW", self.withdrawPreferences)
+                self.tab_dictionary[eachTab]["TkFrameForTab"] = ttk.Frame(preferencesWindow)
+                self.tab_dictionary[eachTab]["TkFrameForTab"].pack()
+                preferencesWindow.protocol("WM_DELETE_WINDOW", self.withdraw_preferences)
                 preferencesWindow.withdraw()
             else:
-                self.tabDictionary[eachTab]["TkFrameForTab"] = ttk.Frame(self.subContainer)
-                self.subContainer.add(self.tabDictionary[eachTab]["TkFrameForTab"], text=self.tabDictionary[eachTab]["Name"], image=self.tabDictionary[eachTab]["TkPhotoImageForTab"], compound=tk.TOP)
+                self.tab_dictionary[eachTab]["TkFrameForTab"] = ttk.Frame(self.sub_container)
+                self.sub_container.add(self.tab_dictionary[eachTab]["TkFrameForTab"], text=self.tab_dictionary[eachTab]["Name"], image=self.tab_dictionary[eachTab]["TkPhotoImageForTab"], compound=tk.TOP)
 
-            #self.tabDictionary[eachTab]["TkFrameForTab"] = ttk.Frame(self.subContainer)
-            #self.subContainer.add(self.tabDictionary[eachTab]["TkFrameForTab"], text=self.tabDictionary[eachTab]["Name"], image=self.tabDictionary[eachTab]["TkPhotoImageForTab"], compound=tk.TOP)
+            #self.tab_dictionary[eachTab]["TkFrameForTab"] = ttk.Frame(self.subContainer)
+            #self.subContainer.add(self.tab_dictionary[eachTab]["TkFrameForTab"], text=self.tab_dictionary[eachTab]["Name"], image=self.tab_dictionary[eachTab]["TkPhotoImageForTab"], compound=tk.TOP)
             
             self.labelFramesForTab(eachTab)
             
-        self.stopProgress()
+        self.stop_progress()
         if not fromChooseGameWindow:
             self.updateValues()
-        self.startProgress()
+        self.start_progress()
         self.bindTkVars()
         
         #self.theCanvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        self.showSubContainer()
+        self.show_sub_container()
         #self.showStatusBar()
-        self.stopProgress()
+        self.stop_progress()
         self.sme('Loading complete.')
         
     def bindTkVars(self):
-        for eachSetting in self.settingDictionary:
-            TkVar = self.settingDictionary[eachSetting].get('TkVar')
+        for eachSetting in self.setting_dictionary:
+            TkVar = self.setting_dictionary[eachSetting].get('TkVar')
             if TkVar:
-                self.settingDictionary[eachSetting]["TkVar"].trace_add('write', lambda var, indx, mode, setting=eachSetting:self.assignValue(var, indx, mode, setting))
-            forceSelect = self.settingDictionary[eachSetting].get('forceSelect')
+                self.setting_dictionary[eachSetting]["TkVar"].trace_add('write', lambda var, indx, mode, setting=eachSetting:self.assignValue(var, indx, mode, setting))
+            forceSelect = self.setting_dictionary[eachSetting].get('forceSelect')
             if forceSelect:
                 self.assignValue(1, 2, 3, eachSetting)
 
     def updateValues(self):
-        self.startProgress()
+        self.start_progress()
         self.sme('Updating INI values.')
-        for eachSetting in self.settingDictionary:
+        for eachSetting in self.setting_dictionary:
             self.widgetTypeSwitcher(eachSetting)
         self.sme('Checking for dependent settings.')
         self.dependents()
         self.sme('Update values complete.')
-        self.stopProgress()
+        self.stop_progress()
 
     def dependents(self):
-        #self.dependentSettingsDictionary
-        for setting in self.dependentSettingsDictionary:
-            for masterSetting in self.dependentSettingsDictionary[setting]:
+        #self.dependent_settings_dictionary
+        for setting in self.dependent_settings_dictionary:
+            for masterSetting in self.dependent_settings_dictionary[setting]:
                 
-                theOperator = self.dependentSettingsDictionary[setting][masterSetting].get('operator')
-                setToOff = self.dependentSettingsDictionary[setting][masterSetting].get('setToOff', False)
+                theOperator = self.dependent_settings_dictionary[setting][masterSetting].get('operator')
+                setToOff = self.dependent_settings_dictionary[setting][masterSetting].get('setToOff', False)
                 if theOperator == 'equal' or theOperator == 'not-equal':
-                    value = self.dependentSettingsDictionary[setting][masterSetting].get('value')
+                    value = self.dependent_settings_dictionary[setting][masterSetting].get('value')
                     currentValue = self.widgetTypeSwitcher(masterSetting)
                     var = 'string'
                 else:
-                    value = float(self.dependentSettingsDictionary[setting][masterSetting].get('value'))
+                    value = float(self.dependent_settings_dictionary[setting][masterSetting].get('value'))
                     currentValue = float(self.widgetTypeSwitcher(masterSetting))
                     var = 'float'
                 theOperator = operatorDict[theOperator]
-                TkWidgetTwo = self.settingDictionary[setting].get('TkWidgetTwo')
+                TkWidgetTwo = self.setting_dictionary[setting].get('TkWidgetTwo')
                 if theOperator(currentValue, value):
-                    self.settingDictionary[setting]['TkWidget'].configure(state='normal')
+                    self.setting_dictionary[setting]['TkWidget'].configure(state='normal')
                     if TkWidgetTwo:
                         TkWidgetTwo.configure(state='normal')
                 else:
                     if setToOff:
-                        offvalue = self.dependentSettingsDictionary[setting][masterSetting].get('offvalue')
-                        self.settingDictionary[setting]['TkVar'].set(offvalue)
-                    self.settingDictionary[setting]['TkWidget'].configure(state='disabled')
+                        offvalue = self.dependent_settings_dictionary[setting][masterSetting].get('offvalue')
+                        self.setting_dictionary[setting]['TkVar'].set(offvalue)
+                    self.setting_dictionary[setting]['TkWidget'].configure(state='disabled')
                     if TkWidgetTwo:
                         TkWidgetTwo.configure(state='disabled')
 
-                if not self.settingsThatSettingsDependOn.get(masterSetting):
-                    self.settingsThatSettingsDependOn[masterSetting] = {}
+                if not self.settings_that_settings_depend_on.get(masterSetting):
+                    self.settings_that_settings_depend_on[masterSetting] = {}
 
-                self.settingsThatSettingsDependOn[masterSetting][setting] = {
-                    'theOperator': operatorDict[self.dependentSettingsDictionary[setting][masterSetting].get('operator')],
+                self.settings_that_settings_depend_on[masterSetting][setting] = {
+                    'theOperator': operatorDict[self.dependent_settings_dictionary[setting][masterSetting].get('operator')],
                     'value': value,
                     'var': var,
                     'setToOff': setToOff
@@ -1548,7 +1556,7 @@ class BethiniApp(tk.Tk):
             return True
 
     def getINILocation(self, ini):
-        INILocation = app.inis(ini)
+        INILocation = APP.inis(ini)
         if INILocation == '':
             INILocation == ''
         elif INILocation == 'sTheme':
@@ -1569,7 +1577,7 @@ class BethiniApp(tk.Tk):
         #delimiter
 
         settingValues = []
-        #targetINIs = self.tabDictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("targetINIs")
+        #targetINIs = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("targetINIs")
         if targetINIs:
             ININumber = -1
             for INI in targetINIs:
@@ -1586,7 +1594,7 @@ class BethiniApp(tk.Tk):
                     if INI == MyAppNameConfig or INI == 'theme.ini':
                         defaultValue = "Does Not Exist"
                     else:
-                        defaultValue = app.get_value(currentSetting, "default")
+                        defaultValue = APP.get_value(currentSetting, "default")
 
                     #targetINI = ModifyINI(str(INILocation) + str(INI))
 
@@ -1597,27 +1605,27 @@ class BethiniApp(tk.Tk):
                 #Check to see if the settings correspond with specified
                 #setting choices.
                 if settingChoices:
-                   for choice in settingChoices:
-                       if settingChoices[choice] == settingValues:
-                           settingValues = [choice]
+                    for choice in settingChoices:
+                        if settingChoices[choice] == settingValues:
+                            settingValues = [choice]
 
                 #Check to see if there are multiple values separated by a
                 #delimiter
                 if delimiter:
                     delimitedValue = ''
                     for n in range(len(settingValues)):
-                       if n != len(settingValues) - 1:
-                           delimitedValue += settingValues[n] + delimiter
-                       else:
-                           delimitedValue += settingValues[n]
+                        if n != len(settingValues) - 1:
+                            delimitedValue += settingValues[n] + delimiter
+                        else:
+                            delimitedValue += settingValues[n]
                     settingValues = [delimitedValue]
 
         return settingValues
 
     def openINI(self, location, INI):
-        openINI = self.openINIs.get(INI)
+        openINI = self.open_inis.get(INI)
         if openINI:
-            openINIlocation = self.openINIs[INI]['located']
+            openINIlocation = self.open_inis[INI]['located']
             wID = 0
             for eachLocation in openINIlocation:
                 wID += 1
@@ -1626,22 +1634,22 @@ class BethiniApp(tk.Tk):
             #if the location is not found, add it
             wID += 1
             wID = str(wID)
-            self.openINIs[INI]['located'][wID] = {
+            self.open_inis[INI]['located'][wID] = {
                 'at':location
                 }
-            self.openINIs[INI]['located'][wID]['object'] = ModifyINI(location + INI)
-            return self.openINIs[INI]['located'][wID]['object']
+            self.open_inis[INI]['located'][wID]['object'] = ModifyINI(location + INI)
+            return self.open_inis[INI]['located'][wID]['object']
         else:
             wID = "1"
-            self.openINIs[INI] = {
+            self.open_inis[INI] = {
                 'located': {
                     wID: {
                         'at': location
                         }
                     }
                 }
-            self.openINIs[INI]['located'][wID]['object'] = ModifyINI(location + INI)
-            return self.openINIs[INI]['located'][wID]['object']
+            self.open_inis[INI]['located'][wID]['object'] = ModifyINI(location + INI)
+            return self.open_inis[INI]['located'][wID]['object']
 
 def onClosing():
     if messagebox.askyesno("Quit?", "Do you want to quit?"):

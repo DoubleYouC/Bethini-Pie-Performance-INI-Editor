@@ -39,8 +39,8 @@ def hex_to_rgb(value):
         return tuple(int(value[i:i + 1], 16)*17 for i in range(0, 3))
     return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
-def hex_to_decimal(hex):
-    return str(int(str(hex).lstrip('#'),16))
+def hex_to_decimal(hex_):
+    return str(int(str(hex_).lstrip('#'),16))
 
 def decimal_to_rgb(decimal):
     decimal = int(decimal)
@@ -248,12 +248,12 @@ class CustomFunctions:
 
         try:
             gameFolder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\Bethesda Softworks\\{gameReg}'),"installed path")[0]
-        except Exception as e:
+        except:
             sm('Did not find game folder in the registry (no WOW6432Node location).', exception=1)
         if gameFolder == 'Not Detected':
             try:
                 gameFolder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\WOW6432Node\\Bethesda Softworks\\{gameReg}'),"installed path")[0]
-            except Exception as e:
+            except:
                 sm('Did not find game folder in the registry.', exception=1)
 
         return gameFolder
@@ -288,12 +288,12 @@ class CustomFunctions:
                 if os.path.isfile(nxmhandlers):
                     nxmhandlersINI = ModifyINI(nxmhandlers)
                     sm(f'nxmhandlers.ini found here: {nxmhandlers}')
-        except Exception as e:
+        except:
             sm('NXM links are probably not set up.', exception=1)
         
         try:
             nxmhandlersINI
-        except Exception as e:
+        except:
             #nxmhandlers.ini not found.  Check for the AppData location.
             sm('nxmhandlers.ini not found. Checking AppData location.', exception=1)
             AppDataLocation = str(pathlib.Path.home()) + r"\AppData\Local\ModOrganizer\nxmhandler.ini"
@@ -313,7 +313,7 @@ class CustomFunctions:
                     pathValue = os.path.split(nxmhandlersINI.getValue('handlers', pathKey).replace('\\\\','\\'))[0]
                     pathValue += '\\'
                     sm(f'Mod Organizer appears to be located at {pathValue}')
-        except Exception as e:
+        except:
             sm('There is probably no nxmhandler.ini.', exception=1)
 
         ModOrganizerINILocation = 'Not Detected'
