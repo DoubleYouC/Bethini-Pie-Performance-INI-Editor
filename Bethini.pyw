@@ -143,7 +143,6 @@ class BethiniApp(tk.Tk):
         #self.titleBar = tk.Frame(self, bg=containerColor, relief='raised', bd=2)
         #self.closeButton = ttk.Button(self.titleBar, text='✕', command=onClosing)
 
-
         self.the_canvas = tk.Canvas(self, borderwidth=0, background=containerColor,
                                    height=0, highlightthickness=0)
         self.hsbframeholder = ttk.Frame(self)
@@ -356,7 +355,6 @@ class BethiniApp(tk.Tk):
             tab_number += 1
             self.tab_dictionary["Page" + str(tab_number)] = {"Name":tab}
 
-
         self.setup_dictionary = {}
         self.setting_dictionary = {}
         self.dependent_settings_dictionary = {}
@@ -371,14 +369,14 @@ class BethiniApp(tk.Tk):
     def menu(self):
         menubar = tk.Menu(self)
         filemenu = tk.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Save", command = self.SaveINIFiles)
+        filemenu.add_command(label="Save", command = self.save_ini_files)
         filemenu.add_separator()
         filemenu.add_command(label="Choose game", command = lambda: self.choose_game(forced=1))
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=onClosing)
         editmenu = tk.Menu(menubar, tearoff=0)
         editmenu.add_command(label="Preferences", command = self.show_preferences)
-        editmenu.add_command(label="Setup", command = self.showSetup)
+        editmenu.add_command(label="Setup", command = self.show_setup)
         helpmenu = tk.Menu(menubar, tearoff=0)
         helpmenu.add_command(label="Visit Web Page",
                              command = lambda: webbrowser.open_new_tab('http://www.nexusmods.com/skyrimspecialedition/mods/4875/'))
@@ -403,24 +401,24 @@ class BethiniApp(tk.Tk):
         about_frame = ttk.Frame(about_window)
         about_frame_real = ttk.Frame(about_frame)
 
-        AboutLabel = ttk.Label(about_frame_real,
+        about_label = ttk.Label(about_frame_real,
                                text=f'About {MyAppName}\n\n{MyAppName} was created by DoubleYou.\n\nLicensing is CC by-NC-SA.',
                                justify=tk.CENTER)
 
         about_frame.pack(fill=tk.BOTH, expand=True)
         about_frame_real.pack(anchor=tk.CENTER, expand=True)
-        AboutLabel.pack(anchor=tk.CENTER, padx='10', pady='10')
+        about_label.pack(anchor=tk.CENTER, padx='10', pady='10')
 
-    def showSetup(self):
+    def show_setup(self):
         self.withdraw()
         setupWindow.deiconify()
 
-    def withdrawSetup(self):
+    def withdraw_setup(self):
         setupWindow.withdraw()
         self.deiconify()
         self.updateValues()
 
-    def SaveINIFiles(self):
+    def save_ini_files(self):
         #self.openINIs = {
         #    MyAppNameConfig : {
         #        'located': {
@@ -431,120 +429,122 @@ class BethiniApp(tk.Tk):
         #            }
         #        }
         #    }
-        firstTimeBackup = False
-        filesSaved = False
-        self.removeInvalidSettings()
-        TheOpenedINIs = self.open_inis
-        INIList = list(TheOpenedINIs.keys())
-        filesToRemove = INIList[2:]
-        filesToRemove.append('log.log')
-        for INI in TheOpenedINIs:
-            locationList = list(TheOpenedINIs[INI]['located'].keys())
-            for n in range(len(locationList)):
-                thisLocation = TheOpenedINIs[INI]['located'][str(n+1)].get('at')
-                thisINIObject = TheOpenedINIs[INI]['located'][str(n+1)].get('object')
-                if INI == MyAppNameConfig:
+        first_time_backup = False
+        files_saved = False
+        self.remove_invalid_settings()
+        the_opened_inis = self.open_inis
+        ini_list = list(the_opened_inis.keys())
+        files_to_remove = ini_list[2:]
+        files_to_remove.append('log.log')
+        for each_ini in the_opened_inis:
+            location_list = list(the_opened_inis[each_ini]['located'].keys())
+            for n in range(len(location_list)):
+                this_location = the_opened_inis[each_ini]['located'][str(n+1)].get('at')
+                this_ini_object = the_opened_inis[each_ini]['located'][str(n+1)].get('object')
+                if each_ini == MyAppNameConfig:
                     continue
-                if not thisINIObject.HasBeenModified:
-                    self.sme(f'{INI} has not been modified, so there is no reason to resave it.')
+                if not this_ini_object.HasBeenModified:
+                    self.sme(f'{each_ini} has not been modified, so there is no reason to resave it.')
                     continue
-                if messagebox.askyesno(f"Save {INI}", f"Do you want to save {thisLocation}{INI}?"):
+                if messagebox.askyesno(f"Save {each_ini}", f"Do you want to save {this_location}{each_ini}?"):
                     #we need to make a backup of each save before actually saving.
-                    if INI != 'theme.ini':
-                        firstTimeBackupTrigger = removeExcessDirFiles(f'{thisLocation}{MyAppName} backups', int(appConfig.getValue('General', 'iMaxBackups', '-1')), filesToRemove)
-                        if firstTimeBackupTrigger:
-                            firstTimeBackup = True
-                        if firstTimeBackup:
-                            theBackupDirectory = f'{thisLocation}\\{MyAppName} backups\\First-Time-Backup\\'
-                            if not os.path.isdir(theBackupDirectory):
-                                os.makedirs(theBackupDirectory)
-                            if os.path.exists(f"{theBackupDirectory}{INI}"):
-                                self.sme(f'{theBackupDirectory}{INI} exists, so it will not be overwritten.')
+                    if each_ini != 'theme.ini':
+                        first_time_backup_trigger = removeExcessDirFiles(f'{this_location}{MyAppName} backups',
+                                                                      int(appConfig.getValue('General', 'iMaxBackups', '-1')),
+                                                                      files_to_remove)
+                        if first_time_backup_trigger:
+                            first_time_backup = True
+                        if first_time_backup:
+                            the_backup_directory = f'{this_location}\\{MyAppName} backups\\First-Time-Backup\\'
+                            if not os.path.isdir(the_backup_directory):
+                                os.makedirs(the_backup_directory)
+                            if os.path.exists(f"{the_backup_directory}{each_ini}"):
+                                self.sme(f'{the_backup_directory}{each_ini} exists, so it will not be overwritten.')
                             else:
-                                copyfile(f"{thisLocation}{INI}", f"{theBackupDirectory}{INI}")
-                            copyfile(MyAppNameLog, f"{theBackupDirectory}log.log")
-                        theBackupDirectory = f'{thisLocation}\\{MyAppName} backups\\{logDirectoryDate}\\'
-                        if not os.path.isdir(theBackupDirectory):
-                            os.makedirs(theBackupDirectory)
-                        if os.path.exists(f"{theBackupDirectory}{INI}"):
-                            self.sme(f'{theBackupDirectory}{INI} exists, so it will not be overwritten.')
+                                copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
+                            copyfile(MyAppNameLog, f"{the_backup_directory}log.log")
+                        the_backup_directory = f'{this_location}\\{MyAppName} backups\\{logDirectoryDate}\\'
+                        if not os.path.isdir(the_backup_directory):
+                            os.makedirs(the_backup_directory)
+                        if os.path.exists(f"{the_backup_directory}{each_ini}"):
+                            self.sme(f'{the_backup_directory}{each_ini} exists, so it will not be overwritten.')
                         else:
-                            copyfile(f"{thisLocation}{INI}", f"{theBackupDirectory}{INI}")
-                        copyfile(MyAppNameLog, f"{theBackupDirectory}log.log")
-                    thisINIObject.writeINI(1)
-                    filesSaved = True
-                    self.sme(f"{thisLocation}{INI} saved.")
-        if not filesSaved:
+                            copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
+                        copyfile(MyAppNameLog, f"{the_backup_directory}log.log")
+                    this_ini_object.writeINI(1)
+                    files_saved = True
+                    self.sme(f"{this_location}{each_ini} saved.")
+        if not files_saved:
             self.sme('No files were modified.')
-                        
-    def setPreset(self, presetid):
+
+    def set_preset(self, preset_id):
         self.start_progress()
-        if presetid == "Default":
-            self.applyINIDict(APP.preset_values('default'))
-            self.removeINIDict(APP.can_remove())
-            self.applyINIDict(APP.preset_values('fixedDefault'))
-            presetVar = ""
-        elif presetid == "recommended":
-            presetDict = APP.preset_values(f'{presetid}')
-            self.applyINIDict(presetDict)
-            presetVar = ""
+        if preset_id == "Default":
+            self.apply_ini_dict(APP.preset_values('default'))
+            self.remove_ini_dict(APP.can_remove())
+            self.apply_ini_dict(APP.preset_values('fixedDefault'))
+            preset_var = ""
+        elif preset_id == "recommended":
+            preset_dict = APP.preset_values(f'{preset_id}')
+            self.apply_ini_dict(preset_dict)
+            preset_var = ""
         else:
-            presetVar = self.preset_var.get()
-            presetDict = APP.preset_values(f'{presetVar} {presetid}')
-            self.applyINIDict(presetDict)
+            preset_var = self.preset_var.get()
+            preset_dict = APP.preset_values(f'{preset_var} {preset_id}')
+            self.apply_ini_dict(preset_dict)
         self.stop_progress()
         self.updateValues()
-        self.sme(f"Preset {presetVar} {presetid} applied.")
+        self.sme(f"Preset {preset_var} {preset_id} applied.")
 
-    def removeInvalidSettings(self):
-        TheOpenedINIs = self.open_inis
-        
-        for INI in TheOpenedINIs:
-            if INI == MyAppNameConfig or INI == 'theme.ini':
+    def remove_invalid_settings(self):
+        the_opened_inis = self.open_inis
+
+        for each_ini in the_opened_inis:
+            if each_ini == MyAppNameConfig or each_ini == 'theme.ini':
                 continue
-            elif APP.inis(INI):
-                locationList = list(TheOpenedINIs[INI]['located'].keys())
-                for n in range(len(locationList)):
-                    #thisLocation = TheOpenedINIs[INI]['located'][str(n+1)].get('at')
-                    thisINIObject = TheOpenedINIs[INI]['located'][str(n+1)].get('object')
+            elif APP.inis(each_ini):
+                location_list = list(the_opened_inis[each_ini]['located'].keys())
+                for n in range(len(location_list)):
+                    #thisLocation = the_opened_inis[each_ini]['located'][str(n+1)].get('at')
+                    this_ini_object = the_opened_inis[each_ini]['located'][str(n+1)].get('object')
 
-                    sections = thisINIObject.getSections()
+                    sections = this_ini_object.getSections()
 
                     for section in sections:
-                        settings = thisINIObject.getSettings(section)
+                        settings = this_ini_object.getSettings(section)
                         if settings == []:
-                            thisINIObject.removeSection(section)
+                            this_ini_object.removeSection(section)
                             self.sme(f'{section} was removed because it was empty.')
                         else:
                             for setting in settings:
                                 if ';' in setting:
                                     self.sme(f'{setting}:{section} will be preserved, as it is a comment.')
-                                elif not APP.does_setting_exist(INI, section, setting):
-                                    thisINIObject.removeSetting(section, setting)
-                                    self.sme(f'{setting}:{section} was removed because it is not recognized.')                       
+                                elif not APP.does_setting_exist(each_ini, section, setting):
+                                    this_ini_object.removeSetting(section, setting)
+                                    self.sme(f'{setting}:{section} was removed because it is not recognized.')
 
-    def applyINIDict(self, INIDict):
-        presetsIgnoreTheseSettings = APP.presets_ignore_these_settings()
-        for eachSetting in INIDict:
-            if eachSetting in presetsIgnoreTheseSettings:
+    def apply_ini_dict(self, ini_dict):
+        presets_ignore_these_settings = APP.presets_ignore_these_settings()
+        for each_setting in ini_dict:
+            if each_setting in presets_ignore_these_settings:
                 continue
-            targetINI = INIDict[eachSetting]['ini']
-            targetSection = INIDict[eachSetting]['section']
-            thisValue = str(INIDict[eachSetting]['value'])
+            target_ini = ini_dict[each_setting]['ini']
+            target_section = ini_dict[each_setting]['section']
+            this_value = str(ini_dict[each_setting]['value'])
 
-            INILocation = APP.inis(targetINI)
-            if INILocation != '':
-                INILocation = appConfig.getValue('Directories', INILocation)
-            theTargetINI = self.openINI(str(INILocation), str(targetINI))
+            ini_location = APP.inis(target_ini)
+            if ini_location != '':
+                ini_location = appConfig.getValue('Directories', ini_location)
+            the_target_ini = self.openINI(str(ini_location), str(target_ini))
 
-            theTargetINI.assignINIValue(targetSection, eachSetting, thisValue)
-            self.sme(targetINI + " [" + targetSection + "] " + eachSetting + "=" + thisValue)
+            the_target_ini.assignINIValue(target_section, each_setting, this_value)
+            self.sme(target_ini + " [" + target_section + "] " + each_setting + "=" + this_value)
 
-    def removeINIDict(self, INIDict):
-        for eachSetting in INIDict:
-            targetINI = INIDict[eachSetting]['ini']
-            targetSection = INIDict[eachSetting]['section']
-            thisValue = str(INIDict[eachSetting]['value'])
+    def remove_ini_dict(self, ini_dict):
+        for eachSetting in ini_dict:
+            targetINI = ini_dict[eachSetting]['ini']
+            targetSection = ini_dict[eachSetting]['section']
+            thisValue = str(ini_dict[eachSetting]['value'])
 
             INILocation = APP.inis(targetINI)
             if INILocation != '':
@@ -681,7 +681,7 @@ class BethiniApp(tk.Tk):
 
         presetid = self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting].get("preset id")
         self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_] = ttk.Button(self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting]["TkFinalSettingFrame"],
-                                                                                                                         text=setting, command=lambda: self.setPreset(presetid))
+                                                                                                                         text=setting, command=lambda: self.set_preset(presetid))
         self.tab_dictionary[eachTab]["LabelFrames"][TheLabelFrame]["SettingFrames"][onFrame][TheSetting][id_].pack(anchor=tk.CENTER, padx=5, pady=2)
         self.tooltip(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
         self.addToSettingDictionary(eachTab, labelFrame, TheLabelFrame, onFrame, setting, TheSetting, id_)
@@ -1419,7 +1419,7 @@ class BethiniApp(tk.Tk):
                 setupWindow.title('Setup')
                 self.tab_dictionary[eachTab]["TkFrameForTab"] = ttk.Frame(setupWindow)
                 self.tab_dictionary[eachTab]["TkFrameForTab"].pack()
-                setupWindow.protocol("WM_DELETE_WINDOW", self.withdrawSetup)
+                setupWindow.protocol("WM_DELETE_WINDOW", self.withdraw_setup)
                 if not fromChooseGameWindow:
                     setupWindow.withdraw()
             elif self.tab_dictionary[eachTab]['Name'] == 'Preferences':
@@ -1655,7 +1655,7 @@ def onClosing():
     if messagebox.askyesno("Quit?", "Do you want to quit?"):
         if appConfig.HasBeenModified:
             appConfig.writeINI(1)
-        window.SaveINIFiles()
+        window.save_ini_files()
         window.quit()
 
 def removeExcessDirFiles(theDir, maxToKeep, filesToRemove):
