@@ -27,7 +27,7 @@ class ModifyINI:
 
         self.HasBeenModified = False
 
-    def getValue(self, section, setting, default='Does Not Exist'):
+    def get_value(self, section, setting, default='Does Not Exist'):
         
         if section in self.caseInsensitiveConfig:
             return self.caseInsensitiveConfig[section].get(setting, default)
@@ -70,7 +70,7 @@ class ModifyINI:
             if section not in self.config: #if section still not in self.config, make the section.
                 self.config[section] = {}
                 self.caseInsensitiveConfig[section] = {}
-        if self.getValue(section, setting) != value:
+        if self.get_value(section, setting) != value:
             for eachSetting in self.config[section]:
                 #This beautiful for loop prevents duplicate settings if they
                 #happen to be there in some messed up capitalized

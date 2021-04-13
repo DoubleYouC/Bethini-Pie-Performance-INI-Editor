@@ -101,9 +101,9 @@ class Info:
         profiles_directory = ""
         if 'Not Detected' not in mod_organizer_ini_location:
             mod_organizer_ini = ModifyINI(mod_organizer_ini_location)
-            base_directory = mod_organizer_ini.getValue('Settings','base_directory',
+            base_directory = mod_organizer_ini.get_value('Settings','base_directory',
                                                         default=lambda: os.path.split(mod_organizer_ini_location)[0]).replace('\\\\','\\').replace('/','\\')
-            profiles_directory = mod_organizer_ini.getValue('Settings','profiles_directory',
+            profiles_directory = mod_organizer_ini.get_value('Settings','profiles_directory',
                                                             default=f'{base_directory}\\profiles').replace('\\\\','\\').replace('/','\\')
             profiles = os.listdir(profiles_directory)
         return [profiles_directory, profiles]
@@ -166,7 +166,7 @@ class CustomFunctions:
             default_ini_location = Info.get_documents_directory() + f'\\My Games\\{game_documents_name}\\'
         else:
             default_ini_location = ''
-        ini_path = ModifyINI("Bethini.ini").getValue("Directories",
+        ini_path = ModifyINI("Bethini.ini").get_value("Directories",
                                                     "s" + game_name + "INIPath",
                                                     default=default_ini_location)
         backup_directory = f'{ini_path}Bethini Pie backups\\{choice}\\'
@@ -182,7 +182,7 @@ class CustomFunctions:
                 if ini == 'theme.ini':
                     continue
                 else:
-                    ini_location = ModifyINI("Bethini.ini").getValue('Directories',
+                    ini_location = ModifyINI("Bethini.ini").get_value('Directories',
                                                                      bethini_key, default_ini_location)
             ini_files_with_location[ini] = ini_location
 
@@ -222,7 +222,7 @@ class CustomFunctions:
             defaultINILocation = Info.get_documents_directory() + f'\\My Games\\{gameDocumentsName}\\'
         else:
             defaultINILocation = ''
-        INIPath = ModifyINI("Bethini.ini").getValue("Directories", "s" + game_name + "INIPath", default=defaultINILocation)
+        INIPath = ModifyINI("Bethini.ini").get_value("Directories", "s" + game_name + "INIPath", default=defaultINILocation)
         backup_directory = f'{INIPath}/Bethini Pie backups'
         try:
             backups = os.listdir(backup_directory)
@@ -272,7 +272,7 @@ class CustomFunctions:
     def getMODirectory(gameName):
         #This custom function is used to detect the location of Mod Organizer
 
-        ModOrganizerINILocationFromConfig = ModifyINI("Bethini.ini").getValue("Directories", "s" + gameName + "ModOrganizerINIPath", default="Not Detected")
+        ModOrganizerINILocationFromConfig = ModifyINI("Bethini.ini").get_value("Directories", "s" + gameName + "ModOrganizerINIPath", default="Not Detected")
 
         pathValue = "Not Detected"
         gameReg = Info.nxmhandler_game_reference(gameName)
@@ -302,15 +302,15 @@ class CustomFunctions:
                 nxmhandlersINI = ModifyINI(nxmhandlers)
                 sm(f'nxmhandler.ini found in {nxmhandlers}')
         try:
-            size = int(nxmhandlersINI.getValue('handlers', 'size')) + 1
+            size = int(nxmhandlersINI.get_value('handlers', 'size')) + 1
             for n in range(size):
                 key = str(n) + '\\games'
-                value = nxmhandlersINI.getValue('handlers', key)
+                value = nxmhandlersINI.get_value('handlers', key)
                 if gameReg != "skyrimse":
                     value = value.replace('skyrimse','')
                 if gameReg in value:
                     pathKey = str(n) + '\\executable'
-                    pathValue = os.path.split(nxmhandlersINI.getValue('handlers', pathKey).replace('\\\\','\\'))[0]
+                    pathValue = os.path.split(nxmhandlersINI.get_value('handlers', pathKey).replace('\\\\','\\'))[0]
                     pathValue += '\\'
                     sm(f'Mod Organizer appears to be located at {pathValue}')
         except:
