@@ -411,10 +411,10 @@ class BethiniApp(tk.Tk):
 
     def show_setup(self):
         self.withdraw()
-        setupWindow.deiconify()
+        SETUP_WINDOW.deiconify()
 
     def withdraw_setup(self):
-        setupWindow.withdraw()
+        SETUP_WINDOW.withdraw()
         self.deiconify()
         self.updateValues()
 
@@ -505,7 +505,6 @@ class BethiniApp(tk.Tk):
             elif APP.inis(each_ini):
                 location_list = list(the_opened_inis[each_ini]['located'].keys())
                 for n in range(len(location_list)):
-                    #thisLocation = the_opened_inis[each_ini]['located'][str(n+1)].get('at')
                     this_ini_object = the_opened_inis[each_ini]['located'][str(n+1)].get('object')
 
                     sections = this_ini_object.getSections()
@@ -520,8 +519,11 @@ class BethiniApp(tk.Tk):
                                 if ';' in each_setting:
                                     self.sme(f'{each_setting}:{section} will be preserved, as it is a comment.')
                                 elif not APP.does_setting_exist(each_ini, section, each_setting):
-                                    this_ini_object.removeSetting(section, each_setting)
+                                    sm(this_ini_object.removeSetting(section, each_setting))
                                     self.sme(f'{each_setting}:{section} was removed because it is not recognized.')
+                                    if this_ini_object.getSettings(section) == []:
+                                        this_ini_object.removeSection(section)
+                                        self.sme(f'{section} was removed because it was empty.')
 
     def apply_ini_dict(self, ini_dict):
         presets_ignore_these_settings = APP.presets_ignore_these_settings()
@@ -1413,22 +1415,30 @@ class BethiniApp(tk.Tk):
 
             self.create_tab_image(each_tab)
             if self.tab_dictionary[each_tab]['Name'] == 'Setup':
-                global setupWindow
-                self.tab_dictionary[each_tab]['SetupWindow'] = tk.Toplevel(self)
-                setupWindow = self.tab_dictionary[each_tab]['SetupWindow']
-                setupWindow.title('Setup')
-                self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(setupWindow)
+                global SETUP_WINDOW
+                self.tab_dictionary[each_tab]['SetupWindow'] = tk.Toplevel(self, bg=subContainerColor)
+                SETUP_WINDOW = self.tab_dictionary[each_tab]['SetupWindow']
+                SETUP_WINDOW.title('Setup')
+                self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(SETUP_WINDOW)
                 self.tab_dictionary[each_tab]["TkFrameForTab"].pack()
-                setupWindow.protocol("WM_DELETE_WINDOW", self.withdraw_setup)
+
+                setup_ok_button = ttk.Button(SETUP_WINDOW, text="OK", command=self.withdraw_setup)
+                setup_ok_button.pack(anchor=tk.SE, padx=5, pady=5)
+
+                SETUP_WINDOW.protocol("WM_DELETE_WINDOW", self.withdraw_setup)
                 if not fromChooseGameWindow:
-                    setupWindow.withdraw()
+                    SETUP_WINDOW.withdraw()
             elif self.tab_dictionary[each_tab]['Name'] == 'Preferences':
                 global preferencesWindow
-                self.tab_dictionary[each_tab]['PreferencesWindow'] = tk.Toplevel(self)
+                self.tab_dictionary[each_tab]['PreferencesWindow'] = tk.Toplevel(self, bg=subContainerColor)
                 preferencesWindow = self.tab_dictionary[each_tab]['PreferencesWindow']
                 preferencesWindow.title('Preferences')
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(preferencesWindow)
                 self.tab_dictionary[each_tab]["TkFrameForTab"].pack()
+
+                preferences_ok_button = ttk.Button(preferencesWindow, text="OK", command=self.withdraw_preferences)
+                preferences_ok_button.pack(anchor=tk.SE, padx=5, pady=5)
+
                 preferencesWindow.protocol("WM_DELETE_WINDOW", self.withdraw_preferences)
                 preferencesWindow.withdraw()
             else:
@@ -1439,6 +1449,7 @@ class BethiniApp(tk.Tk):
             #self.subContainer.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.TOP)
             
             self.label_frames_for_tab(each_tab)
+
             
         self.stop_progress()
         if not fromChooseGameWindow:
@@ -1623,6 +1634,7 @@ class BethiniApp(tk.Tk):
         return settingValues
 
     def open_ini(self, location, INI):
+
         open_ini = self.open_inis.get(INI)
         if open_ini:
             openINIlocation = self.open_inis[INI]['located']
