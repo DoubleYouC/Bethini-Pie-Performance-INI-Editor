@@ -11,6 +11,7 @@
 *.sln.docstates
 paradigm.txt
 Bethini.ini
+Build with pyinstaller.bat
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
