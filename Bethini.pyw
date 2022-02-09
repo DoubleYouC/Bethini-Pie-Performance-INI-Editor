@@ -81,6 +81,30 @@ class BethiniApp(tk.Tk):
             'TkSlider': self.sliderAssignValue
             }
 
+        self.tkinter_switch_dict = {
+            'Left': tk.LEFT,
+            'Right': tk.RIGHT,
+            'Top': tk.TOP,
+            'Bottom': tk.BOTTOM,
+            'X': tk.X,
+            'Y': tk.Y,
+            'Center': tk.CENTER,
+            'Both': tk.BOTH,
+            'Horizontal': tk.HORIZONTAL,
+            'Flat': tk.FLAT,
+            'N': tk.N,
+            'NE': tk.NE,
+            'NW': tk.NW,
+            'NS': tk.NS,
+            'NSEW': tk.NSEW,
+            'S': tk.S,
+            'SE': tk.SE,
+            'SW': tk.SW,
+            'E': tk.E,
+            'EW': tk.EW,
+            'W': tk.W,
+            'None': None
+            }
         self.types_without_label = ['Checkbutton', 'preset', 'radioPreset', 'description']
         self.types_packed_left = ['Dropdown', 'Combobox', 'Entry', 'Spinbox', 'Slider', 'Color']
 
@@ -578,10 +602,13 @@ class BethiniApp(tk.Tk):
                 the_dict["LabelFrames"][the_label_frame]["TkLabelFrame"] = ttk.LabelFrame(the_dict["TkFrameForTab"], text=label_frame, width=200)
             else:
                 the_dict["LabelFrames"][the_label_frame]["TkLabelFrame"] = ttk.Frame(the_dict["TkFrameForTab"])
-            if (label_frame_number) % 2 == 0:
-                the_dict["LabelFrames"][the_label_frame]["TkLabelFrame"].pack(anchor=tk.CENTER, side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
-            else:
-                the_dict["LabelFrames"][the_label_frame]["TkLabelFrame"].pack(anchor=tk.CENTER, side=tk.TOP, fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+            pack_settings = APP.pack_settings(self.tab_dictionary[each_tab]["Name"], label_frame)
+            the_dict["LabelFrames"][the_label_frame]["TkLabelFrame"].pack(anchor=self.tkinter_switch_dict[pack_settings.get('Anchor','NW')],
+                                                                          side=self.tkinter_switch_dict[pack_settings.get('Side','Top')],
+                                                                          fill=self.tkinter_switch_dict[pack_settings.get('Fill','Both')],
+                                                                          expand=pack_settings.get('Expand', 1),
+                                                                          padx=10, pady=10)
             self.settings_frames_for_label_frame(each_tab, label_frame, the_label_frame)
 
     def settings_frames_for_label_frame(self, each_tab, label_frame, the_label_frame):
