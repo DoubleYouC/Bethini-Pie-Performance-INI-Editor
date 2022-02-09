@@ -172,6 +172,16 @@ class AppName:
     def settings_in_label_frame(self, tab, label_frame):
         return self.iter_items_list(self.bethini['displayTabs'][tab][label_frame]['Settings'])
 
+    def pack_settings(self, tab, label_frame):
+        default_pack_settings = {
+            'Side': 'Top',
+            'Anchor': 'NW',
+            'Fill': 'Both',
+            'Expand': 1
+            }
+        pack_settings = self.bethini['displayTabs'][tab][label_frame].get('Pack', default_pack_settings)
+        return pack_settings
+
     def number_of_vertically_stacked_settings(self, tab, label_frame):
         return self.bethini['displayTabs'][tab][label_frame]['NumberOfVerticallyStackedSettings']
 
