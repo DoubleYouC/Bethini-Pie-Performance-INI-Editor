@@ -158,6 +158,7 @@ class Info:
 class CustomFunctions:
 
     def restore_backup(game_name, choice):
+        sm(f'Restoring backup from {choice}.')
         app = AppName(game_name)
         ini_files = app.what_ini_files_are_used()
 
