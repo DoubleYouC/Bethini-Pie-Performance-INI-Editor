@@ -83,7 +83,7 @@ class customConfigParser(configparser.RawConfigParser):
                     sectname = mo.group('header')
                     if sectname in self._sections:
                         if self._strict and sectname in elements_added:
-                            raise DuplicateSectionError(sectname, fpname,
+                            raise configparser.DuplicateSectionError(sectname, fpname,
                                                         lineno)
                         cursect = self._sections[sectname]
                         elements_added.add(sectname)
