@@ -302,8 +302,48 @@ class BethiniApp(tk.Tk):
         return new_color
 
     def tooltip(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_):
-        CreateToolTip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_],
-                      self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tooltip"])
+        #Sets the tooltips.
+
+        #Fectches the tooltip description.
+        tooltip_description = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("tooltip", "No description available.")
+
+        #Checks for INI settings specified, and adds them to the bottom of the tooltip if found.
+        target_ini_files = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("targetINIs")
+        if target_ini_files: #If there are INI settings specified
+            target_sections = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("targetSections")
+            target_settings = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("settings")
+
+            #Place INI settings into a dictionary to filter out duplicate target INI files and sections.
+            settings_location_dict = {}
+            for n in range(len(target_ini_files)):
+                if target_ini_files[n] not in settings_location_dict:
+                    settings_location_dict[target_ini_files[n]] = {}
+                if target_sections[n] not in settings_location_dict[target_ini_files[n]]:
+                    settings_location_dict[target_ini_files[n]][target_sections[n]] = []
+                settings_location_dict[target_ini_files[n]][target_sections[n]].append(target_settings[n])
+            
+            #Iterates through the dictionary and makes a formatted string to append to the bottom of the tooltip description.
+            tooltip_INI_targets = ''
+            iterator = 0
+            for target_ini in settings_location_dict:
+                iterator += 1
+                if iterator > 1:
+                    tooltip_INI_targets += '\n'
+                tooltip_INI_targets += str(target_ini)
+                
+                for target_section in settings_location_dict[target_ini]:
+                    tooltip_INI_targets += '\n[' + str(target_section) + ']'
+                    for target_setting in settings_location_dict[target_ini][target_section]:
+                        tooltip_INI_targets += '\n' + str(target_setting)
+                if iterator != len(settings_location_dict):
+                    tooltip_INI_targets += '\n'
+
+            #Appends our formatted string of INI settings to the bottom of the tooltip description.
+            tooltip_text = tooltip_description + '\n\n' + tooltip_INI_targets
+        else: #If there are no INI settings specified, only the tooltip description will be used.
+            tooltip_text = tooltip_description
+            
+        CreateToolTip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text)
 
     def choose_game(self, forced=0):
         self.withdraw()
