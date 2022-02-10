@@ -337,7 +337,7 @@ class BethiniApp(tk.Tk):
                 raise Exception("App/Game specified in " + MyAppNameConfig + " differs from the game chosen, so it will be changed to the one you chose.")
         except:
             self.sme('Change of game/application', exception=1)
-            app_config.assignINIValue('General','sAppName', game)
+            app_config.assign_setting_value('General','sAppName', game)
             from_choose_game_window = True
 
         tk.Tk.wm_title(self, MyAppName + " - " + game)
@@ -467,7 +467,7 @@ class BethiniApp(tk.Tk):
                 this_ini_object = the_opened_inis[each_ini]['located'][str(n+1)].get('object')
                 if each_ini == MyAppNameConfig:
                     continue
-                if not this_ini_object.HasBeenModified:
+                if not this_ini_object.has_been_modified:
                     self.sme(f'{each_ini} has not been modified, so there is no reason to resave it.')
                     continue
                 if messagebox.askyesno(f"Save {each_ini}", f"Do you want to save {this_location}{each_ini}?"):
@@ -495,7 +495,7 @@ class BethiniApp(tk.Tk):
                         else:
                             copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
                         copyfile(MyAppNameLog, f"{the_backup_directory}log.log")
-                    this_ini_object.writeINI(1)
+                    this_ini_object.save_ini_file(1)
                     files_saved = True
                     self.sme(f"{this_location}{each_ini} saved.")
         if not files_saved:
@@ -531,22 +531,22 @@ class BethiniApp(tk.Tk):
                 for n in range(len(location_list)):
                     this_ini_object = the_opened_inis[each_ini]['located'][str(n+1)].get('object')
 
-                    sections = this_ini_object.getSections()
+                    sections = this_ini_object.get_sections()
 
                     for section in sections:
-                        settings = this_ini_object.getSettings(section)
+                        settings = this_ini_object.get_settings(section)
                         if settings == []:
-                            this_ini_object.removeSection(section)
+                            this_ini_object.remove_section(section)
                             self.sme(f'{section} was removed because it was empty.')
                         else:
                             for each_setting in settings:
                                 if ';' in each_setting:
                                     self.sme(f'{each_setting}:{section} will be preserved, as it is a comment.')
                                 elif not APP.does_setting_exist(each_ini, section, each_setting):
-                                    sm(this_ini_object.removeSetting(section, each_setting))
+                                    sm(this_ini_object.remove_setting(section, each_setting))
                                     self.sme(f'{each_setting}:{section} was removed because it is not recognized.')
-                                    if this_ini_object.getSettings(section) == []:
-                                        this_ini_object.removeSection(section)
+                                    if this_ini_object.get_settings(section) == []:
+                                        this_ini_object.remove_section(section)
                                         self.sme(f'{section} was removed because it was empty.')
 
     def apply_ini_dict(self, ini_dict):
@@ -563,7 +563,7 @@ class BethiniApp(tk.Tk):
                 ini_location = app_config.get_value('Directories', ini_location)
             the_target_ini = self.open_ini(str(ini_location), str(target_ini))
 
-            the_target_ini.assignINIValue(target_section, each_setting, this_value)
+            the_target_ini.assign_setting_value(target_section, each_setting, this_value)
             self.sme(target_ini + " [" + target_section + "] " + each_setting + "=" + this_value)
 
     def remove_ini_dict(self, ini_dict):
@@ -580,7 +580,7 @@ class BethiniApp(tk.Tk):
             current_value = the_target_ini.get_value(target_section, each_setting, this_value)
 
             if current_value == this_value:
-                the_target_ini.removeSetting(target_section, each_setting)
+                the_target_ini.remove_setting(target_section, each_setting)
                 self.sme(f"{target_ini} [{target_section}] {each_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed")
 
     def create_tab_image(self, each_tab):
@@ -1231,12 +1231,12 @@ class BethiniApp(tk.Tk):
                             continue
                         else:
                             theValue = this_value[n][0]
-                            the_target_ini.assignINIValue(targetSections[n], theSettings[n], theValue)
+                            the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
                             self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + theValue)
-                        the_target_ini.assignINIValue(targetSections[n], theSettings[n], theValue)
+                        the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + theValue)
                     else:
-                        the_target_ini.assignINIValue(targetSections[n], theSettings[n], this_value[n])
+                        the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value[n])
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value[n])
 
     def dropdownAssignValue(self, each_setting):
@@ -1298,7 +1298,7 @@ class BethiniApp(tk.Tk):
 
                 if partial:
                     theValue = theValueStr.format(this_value)
-                the_target_ini.assignINIValue(targetSections[n], theSettings[n], theValue)
+                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
                 self.sme(f'{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}')
 
     def comboboxAssignValue(self, each_setting):
@@ -1322,7 +1322,7 @@ class BethiniApp(tk.Tk):
                         this_value = int(this_value)
                     this_value = str(this_value)
 
-                the_target_ini.assignINIValue(targetSections[n], theSettings[n], this_value)
+                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
 
     def entryAssignValue(self, each_setting):
@@ -1366,7 +1366,7 @@ class BethiniApp(tk.Tk):
 
                 if partial:
                     this_value = theValueStr.format(this_value)
-                the_target_ini.assignINIValue(targetSections[n], theSettings[n], this_value)
+                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
 
     def sliderAssignValue(self, each_setting):
@@ -1383,7 +1383,7 @@ class BethiniApp(tk.Tk):
                 ini_location = self.getINILocation(targetINIs[n])
                 the_target_ini = self.open_ini(str(ini_location), str(targetINIs[n]))
 
-                the_target_ini.assignINIValue(targetSections[n], theSettings[n], this_value)
+                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
 
     def spinboxAssignValue(self, each_setting):
@@ -1400,7 +1400,7 @@ class BethiniApp(tk.Tk):
                 ini_location = self.getINILocation(targetINIs[n])
                 the_target_ini = self.open_ini(str(ini_location), str(targetINIs[n]))
 
-                the_target_ini.assignINIValue(targetSections[n], theSettings[n], this_value)
+                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
 
     def colorAssignValue(self, each_setting):
@@ -1419,19 +1419,19 @@ class BethiniApp(tk.Tk):
                 the_target_ini = self.open_ini(str(ini_location), str(targetINIs[n]))
 
                 if color_value_type == 'hex':
-                    the_target_ini.assignINIValue(targetSections[n], theSettings[n], this_value)
+                    the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                     self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
                 elif color_value_type == 'decimal':
-                    the_target_ini.assignINIValue(targetSections[n], theSettings[n], this_value)
+                    the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                     self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
                 elif color_value_type == 'rgb' or color_value_type == 'rgb 1':
                     if len(theSettings) > 1:
                         theValue = str(ast.literal_eval(this_value)[n])
-                        the_target_ini.assignINIValue(targetSections[n], theSettings[n], theValue)
+                        the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + theValue)
                     else:
                         this_value = this_value.lstrip('(').rstrip(')')
-                        the_target_ini.assignINIValue(targetSections[n], theSettings[n], this_value)
+                        the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
                 
     def createTabs(self, fromChooseGameWindow=False):
@@ -1692,8 +1692,8 @@ class BethiniApp(tk.Tk):
 
 def onClosing():
     if messagebox.askyesno("Quit?", "Do you want to quit?"):
-        if app_config.HasBeenModified:
-            app_config.writeINI(1)
+        if app_config.has_been_modified:
+            app_config.save_ini_file(1)
         window.save_ini_files()
         window.quit()
 
@@ -1753,8 +1753,8 @@ if __name__ == '__main__':
     MyAppNameConfig = f'{MyAppShortName}.ini'
     app_config = ModifyINI(MyAppNameConfig)
     iMaxLogs = app_config.get_value('General', 'iMaxLogs', '5')
-    app_config.assignINIValue('General', 'iMaxLogs', iMaxLogs)
-    app_config.assignINIValue('General', 'iMaxBackups', app_config.get_value('General', 'iMaxBackups', '5'))
+    app_config.assign_setting_value('General', 'iMaxLogs', iMaxLogs)
+    app_config.assign_setting_value('General', 'iMaxBackups', app_config.get_value('General', 'iMaxBackups', '5'))
     
     theme = app_config.get_value('General', 'sTheme', default='Default')
 
@@ -1768,7 +1768,7 @@ if __name__ == '__main__':
         #If the theme doesn't exist, revert to Default theme.
         theme = 'Default'
     #Make sure that the theme is specified in the config file.
-    app_config.assignINIValue('General', 'sTheme', theme)
+    app_config.assign_setting_value('General', 'sTheme', theme)
 
     #Open Theme config.
     ThemeConfig = ModifyINI(f'theme\\{theme}\\theme.ini')

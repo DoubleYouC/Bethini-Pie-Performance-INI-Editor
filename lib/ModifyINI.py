@@ -15,146 +15,116 @@ class ModifyINI:
     #It also modifies the configparser to work in the way that we desire.
     #This by nature allows us to make the changes in how we use the confiparser
     #apply to every instance of modifying the INI files.
-    def __init__(self, ini_to_manage, preserveCase=True):
+    def __init__(self, ini_to_manage, preserve_case=True):
         self.ini_to_manage = ini_to_manage
         self.config = customConfigParser()
-        if preserveCase:
+        if preserve_case:
             self.config.optionxform = lambda option: option
         self.config.read(self.ini_to_manage)
 
         self.case_insensitive_config = customConfigParser()
         self.case_insensitive_config.read(self.ini_to_manage)
 
-        self.HasBeenModified = False
+        self.has_been_modified = False
 
-    def getExistingSection(self, section):
-        #this function looks for an existing case version of the section we are looking for
-        theSection = section
-        section = section.lower()
-        for eachSection in self.getSections():
-            originalSection = eachSection
-            eachSection = eachSection.lower()
-            if eachSection == section:
-                theSection = originalSection
+    def get_existing_section(self, section):
+        #This function searches for and returns an existing case version of the given section.
+        if self.config.has_section(section):
+            return section
+
+        lowercase_section = section.lower()
+        
+        for existing_section in self.get_sections():
+            lowercase_existing_section = existing_section.lower()
+            if lowercase_existing_section == lowercase_section:
+                section = existing_section
                 break
-        return theSection
+        return section
 
     def get_existing_setting(self, section, setting):
-        #this function looks for an existing case version of the setting we are looking for
-        if section not in self.config:
-            section = self.getExistingSection(section)
+        #This function searches for and returns an existing case version of the given setting.
 
-        theSetting = setting
-        #benablefileselection
-        setting = setting.lower()
-        #benablefileselection
-        for eachSetting in self.getSettings(section, True):
+        section = self.get_existing_section(section)
 
-            originalSetting = eachSetting
-            #bEnableFileSelection
-            eachSetting = eachSetting.lower()
-            #benablefileselection
-            if eachSetting == setting:
-                theSetting = originalSetting
-                #sets the return setting to the original case
+        lowercase_setting = setting.lower()
+
+        for existing_setting in self.get_settings(section, True):
+            lowercase_existing_setting = existing_setting.lower()
+            if lowercase_existing_setting == lowercase_setting:
+                setting = existing_setting
                 break
-        return theSetting
+        return setting
 
     def get_value(self, section, setting, default='Does Not Exist'):
-
-        section = self.getExistingSection(section)
-        
-        if section in self.case_insensitive_config:
-            return self.case_insensitive_config[section].get(setting, default)
+        #Retrieves the value of a given setting, if it exists.
+        section = self.get_existing_section(section) #Even though we are checking the case_insensitive_config, sections ARE case sensitive.
+        if self.case_insensitive_config.has_section(section):
+            return self.case_insensitive_config.get(section, setting, fallback=default)
         else:
             return default
 
-    def getSections(self):
+    def get_sections(self):
+        #Retrieves all sections.
         return self.case_insensitive_config.sections()
 
-    def getSettings(self, section, original_case=False):
-        settings = []
+    def get_settings(self, section, original_case=False):
+        #Retrieves all settings within the given section.
+        section = self.get_existing_section(section)
         if original_case:
-            for item in self.config.items(section):
-                settings.append(item[0])
+            settings = self.config.options(section)
         else:
-            for item in self.case_insensitive_config.items(section):
-                settings.append(item[0])
+            settings = self.case_insensitive_config.options(section)
         return settings
 
-    def assignINIValue(self, section, setting, value):
-        #assigns the specified value to the specified setting only if
-        #different.  Case sensitive.  Returns true if the value was changed.
+    def assign_setting_value(self, section, setting, value):
+        #Assigns the specified value to the specified setting only if
+        #different. Returns true if the value was changed.
 
-        if section not in self.config:
-            #check to make sure it is not in the file as an alternative case
-            section = self.getExistingSection(section)
-            if section not in self.config: #if section still not in self.config, make the section.
-                self.config[section] = {}
-                self.case_insensitive_config[section] = {}
+        section = self.get_existing_section(section) #preserves existing case for section
+
+        if not self.config.has_section(section): #if section not in self.config, make the section.
+            self.config.add_section(section)
+            self.case_insensitive_config.add_section(section)
+
+        setting = self.get_existing_setting(section, setting) #preserves existing case for setting
+
         if self.get_value(section, setting) != value:
-            for eachSetting in self.config[section]:
-                #This beautiful for loop prevents duplicate settings if they
-                #happen to be there in some messed up capitalized
-                #non-capitalized state!!!  Oh how I cried and cried trying to
-                #figure this one out!
-                if eachSetting.lower() == setting.lower():
-                    self.config.remove_option(section, eachSetting)
             self.config[section][setting] = value
             self.case_insensitive_config[section][setting] = value
-            self.HasBeenModified = True
+            self.has_been_modified = True
             return True
         else:
             return False
 
-    def removeSetting(self, section, setting):
-        if section not in self.config:
-            section = self.getExistingSection(section)
+    def remove_setting(self, section, setting):
+        #Removes the specified setting.
+        existing_section = self.get_existing_section(section)
+        existing_setting = self.get_existing_setting(existing_section, setting)
+        self.config.remove_option(existing_section, existing_setting)
+        self.case_insensitive_config.remove_option(existing_section, existing_setting)
+        self.has_been_modified = True
 
-        setting = self.get_existing_setting(section, setting)
-        self.config.remove_option(section, setting)
-        self.case_insensitive_config.remove_option(section, setting)
-        self.HasBeenModified = True
-
-    def removeSection(self, section):
-        if section not in self.config:
-            section = self.getExistingSection(section)
-        self.config.remove_section(section)
-        self.case_insensitive_config.remove_section(section)
-        self.HasBeenModified = True
-
-    def writeValue(self, section, setting, value):
-        #writes the specified value to the specified setting only if the value
-        #is different from what is already there.
-        if self.assignINIValue(section, setting, value):
-            self.writeINI()
-            self.HasBeenModified = False
-
-    def doesSettingExist(self, section, setting):
-        #returns boolean for if the setting exists.
-        if section not in self.config:
-            section = self.getExistingSection(section)
-        if setting in self.case_insensitive_config[section]:
-            return True
-        elif '=' not in setting:
-            return True
-        else:
-            return False
+    def remove_section(self, section):
+        #Removes the specified section.
+        existing_section = self.get_existing_section(section)
+        self.config.remove_section(existing_section)
+        self.case_insensitive_config.remove_section(existing_section)
+        self.has_been_modified = True
 
     def sort(self):
-        #sorts all sections and settings.
+        #Sorts all sections and settings.
         for section in self.config._sections:
             self.config._sections[section] = OrderedDict(sorted(self.config._sections[section].items(), key=lambda t: t[0]))
         self.config._sections = OrderedDict(sorted(self.config._sections.items(), key=lambda t: t[0]))
-        self.HasBeenModified = True
+        self.has_been_modified = True
 
-    def writeINI(self, sort=False):
+    def save_ini_file(self, sort=False):
         #writes the file.
         if sort:
             self.sort()
-        with open(self.ini_to_manage, 'w') as configfile:
-            self.config.write(configfile, space_around_delimiters = False)
-        self.HasBeenModified = False
+        with open(self.ini_to_manage, 'w') as config_file:
+            self.config.write(config_file, space_around_delimiters = False)
+        self.has_been_modified = False
 
 if __name__ == '__main__':
     print('This is the ModifyINI class module.')
