@@ -2,8 +2,8 @@ import tkinter as tk
 
 class CreateToolTip(object):
     def __init__(self, widget, text='widget info'):
-        self.waittime = 500
-        self.wraplength = 180
+        self.wait_time = 500
+        self.wrap_length = 200
         self.widget = widget
         self.text = text
         self.widget.bind('<Enter>', self.enter)
@@ -17,11 +17,11 @@ class CreateToolTip(object):
 
     def leave(self, event=None):
         self.unschedule()
-        self.hidetip()
+        self.hide_tip()
 
     def schedule(self):
         self.unschedule()
-        self.id = self.widget.after(self.waittime, self.showtip)
+        self.id = self.widget.after(self.wait_time, self.show_tip)
 
     def unschedule(self):
         id_ = self.id
@@ -29,7 +29,7 @@ class CreateToolTip(object):
         if id_:
             self.widget.after_cancel(id_)
 
-    def showtip(self, event=None):
+    def show_tip(self, event=None):
         x = y = 0
         x, y, cx, cy = self.widget.bbox('insert')
         x += self.widget.winfo_rootx() + 25
@@ -41,10 +41,10 @@ class CreateToolTip(object):
         self.tw.wm_geometry('+%d+%d' % (x, y))
         label = tk.Label(self.tw, text=self.text, justify=tk.LEFT,
                          background='#ffffff', relief=tk.SOLID, borderwidth=1,
-                         wraplength = self.wraplength)
+                         wraplength = self.wrap_length)
         label.pack(ipadx=1)
 
-    def hidetip(self):
+    def hide_tip(self):
         tw = self.tw
         self.tw = None
         if tw:
