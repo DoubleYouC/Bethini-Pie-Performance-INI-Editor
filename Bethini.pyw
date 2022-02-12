@@ -389,7 +389,7 @@ class BethiniApp(tk.Tk):
         global APP
         APP = AppName(game)
         global GAME_NAME
-        GAME_NAME = APP.game_name
+        GAME_NAME = APP.data["gameName"]
         self.sme(f'Application/game is {GAME_NAME}')
 
         #The self.tab_dictionary lists all the tabs, which
@@ -586,7 +586,7 @@ class BethiniApp(tk.Tk):
 
     def apply_ini_dict(self, ini_dict):
         for each_setting in ini_dict:
-            if each_setting in APP.presets_ignore_these_settings:
+            if each_setting in APP.bethini['presetsIgnoreTheseSettings']:
                 continue
             target_ini = ini_dict[each_setting]['ini']
             target_section = ini_dict[each_setting]['section']
