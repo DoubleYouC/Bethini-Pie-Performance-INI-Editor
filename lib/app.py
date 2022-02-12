@@ -20,25 +20,31 @@ class AppName:
             self.default_ini = ini_files[2]
         except IndexError:
             self.default_ini = None
+
         self.ini_values = self.data["iniValues"]
+        self.game_name = self.data["gameName"]
+        self.presets_ignore_these_settings = self.bethini["presetsIgnoreTheseSettings"]
+
         self.ini_section_setting_dict = self.get_ini_section_setting_dict()
         self.setting_values = self.setting_values()
         self.settings = self.settings()
         self.sections = self.sections()
+    
+    def iter_items_list(self, items):
+        item_list = []
+        for item in items:
+            item_list.append(item)
+        return item_list
 
-    def game_name(self):
-        return self.data["gameName"]
-
-    def presets_ignore_these_settings(self):
-        return self.bethini["presetsIgnoreTheseSettings"]
+    def tabs(self):
+        return self.iter_items_list(self.bethini["displayTabs"])
 
     def custom(self, custom_variable):
         return self.bethini["customFunctions"][custom_variable]
 
     def what_ini_files_are_used(self):
-        the_inis_dict = self.bethini["INIs"]
         ini_files = []
-        for ini in the_inis_dict:
+        for ini in self.bethini["INIs"]:
             if ini != "Bethini.ini":
                 ini_files.append(ini)
         return ini_files
@@ -157,17 +163,8 @@ class AppName:
                     }
         return can_remove
 
-    def tabs(self):
-        return self.iter_items_list(self.bethini["displayTabs"])
-
     def label_frames_in_tab(self, tab):
         return self.iter_items_list(self.bethini['displayTabs'][tab])
-
-    def iter_items_list(self, items):
-        item_list = []
-        for item in items:
-            item_list.append(item)
-        return item_list
 
     def settings_in_label_frame(self, tab, label_frame):
         return self.iter_items_list(self.bethini['displayTabs'][tab][label_frame]['Settings'])

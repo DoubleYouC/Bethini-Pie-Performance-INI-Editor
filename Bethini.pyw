@@ -389,14 +389,9 @@ class BethiniApp(tk.Tk):
         global APP
         APP = AppName(game)
         global GAME_NAME
-        GAME_NAME = APP.game_name()
+        GAME_NAME = APP.game_name
         self.sme(f'Application/game is {GAME_NAME}')
 
-        #######
-        # Tabs
-        #######
-
-        tabs = APP.tabs()
         #The self.tab_dictionary lists all the tabs, which
         #is variable, based upon the tabs listed in the associated Bethini.json
 
@@ -415,7 +410,7 @@ class BethiniApp(tk.Tk):
 
         self.tab_dictionary = {}
         tab_number = 0
-        for tab in tabs:
+        for tab in APP.tabs():
             tab_number += 1
             self.tab_dictionary["Page" + str(tab_number)] = {"Name":tab}
 
@@ -590,9 +585,8 @@ class BethiniApp(tk.Tk):
                                         self.sme(f'{section} was removed because it was empty.')
 
     def apply_ini_dict(self, ini_dict):
-        presets_ignore_these_settings = APP.presets_ignore_these_settings()
         for each_setting in ini_dict:
-            if each_setting in presets_ignore_these_settings:
+            if each_setting in APP.presets_ignore_these_settings:
                 continue
             target_ini = ini_dict[each_setting]['ini']
             target_section = ini_dict[each_setting]['section']
