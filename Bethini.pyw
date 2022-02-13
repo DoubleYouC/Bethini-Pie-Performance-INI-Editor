@@ -344,8 +344,13 @@ class BethiniApp(tk.Tk):
             tooltip_text = tooltip_description + '\n\n' + tooltip_INI_targets
         else: #If there are no INI settings specified, only the tooltip description will be used.
             tooltip_text = tooltip_description
+
+        setting_name = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get('Name')
+        photo_for_setting = f'apps\\{GAME_NAME}\\images\\{setting_name}.jpg'
+        if not os.path.isfile(photo_for_setting):
+            photo_for_setting = None
             
-        Hovertip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text, tooltip_wrap_length)
+        Hovertip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text, PREVIEW_WINDOW, PREVIEW_FRAME, photo_for_setting, tooltip_wrap_length)
 
     def choose_game(self, forced=0):
         self.withdraw()
@@ -1508,6 +1513,18 @@ class BethiniApp(tk.Tk):
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(self.sub_container)
                 self.sub_container.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.TOP)
 
+            global PREVIEW_WINDOW
+            PREVIEW_WINDOW = tk.Toplevel(self, bg=subContainerColor)
+            PREVIEW_WINDOW.title('Preview')
+            global PREVIEW_FRAME
+            PREVIEW_FRAME = ttk.Frame(PREVIEW_WINDOW)
+            PREVIEW_FRAME.pack()
+            preview_close_button = ttk.Button(PREVIEW_WINDOW, text="Close", command=PREVIEW_WINDOW.withdraw)
+            preview_close_button.pack(anchor=tk.SE, padx=5, pady=5)
+
+            PREVIEW_WINDOW.protocol("WM_DELETE_WINDOW", PREVIEW_WINDOW.withdraw)
+            PREVIEW_WINDOW.withdraw()
+
             #self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(self.subContainer)
             #self.subContainer.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.TOP)
             
@@ -1525,7 +1542,7 @@ class BethiniApp(tk.Tk):
         #self.showStatusBar()
         self.stop_progress()
         self.sme('Loading complete.')
-        
+
     def bindTkVars(self):
         for each_setting in self.setting_dictionary:
             tk_var = self.setting_dictionary[each_setting].get('tk_var')
