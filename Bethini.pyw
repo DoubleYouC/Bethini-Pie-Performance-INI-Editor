@@ -307,6 +307,8 @@ class BethiniApp(tk.Tk):
         #Fectches the tooltip description.
         tooltip_description = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("tooltip", "No description available.")
 
+        tooltip_wrap_length = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("tooltip_wrap_length", 200)
+
         #Checks for INI settings specified, and adds them to the bottom of the tooltip if found.
         target_ini_files = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("targetINIs")
         if target_ini_files: #If there are INI settings specified
@@ -343,7 +345,7 @@ class BethiniApp(tk.Tk):
         else: #If there are no INI settings specified, only the tooltip description will be used.
             tooltip_text = tooltip_description
             
-        Hovertip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text)
+        Hovertip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text, tooltip_wrap_length)
 
     def choose_game(self, forced=0):
         self.withdraw()
