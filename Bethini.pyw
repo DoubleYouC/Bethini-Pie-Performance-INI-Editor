@@ -26,7 +26,7 @@ from simpleeval import simple_eval
 
 from lib.app import AppName
 from lib.AutoScrollbar import AutoScrollbar
-from lib.tooltips import CreateToolTip
+from lib.tooltips import Hovertip
 from lib.ModifyINI import ModifyINI
 from lib.customFunctions import CustomFunctions, sm, browse_to_location, rgb_to_hex, hex_to_rgb, hex_to_decimal, decimal_to_rgb
 
@@ -302,7 +302,7 @@ class BethiniApp(tk.Tk):
         return new_color
 
     def tooltip(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_):
-        #Sets the tooltips.
+        """Sets the tooltips."""
 
         #Fectches the tooltip description.
         tooltip_description = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("tooltip", "No description available.")
@@ -343,7 +343,7 @@ class BethiniApp(tk.Tk):
         else: #If there are no INI settings specified, only the tooltip description will be used.
             tooltip_text = tooltip_description
             
-        CreateToolTip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text)
+        Hovertip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text)
 
     def choose_game(self, forced=0):
         self.withdraw()

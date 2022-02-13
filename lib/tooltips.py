@@ -1,54 +1,24 @@
-import tkinter as tk
+from tkinter import *
+from idlelib.tooltip import OnHoverTooltipBase
 
-class CreateToolTip(object):
-    def __init__(self, widget, text='widget info'):
-        self.wait_time = 500
-        self.wrap_length = 200
-        self.widget = widget
+class Hovertip(OnHoverTooltipBase):
+    "A tooltip that pops up when a mouse hovers over an anchor widget."
+    def __init__(self, anchor_widget, text, wrap_length=250, hover_delay=1000):
+        """Create a text tooltip with a mouse hover delay.
+
+        anchor_widget: the widget next to which the tooltip will be shown
+        hover_delay: time to delay before showing the tooltip, in milliseconds
+
+        Note that a widget will only be shown when showtip() is called,
+        e.g. after hovering over the anchor widget with the mouse for enough
+        time.
+        """
+        super(Hovertip, self).__init__(anchor_widget, hover_delay=hover_delay)
         self.text = text
-        self.widget.bind('<Enter>', self.enter)
-        self.widget.bind('<Leave>', self.leave)
-        self.widget.bind('<ButtonPress>', self.leave)
-        self.id = None
-        self.tw = None
+        self.wrap_length = wrap_length
 
-    def enter(self, event=None):
-        self.schedule()
-
-    def leave(self, event=None):
-        self.unschedule()
-        self.hide_tip()
-
-    def schedule(self):
-        self.unschedule()
-        self.id = self.widget.after(self.wait_time, self.show_tip)
-
-    def unschedule(self):
-        id_ = self.id
-        self.id = None
-        if id_:
-            self.widget.after_cancel(id_)
-
-    def show_tip(self, event=None):
-        x = y = 0
-        x, y, cx, cy = self.widget.bbox('insert')
-        x += self.widget.winfo_rootx() + 25
-        y += self.widget.winfo_rooty() + 20
-
-        self.tw = tk.Toplevel(self.widget)
-
-        self.tw.wm_overrideredirect(True)
-        self.tw.wm_geometry('+%d+%d' % (x, y))
-        label = tk.Label(self.tw, text=self.text, justify=tk.LEFT,
-                         background='#ffffff', relief=tk.SOLID, borderwidth=1,
-                         wraplength = self.wrap_length)
-        label.pack(ipadx=1)
-
-    def hide_tip(self):
-        tw = self.tw
-        self.tw = None
-        if tw:
-            tw.destroy()
-
-if __name__ == '__main__':
-    print('This is the tooltips module.')
+    def showcontents(self):
+        label = Label(self.tipwindow, text=self.text, justify=LEFT,
+                      background="#fff", relief=SOLID, borderwidth=1,
+                      font=('Segoe UI','10'), wraplength=self.wrap_length)
+        label.pack()
