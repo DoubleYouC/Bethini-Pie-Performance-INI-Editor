@@ -1,14 +1,11 @@
 """Modification of Hovertip"""
 
-
 from idlelib.tooltip import OnHoverTooltipBase
 
 from tkinter import *
 from tkinter import ttk
 
 from PIL import Image, ImageTk
-
-
 
 class Hovertip(OnHoverTooltipBase):
     """A tooltip that pops up when a mouse hovers over an anchor widget."""
@@ -29,22 +26,26 @@ class Hovertip(OnHoverTooltipBase):
         self.photo_for_setting = photo_for_setting
         self.preview_frame = PREVIEW_FRAME
 
+        self.anchor_widget.bind("<Button-3>", self.show_preview)
+
     def showcontents(self):
         label = Label(self.tipwindow, text=self.text, justify=LEFT,
                       background="#fff", relief=SOLID, borderwidth=1,
                       font=('Segoe UI','10'), wraplength=self.wrap_length)
-        if self.photo_for_setting:
-            for widget in self.preview_frame.winfo_children():
-                widget.destroy()
+        label.pack()
 
+    def show_preview(self, hover_delay):
+        for widget in self.preview_frame.winfo_children():
+            widget.destroy()
+
+        if self.photo_for_setting:
             preview_image = Image.open(self.photo_for_setting)
             tk_image = ImageTk.PhotoImage(preview_image)
-
             preview_label = ttk.Label(self.preview_frame, image=tk_image)
             preview_label.image = tk_image
             preview_label.pack(anchor=NW)
 
-            tooltip_label = ttk.Label(self.preview_frame, text=self.text)
-            tooltip_label.pack(anchor=NW)
-            self.preview_window.deiconify()
-        label.pack()
+        tooltip_label = ttk.Label(self.preview_frame, text=self.text, wraplength=1000)
+        tooltip_label.pack(anchor=NW)
+        self.preview_window.deiconify()
+
