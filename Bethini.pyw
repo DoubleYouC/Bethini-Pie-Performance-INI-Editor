@@ -1481,7 +1481,7 @@ class BethiniApp(tk.Tk):
         PREVIEW_WINDOW.title('Preview')
         global PREVIEW_FRAME
         PREVIEW_FRAME = ttk.Frame(PREVIEW_WINDOW)
-        PREVIEW_FRAME.pack()
+        PREVIEW_FRAME.pack(padx=5, pady=5)
         preview_close_button = ttk.Button(PREVIEW_WINDOW, text="Close", command=PREVIEW_WINDOW.withdraw)
         preview_close_button.pack(anchor=tk.SE, padx=5, pady=5)
 
