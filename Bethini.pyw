@@ -1476,6 +1476,17 @@ class BethiniApp(tk.Tk):
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
                 
     def createTabs(self, fromChooseGameWindow=False):
+        global PREVIEW_WINDOW
+        PREVIEW_WINDOW = tk.Toplevel(self, bg=subContainerColor)
+        PREVIEW_WINDOW.title('Preview')
+        global PREVIEW_FRAME
+        PREVIEW_FRAME = ttk.Frame(PREVIEW_WINDOW)
+        PREVIEW_FRAME.pack()
+        preview_close_button = ttk.Button(PREVIEW_WINDOW, text="Close", command=PREVIEW_WINDOW.withdraw)
+        preview_close_button.pack(anchor=tk.SE, padx=5, pady=5)
+
+        PREVIEW_WINDOW.protocol("WM_DELETE_WINDOW", PREVIEW_WINDOW.withdraw)
+        PREVIEW_WINDOW.withdraw()
         
         for each_tab in self.tab_dictionary:
             #each_tab is Page1, Page2, etc.
@@ -1512,18 +1523,6 @@ class BethiniApp(tk.Tk):
             else:
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(self.sub_container)
                 self.sub_container.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.TOP)
-
-            global PREVIEW_WINDOW
-            PREVIEW_WINDOW = tk.Toplevel(self, bg=subContainerColor)
-            PREVIEW_WINDOW.title('Preview')
-            global PREVIEW_FRAME
-            PREVIEW_FRAME = ttk.Frame(PREVIEW_WINDOW)
-            PREVIEW_FRAME.pack()
-            preview_close_button = ttk.Button(PREVIEW_WINDOW, text="Close", command=PREVIEW_WINDOW.withdraw)
-            preview_close_button.pack(anchor=tk.SE, padx=5, pady=5)
-
-            PREVIEW_WINDOW.protocol("WM_DELETE_WINDOW", PREVIEW_WINDOW.withdraw)
-            PREVIEW_WINDOW.withdraw()
 
             #self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(self.subContainer)
             #self.subContainer.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.TOP)
