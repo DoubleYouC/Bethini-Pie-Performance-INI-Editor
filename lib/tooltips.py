@@ -21,6 +21,7 @@ class Hovertip(OnHoverTooltipBase):
         """
         super(Hovertip, self).__init__(anchor_widget, hover_delay=hover_delay)
         self.text = text
+
         self.wrap_length = wrap_length
         self.preview_window = PREVIEW_WINDOW
         self.photo_for_setting = photo_for_setting
@@ -34,18 +35,22 @@ class Hovertip(OnHoverTooltipBase):
                       font=('Segoe UI','10'), wraplength=self.wrap_length)
         label.pack()
 
-    def show_preview(self, hover_delay):
+    def show_preview(self, event=None):
+        """Displays the preview window"""
         for widget in self.preview_frame.winfo_children():
             widget.destroy()
 
         if self.photo_for_setting:
-            preview_image = Image.open(self.photo_for_setting)
-            tk_image = ImageTk.PhotoImage(preview_image)
-            preview_label = ttk.Label(self.preview_frame, image=tk_image)
-            preview_label.image = tk_image
-            preview_label.pack(anchor=NW)
+            self.show_photo()
 
         tooltip_label = ttk.Label(self.preview_frame, text=self.text, wraplength=1000)
         tooltip_label.pack(anchor=NW)
         self.preview_window.deiconify()
 
+    def show_photo(self):
+        """Packs the image in the preview window."""
+        preview_image = Image.open(self.photo_for_setting)
+        tk_image = ImageTk.PhotoImage(preview_image)
+        preview_label = ttk.Label(self.preview_frame, image=tk_image)
+        preview_label.image = tk_image
+        preview_label.pack(anchor=NW)
