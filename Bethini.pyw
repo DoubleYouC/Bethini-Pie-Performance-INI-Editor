@@ -38,7 +38,7 @@ class BethiniApp(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         #self.overrideredirect(True)
-        tk.Tk.iconbitmap(self,default='Icon.ico') #sets the app icon
+        tk.Tk.iconbitmap(self, default='Icon.ico') #sets the app icon
 
         #variables
         self.setup_dictionary = {}
@@ -73,12 +73,12 @@ class BethiniApp(tk.Tk):
 
         self.widget_type_assign_value = {
             'TkCheckbutton': self.checkbox_assign_value,
-            'TkOptionMenu': self.dropdownAssignValue,
-            'TkEntry': self.entryAssignValue,
-            'TkSpinbox': self.spinboxAssignValue,
-            'TkCombobox': self.comboboxAssignValue,
-            'TkColor': self.colorAssignValue,
-            'TkSlider': self.sliderAssignValue
+            'TkOptionMenu': self.dropdown_assign_value,
+            'TkEntry': self.entry_assign_value,
+            'TkSpinbox': self.spinbox_assign_value,
+            'TkCombobox': self.combobox_assign_value,
+            'TkColor': self.color_assign_value,
+            'TkSlider': self.slider_assign_value
             }
 
         self.tkinter_switch_dict = {
@@ -1280,7 +1280,7 @@ class BethiniApp(tk.Tk):
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value[n])
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value[n])
 
-    def dropdownAssignValue(self, each_setting):
+    def dropdown_assign_value(self, each_setting):
         tk_var = self.setting_dictionary[each_setting].get('tk_var')
         this_value = tk_var.get()
         #print(this_value)
@@ -1342,7 +1342,7 @@ class BethiniApp(tk.Tk):
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
                 self.sme(f'{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}')
 
-    def comboboxAssignValue(self, each_setting):
+    def combobox_assign_value(self, each_setting):
         targetINIs = self.setting_dictionary[each_setting].get('targetINIs')
 
         if targetINIs:
@@ -1366,7 +1366,7 @@ class BethiniApp(tk.Tk):
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
 
-    def entryAssignValue(self, each_setting):
+    def entry_assign_value(self, each_setting):
         targetINIs = self.setting_dictionary[each_setting].get('targetINIs')
        
         partial = self.setting_dictionary[each_setting].get('partial')
@@ -1410,7 +1410,7 @@ class BethiniApp(tk.Tk):
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
 
-    def sliderAssignValue(self, each_setting):
+    def slider_assign_value(self, each_setting):
         targetINIs = self.setting_dictionary[each_setting].get('targetINIs')
 
         if targetINIs:
@@ -1427,7 +1427,7 @@ class BethiniApp(tk.Tk):
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
 
-    def spinboxAssignValue(self, each_setting):
+    def spinbox_assign_value(self, each_setting):
         targetINIs = self.setting_dictionary[each_setting].get('targetINIs')
         
         if targetINIs:
@@ -1444,7 +1444,7 @@ class BethiniApp(tk.Tk):
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
 
-    def colorAssignValue(self, each_setting):
+    def color_assign_value(self, each_setting):
         targetINIs = self.setting_dictionary[each_setting].get('targetINIs')
         
         if targetINIs:
