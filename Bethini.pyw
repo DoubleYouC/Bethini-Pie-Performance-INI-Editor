@@ -350,7 +350,7 @@ class BethiniApp(tk.Tk):
         if not os.path.isfile(photo_for_setting):
             photo_for_setting = None
             
-        Hovertip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text, PREVIEW_WINDOW, PREVIEW_FRAME, photo_for_setting, tooltip_wrap_length)
+        Hovertip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text, [PREVIEW_WINDOW, PREVIEW_FRAME, photo_for_setting], tooltip_wrap_length)
 
     def choose_game(self, forced=0):
         self.withdraw()

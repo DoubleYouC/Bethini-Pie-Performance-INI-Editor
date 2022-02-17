@@ -59,8 +59,7 @@ class ModifyINI:
         #Even though we are checking the case_insensitive_config, sections ARE case sensitive.
         if self.case_insensitive_config.has_section(section):
             return self.case_insensitive_config.get(section, setting, fallback=default)
-        else:
-            return default
+        return default
 
     def get_sections(self):
         """Retrieves all sections."""
@@ -92,8 +91,7 @@ class ModifyINI:
             self.case_insensitive_config[section][setting] = value
             self.has_been_modified = True
             return True
-        else:
-            return False
+        return False
 
     def remove_setting(self, section, setting):
         """Removes the specified setting."""

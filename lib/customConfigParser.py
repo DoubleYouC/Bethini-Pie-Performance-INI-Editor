@@ -1,11 +1,14 @@
+"""Custom configparser."""
+
 import configparser
 import sys
 
 class customConfigParser(configparser.RawConfigParser):
-
+    """Our custom configparser will not remove comments when the file is written.
+    Also, it does not raise errors if duplicate options are detected."""
     def __init__(self):
-        #Our custom configparser will not remove comments when the file is written. Also, it does not raise errors if duplicate options are detected.
-        configparser.RawConfigParser.__init__(self, comment_prefixes='/', allow_no_value=True, strict=False)
+        configparser.RawConfigParser.__init__(self, comment_prefixes='/',
+                                              allow_no_value=True, strict=False)
 
     def _read(self, fp, fpname):
         """Parse a sectioned configuration file.
@@ -25,7 +28,8 @@ class customConfigParser(configparser.RawConfigParser):
         section names.
         """
 
-        #This read function was modified to pick the first option value if there is a duplicate option. Any subsequent duplicate option values are discarded.
+        #This read function was modified to pick the first option value if there is a
+        #duplicate option. Any subsequent duplicate option values are discarded.
         elements_added = set()
         cursect = None                        # None, or a dictionary
         sectname = None
