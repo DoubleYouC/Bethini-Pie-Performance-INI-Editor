@@ -30,7 +30,51 @@ from lib.tooltips import Hovertip
 from lib.ModifyINI import ModifyINI
 from lib.customFunctions import CustomFunctions, sm, browse_to_location, rgb_to_hex, hex_to_rgb, hex_to_decimal, decimal_to_rgb
 
-class BethiniApp(tk.Tk):
+#This dictionary maps the operator modules to specific text.
+operator_dictionary = {
+    'greater-than': gt,
+    'greater-or-equal-than': ge,
+    'less-than': lt,
+    'less-or-equal-than': le,
+    'not-equal': ne,
+    'equal': eq
+    }
+
+tkinter_switch_dict = {
+    'Left': tk.LEFT,
+    'Right': tk.RIGHT,
+    'Top': tk.TOP,
+    'Bottom': tk.BOTTOM,
+    'X': tk.X,
+    'Y': tk.Y,
+    'Center': tk.CENTER,
+    'Both': tk.BOTH,
+    'Horizontal': tk.HORIZONTAL,
+    'Flat': tk.FLAT,
+    'N': tk.N,
+    'NE': tk.NE,
+    'NW': tk.NW,
+    'NS': tk.NS,
+    'NSEW': tk.NSEW,
+    'S': tk.S,
+    'SE': tk.SE,
+    'SW': tk.SW,
+    'E': tk.E,
+    'EW': tk.EW,
+    'W': tk.W,
+    'None': None
+}
+
+types_without_label = ['Checkbutton', 'preset', 'radioPreset', 'description']
+types_packed_left = ['Dropdown', 'Combobox', 'Entry', 'Spinbox', 'Slider', 'Color']
+
+current_working_directory = os.getcwd()
+
+#Specify the name of the application.
+my_app_name = "Bethini Pie"
+my_app_short_name = "Bethini"
+
+class bethini_app(tk.Tk):
     #This is the main app, the glue that creates the GUI.
 
     def __init__(self, *args, **kwargs):
@@ -81,88 +125,39 @@ class BethiniApp(tk.Tk):
             'TkSlider': self.slider_assign_value
             }
 
-        self.tkinter_switch_dict = {
-            'Left': tk.LEFT,
-            'Right': tk.RIGHT,
-            'Top': tk.TOP,
-            'Bottom': tk.BOTTOM,
-            'X': tk.X,
-            'Y': tk.Y,
-            'Center': tk.CENTER,
-            'Both': tk.BOTH,
-            'Horizontal': tk.HORIZONTAL,
-            'Flat': tk.FLAT,
-            'N': tk.N,
-            'NE': tk.NE,
-            'NW': tk.NW,
-            'NS': tk.NS,
-            'NSEW': tk.NSEW,
-            'S': tk.S,
-            'SE': tk.SE,
-            'SW': tk.SW,
-            'E': tk.E,
-            'EW': tk.EW,
-            'W': tk.W,
-            'None': None
-            }
-        self.types_without_label = ['Checkbutton', 'preset', 'radioPreset', 'description']
-        self.types_packed_left = ['Dropdown', 'Combobox', 'Entry', 'Spinbox', 'Slider', 'Color']
-
-
-        theme_dir = app_config.get_value('General', 'sTheme', 'Default')
-
-        self.open_inis = {
-            my_app_config : {
-                'located': {
-                    '1': {
-                        'at': '',
-                        'object': app_config
-                        }
-                    }
-                },
-            'theme.ini': {
-                'located': {
-                    '1': {
-                        'at': current_working_directory + '\\theme\\' + theme_dir + '\\',
-                        'object': theme_config
-                        }
-                    }
-                }
-            }
-
         # ttk style overrides
         self.s = ttk.Style()
         self.s.theme_use('alt')
-        self.s.configure(".", background=subContainerColor, font=smallFont,
-                         foreground=textColor, fieldbackground=fieldColor, arrowcolor=textColor)
+        self.s.configure(".", background=sub_container_color, font=smallFont,
+                         foreground=text_color, fieldbackground=field_color, arrowcolor=text_color)
         self.s.map('.',
-                   foreground=[('disabled', textColorDisabled),
-                               ('pressed', textColorPressed),
-                               ('active', textColorActive)],
-                   background=[('disabled', backgroundColorDisabled),
-                               ('pressed', '!focus', backgroundColorPressed),
-                               ('active', backgroundColorActive)])
+                   foreground=[('disabled', text_color_disabled),
+                               ('pressed', text_color_pressed),
+                               ('active', text_color_active)],
+                   background=[('disabled', background_color_disabled),
+                               ('pressed', '!focus', background_color_pressed),
+                               ('active', background_color_active)])
 
         arrow_size = int(round(int(small_font_size)*1.33,0))
 
-        self.s.configure('TCheckbutton', indicatorcolor=indicatorColor)
+        self.s.configure('TCheckbutton', indicatorcolor=indicator_color)
         self.s.configure('TCombobox', arrowsize=arrow_size)
-        self.s.configure('TSpinbox', arrowsize=arrow_size, background=dropdownColor)
-        self.s.configure('TMenubutton', background=dropdownColor)
-        self.s.configure('TCombobox', background=dropdownColor)
+        self.s.configure('TSpinbox', arrowsize=arrow_size, background=dropdown_color)
+        self.s.configure('TMenubutton', background=dropdown_color)
+        self.s.configure('TCombobox', background=dropdown_color)
         self.s.configure('TNotebook', background=container_color)
-        self.s.configure('TRadiobutton', indicatorcolor=indicatorColor)
+        self.s.configure('TRadiobutton', indicatorcolor=indicator_color)
         self.s.configure('TNotebook.Tab', background=button_bar_color, padding=[10,5])
 
         self.s.map('TNotebook.Tab',
-                   background=[('!selected', backgroundColorDisabled)])
+                   background=[('!selected', background_color_disabled)])
 
         self.option_add("*TCombobox*Font", smallFont)
-        self.option_add("*TCombobox*Listbox*background", dropdownColor)
-        self.option_add("*TCombobox*Listbox*foreground", textColor)
+        self.option_add("*TCombobox*Listbox*background", dropdown_color)
+        self.option_add("*TCombobox*Listbox*foreground", text_color)
         self.option_add("*Menu*Font", smallFont)
-        self.option_add("*Menu*background", dropdownColor)
-        self.option_add("*Menu*foreground", textColor)
+        self.option_add("*Menu*background", dropdown_color)
+        self.option_add("*Menu*foreground", text_color)
 
         #self.titleBar = tk.Frame(self, bg=container_color, relief='raised', bd=2)
         #self.closeButton = ttk.Button(self.titleBar, text='✕', command=onClosing)
@@ -199,7 +194,7 @@ class BethiniApp(tk.Tk):
         self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode='indeterminate')
         self.start_progress()
         self.show_status_bar()
-        #upon initialization of the BethiniApp class, self.chooseGame() is
+        #upon initialization of the bethini_app class, self.chooseGame() is
         #called first, so we select or return to the game/app we want to work with
 
         self.choose_game_window = tk.Toplevel(self)
@@ -498,15 +493,14 @@ class BethiniApp(tk.Tk):
         first_time_backup = False
         files_saved = False
         self.remove_invalid_settings()
-        the_opened_inis = self.open_inis
-        ini_list = list(the_opened_inis.keys())
+        ini_list = list(open_inis.keys())
         files_to_remove = ini_list[2:]
         files_to_remove.append('log.log')
-        for each_ini in the_opened_inis:
-            location_list = list(the_opened_inis[each_ini]['located'].keys())
+        for each_ini in open_inis:
+            location_list = list(open_inis[each_ini]['located'].keys())
             for n in range(len(location_list)):
-                this_location = the_opened_inis[each_ini]['located'][str(n+1)].get('at')
-                this_ini_object = the_opened_inis[each_ini]['located'][str(n+1)].get('object')
+                this_location = open_inis[each_ini]['located'][str(n+1)].get('at')
+                this_ini_object = open_inis[each_ini]['located'][str(n+1)].get('object')
                 if each_ini == my_app_config:
                     continue
                 if not this_ini_object.has_been_modified:
@@ -563,15 +557,13 @@ class BethiniApp(tk.Tk):
         self.sme(f"Preset {preset_var} {preset_id} applied.")
 
     def remove_invalid_settings(self):
-        the_opened_inis = self.open_inis
-
-        for each_ini in the_opened_inis:
+        for each_ini in open_inis:
             if each_ini == my_app_config or each_ini == 'theme.ini':
                 continue
             elif APP.inis(each_ini):
-                location_list = list(the_opened_inis[each_ini]['located'].keys())
+                location_list = list(open_inis[each_ini]['located'].keys())
                 for n in range(len(location_list)):
-                    this_ini_object = the_opened_inis[each_ini]['located'][str(n+1)].get('object')
+                    this_ini_object = open_inis[each_ini]['located'][str(n+1)].get('object')
 
                     sections = this_ini_object.get_sections()
 
@@ -602,7 +594,7 @@ class BethiniApp(tk.Tk):
             ini_location = APP.inis(target_ini)
             if ini_location != '':
                 ini_location = app_config.get_value('Directories', ini_location)
-            the_target_ini = self.open_ini(str(ini_location), str(target_ini))
+            the_target_ini = open_ini(str(ini_location), str(target_ini))
 
             the_target_ini.assign_setting_value(target_section, each_setting, this_value)
             self.sme(target_ini + " [" + target_section + "] " + each_setting + "=" + this_value)
@@ -616,7 +608,7 @@ class BethiniApp(tk.Tk):
             ini_location = APP.inis(target_ini)
             if ini_location != '':
                 ini_location = app_config.get_value('Directories', ini_location)
-            the_target_ini = self.open_ini(str(ini_location), str(target_ini))
+            the_target_ini = open_ini(str(ini_location), str(target_ini))
 
             current_value = the_target_ini.get_value(target_section, each_setting, this_value)
 
@@ -645,9 +637,9 @@ class BethiniApp(tk.Tk):
                 the_dict["LabelFrames"][the_label_frame]["TkLabelFrame"] = ttk.Frame(the_dict["TkFrameForTab"])
 
             pack_settings = APP.pack_settings(self.tab_dictionary[each_tab]["Name"], label_frame)
-            the_dict["LabelFrames"][the_label_frame]["TkLabelFrame"].pack(anchor=self.tkinter_switch_dict[pack_settings.get('Anchor','NW')],
-                                                                          side=self.tkinter_switch_dict[pack_settings.get('Side','Top')],
-                                                                          fill=self.tkinter_switch_dict[pack_settings.get('Fill','Both')],
+            the_dict["LabelFrames"][the_label_frame]["TkLabelFrame"].pack(anchor=tkinter_switch_dict[pack_settings.get('Anchor','NW')],
+                                                                          side=tkinter_switch_dict[pack_settings.get('Side','Top')],
+                                                                          fill=tkinter_switch_dict[pack_settings.get('Fill','Both')],
                                                                           expand=pack_settings.get('Expand', 1),
                                                                           padx=10, pady=10)
             self.settings_frames_for_label_frame(each_tab, label_frame, the_label_frame)
@@ -673,7 +665,7 @@ class BethiniApp(tk.Tk):
 
     def setting_label(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting):
         setting_type = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("type")
-        if setting_type not in self.types_without_label:
+        if setting_type not in types_without_label:
             if setting_type:
                 setting_label = each_setting
             else:
@@ -681,7 +673,7 @@ class BethiniApp(tk.Tk):
             setting_label_width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("customWidth")
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkLabel"] = ttk.Label(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
                                                                                                                                    text=setting_label, font=smallFont, width=setting_label_width, anchor=tk.E)
-            if setting_type in self.types_packed_left:
+            if setting_type in types_packed_left:
                 self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkLabel"].pack(anchor=tk.CENTER, side=tk.LEFT, padx=5, pady=5)
             else:
                 self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkLabel"].pack(anchor=tk.CENTER, padx=5, pady=5)
@@ -892,8 +884,8 @@ class BethiniApp(tk.Tk):
 
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = tk.Scale(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
                                                                                                                         from_=from_value, to=to_value, resolution=resolution_value, showvalue=0, digits=digits_value, orient=tk.HORIZONTAL, relief=tk.FLAT,
-                                                                                                                        highlightthickness=0, bg=subContainerColor, length=length_value, font=smallFont, activebackground=backgroundColorActive,
-                                                                                                                        troughcolor=fieldColor,
+                                                                                                                        highlightthickness=0, bg=sub_container_color, length=length_value, font=smallFont, activebackground=background_color_active,
+                                                                                                                        troughcolor=field_color,
                                                                                                                         variable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
 
         width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("width")
@@ -1261,7 +1253,7 @@ class BethiniApp(tk.Tk):
         if targetINIs:
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = self.open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
                 #1
                 if this_value == on_value or this_value == off_value:
                     if type(this_value[n]) is list:
@@ -1314,7 +1306,7 @@ class BethiniApp(tk.Tk):
             for n in range(len(targetINIs)):
                 theValue = ''
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = self.open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
                 #1280x720
                 if this_value == 'Manual...' or this_value == 'Browse...':
                     theValue = ''
@@ -1355,7 +1347,7 @@ class BethiniApp(tk.Tk):
             decimal_places = self.setting_dictionary[each_setting].get('decimal places')
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = self.open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
 
                 if decimal_places and this_value != '':
                     this_value = round(float(this_value),int(decimal_places))
@@ -1394,7 +1386,7 @@ class BethiniApp(tk.Tk):
 
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = self.open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
 
                 if formula:
                     formulaValue = formula.format(this_value)
@@ -1422,7 +1414,7 @@ class BethiniApp(tk.Tk):
 
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = self.open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
 
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
@@ -1439,7 +1431,7 @@ class BethiniApp(tk.Tk):
 
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = self.open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
 
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
@@ -1457,7 +1449,7 @@ class BethiniApp(tk.Tk):
             color_value_type = self.setting_dictionary[each_setting].get("colorValueType")
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = self.open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
 
                 if color_value_type == 'hex':
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
@@ -1477,7 +1469,7 @@ class BethiniApp(tk.Tk):
                 
     def createTabs(self, fromChooseGameWindow=False):
         global PREVIEW_WINDOW
-        PREVIEW_WINDOW = tk.Toplevel(self, bg=subContainerColor)
+        PREVIEW_WINDOW = tk.Toplevel(self, bg=sub_container_color)
         PREVIEW_WINDOW.title('Preview')
         global PREVIEW_FRAME
         PREVIEW_FRAME = ttk.Frame(PREVIEW_WINDOW)
@@ -1495,7 +1487,7 @@ class BethiniApp(tk.Tk):
             self.create_tab_image(each_tab)
             if self.tab_dictionary[each_tab]['Name'] == 'Setup':
                 global SETUP_WINDOW
-                self.tab_dictionary[each_tab]['SetupWindow'] = tk.Toplevel(self, bg=subContainerColor)
+                self.tab_dictionary[each_tab]['SetupWindow'] = tk.Toplevel(self, bg=sub_container_color)
                 SETUP_WINDOW = self.tab_dictionary[each_tab]['SetupWindow']
                 SETUP_WINDOW.title('Setup')
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(SETUP_WINDOW)
@@ -1509,7 +1501,7 @@ class BethiniApp(tk.Tk):
                     SETUP_WINDOW.withdraw()
             elif self.tab_dictionary[each_tab]['Name'] == 'Preferences':
                 global preferencesWindow
-                self.tab_dictionary[each_tab]['PreferencesWindow'] = tk.Toplevel(self, bg=subContainerColor)
+                self.tab_dictionary[each_tab]['PreferencesWindow'] = tk.Toplevel(self, bg=sub_container_color)
                 preferencesWindow = self.tab_dictionary[each_tab]['PreferencesWindow']
                 preferencesWindow.title('Preferences')
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(preferencesWindow)
@@ -1688,7 +1680,7 @@ class BethiniApp(tk.Tk):
 
                     #target_ini = ModifyINI(str(ini_location) + str(INI))
 
-                    target_ini = self.open_ini(str(ini_location), str(INI))
+                    target_ini = open_ini(str(ini_location), str(INI))
                     value = str(target_ini.get_value(currentSection, currentSetting, default=defaultValue))
                     settingValues.append(value)
             if settingValues != []:
@@ -1711,36 +1703,6 @@ class BethiniApp(tk.Tk):
                     settingValues = [delimitedValue]
 
         return settingValues
-
-    def open_ini(self, location, INI):
-
-        open_ini = self.open_inis.get(INI)
-        if open_ini:
-            openINIlocation = self.open_inis[INI]['located']
-            wID = 0
-            for eachLocation in openINIlocation:
-                wID += 1
-                if openINIlocation[eachLocation]['at'] == location:
-                    return openINIlocation[eachLocation].get('object')
-            #if the location is not found, add it
-            wID += 1
-            wID = str(wID)
-            self.open_inis[INI]['located'][wID] = {
-                'at':location
-                }
-            self.open_inis[INI]['located'][wID]['object'] = ModifyINI(location + INI)
-            return self.open_inis[INI]['located'][wID]['object']
-        else:
-            wID = "1"
-            self.open_inis[INI] = {
-                'located': {
-                    wID: {
-                        'at': location
-                        }
-                    }
-                }
-            self.open_inis[INI]['located'][wID]['object'] = ModifyINI(location + INI)
-            return self.open_inis[INI]['located'][wID]['object']
 
 def on_closing():
     """Initialized upon closing the app. Asks if the user wants to save INI files if any INI files have been modified before quitting."""
@@ -1782,21 +1744,35 @@ def remove_excess_directory_files(directory, max_to_keep, files_to_remove):
                     sm(f"Error: {dir_path} : {e.strerror}")
     return False
 
-current_working_directory = os.getcwd()
-
-#This dictionary maps the operator modules to specific text.
-operator_dictionary = {
-    'greater-than': gt,
-    'greater-or-equal-than': ge,
-    'less-than': lt,
-    'less-or-equal-than': le,
-    'not-equal': ne,
-    'equal': eq
-    }
-
-#Specify the name of the application.
-my_app_name = "Bethini Pie"
-my_app_short_name = "Bethini"
+def open_ini(location, ini):
+    """Given the location and name of an INI file, opens the INI object and stores it in open_inis."""
+    open_ini = open_inis.get(ini)
+    if open_ini:
+        open_ini_location = open_inis[ini]['located']
+        open_ini_id = 0
+        for each_location in open_ini_location:
+            open_ini_id += 1
+            if open_ini_location[each_location]['at'] == location:
+                return open_ini_location[each_location].get('object')
+        #if the location is not found, add it
+        open_ini_id += 1
+        open_ini_id = str(open_ini_id)
+        open_inis[ini]['located'][open_ini_id] = {
+            'at':location
+            }
+        open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(location + ini)
+        return open_inis[ini]['located'][open_ini_id]['object']
+    #if the ini has not been opened before
+    open_ini_id = "1"
+    open_inis[ini] = {
+        'located': {
+            open_ini_id: {
+                'at': location
+                }
+            }
+        }
+    open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(location + ini)
+    return open_inis[ini]['located'][open_ini_id]['object']
 
 if __name__ == '__main__':
     #Make logs.
@@ -1827,6 +1803,7 @@ if __name__ == '__main__':
         theme = 'Default'
     #Make sure that the theme is specified in the config file.
     app_config.assign_setting_value('General', 'sTheme', theme)
+    theme_dir = app_config.get_value('General', 'sTheme', 'Default')
 
     #Open Theme config.
     theme_config = ModifyINI(f'theme\\{theme}\\theme.ini')
@@ -1840,22 +1817,42 @@ if __name__ == '__main__':
     #Set the theme colors.
     button_bar_color = theme_config.get_value('Colors','sButtonBarColor','#969696')
     container_color = theme_config.get_value('Colors','sContainerColor','#555555')
-    subContainerColor = theme_config.get_value('Colors','sSubContainerColor','#A5A5A5')
-    dropdownColor = theme_config.get_value('Colors','sDropDownColor','#BEBEBE')
-    fieldColor = theme_config.get_value('Colors','sFieldColor','#FFFFFF')
-    indicatorColor = theme_config.get_value('Colors','sIndicatorColor','#FFFFFF')
-    textColor = theme_config.get_value('Colors','sTextColor','#000000')
+    sub_container_color = theme_config.get_value('Colors','sSubContainerColor','#A5A5A5')
+    dropdown_color = theme_config.get_value('Colors','sDropDownColor','#BEBEBE')
+    field_color = theme_config.get_value('Colors','sFieldColor','#FFFFFF')
+    indicator_color = theme_config.get_value('Colors','sIndicatorColor','#FFFFFF')
+    text_color = theme_config.get_value('Colors','sTextColor','#000000')
 
-    textColorDisabled = theme_config.get_value('Colors','sTextColorDisabled','#7F7F7F')
-    textColorPressed = theme_config.get_value('Colors','sTextColorPressed','#323232')
-    textColorActive = theme_config.get_value('Colors','sTextColorActive','#000000')
+    text_color_disabled = theme_config.get_value('Colors','sTextColorDisabled','#7F7F7F')
+    text_color_pressed = theme_config.get_value('Colors','sTextColorPressed','#323232')
+    text_color_active = theme_config.get_value('Colors','sTextColorActive','#000000')
 
-    backgroundColorDisabled = theme_config.get_value('Colors','sBackgroundColorDisabled','#E1E1E1')
-    backgroundColorPressed = theme_config.get_value('Colors','sBackgroundColorPressed','#828282')
-    backgroundColorActive = theme_config.get_value('Colors','sBackgroundColorActive','#A5A5A5')
+    background_color_disabled = theme_config.get_value('Colors','sBackgroundColorDisabled','#E1E1E1')
+    background_color_pressed = theme_config.get_value('Colors','sBackgroundColorPressed','#828282')
+    background_color_active = theme_config.get_value('Colors','sBackgroundColorActive','#A5A5A5')
+    
+    #Initialize open_inis dictionary to store list of opened INI files in.
+    open_inis = {
+        my_app_config: {
+            'located': {
+                '1': {
+                    'at': '',
+                    'object': app_config
+                }
+            }
+        },
+        'theme.ini': {
+            'located': {
+                '1': {
+                    'at': f'{current_working_directory}\\theme\\{theme_dir}\\',
+                    'object': theme_config
+                }
+            }
+        }
+    }
 
     #Start the app class
-    window = BethiniApp()
+    window = bethini_app()
     window.protocol("WM_DELETE_WINDOW", on_closing)
     window.mainloop()
 
