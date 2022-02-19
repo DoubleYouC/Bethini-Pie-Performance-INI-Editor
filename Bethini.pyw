@@ -112,7 +112,7 @@ class BethiniApp(tk.Tk):
         theme_dir = app_config.get_value('General', 'sTheme', 'Default')
 
         self.open_inis = {
-            MyAppNameConfig : {
+            my_app_config : {
                 'located': {
                     '1': {
                         'at': '',
@@ -123,8 +123,8 @@ class BethiniApp(tk.Tk):
             'theme.ini': {
                 'located': {
                     '1': {
-                        'at': cwd + '\\theme\\' + theme_dir + '\\',
-                        'object': ThemeConfig
+                        'at': current_working_directory + '\\theme\\' + theme_dir + '\\',
+                        'object': theme_config
                         }
                     }
                 }
@@ -143,16 +143,16 @@ class BethiniApp(tk.Tk):
                                ('pressed', '!focus', backgroundColorPressed),
                                ('active', backgroundColorActive)])
 
-        arrow_size = int(round(int(smallFontSize)*1.33,0))
+        arrow_size = int(round(int(small_font_size)*1.33,0))
 
         self.s.configure('TCheckbutton', indicatorcolor=indicatorColor)
         self.s.configure('TCombobox', arrowsize=arrow_size)
         self.s.configure('TSpinbox', arrowsize=arrow_size, background=dropdownColor)
         self.s.configure('TMenubutton', background=dropdownColor)
         self.s.configure('TCombobox', background=dropdownColor)
-        self.s.configure('TNotebook', background=containerColor)
+        self.s.configure('TNotebook', background=container_color)
         self.s.configure('TRadiobutton', indicatorcolor=indicatorColor)
-        self.s.configure('TNotebook.Tab', background=buttonBarColor, padding=[10,5])
+        self.s.configure('TNotebook.Tab', background=button_bar_color, padding=[10,5])
 
         self.s.map('TNotebook.Tab',
                    background=[('!selected', backgroundColorDisabled)])
@@ -164,10 +164,10 @@ class BethiniApp(tk.Tk):
         self.option_add("*Menu*background", dropdownColor)
         self.option_add("*Menu*foreground", textColor)
 
-        #self.titleBar = tk.Frame(self, bg=containerColor, relief='raised', bd=2)
+        #self.titleBar = tk.Frame(self, bg=container_color, relief='raised', bd=2)
         #self.closeButton = ttk.Button(self.titleBar, text='✕', command=onClosing)
 
-        self.the_canvas = tk.Canvas(self, borderwidth=0, background=containerColor,
+        self.the_canvas = tk.Canvas(self, borderwidth=0, background=container_color,
                                    height=0, highlightthickness=0)
         self.hsbframeholder = ttk.Frame(self)
 
@@ -222,7 +222,7 @@ class BethiniApp(tk.Tk):
         self.choose_game_frame_2.pack(anchor=tk.CENTER, expand=True)
         self.choose_game_label.pack(side=tk.LEFT, anchor=tk.CENTER, padx=5, pady=5)
         self.choose_game_dropdown.pack(anchor=tk.CENTER, padx=5, pady=5)
-        self.choose_game_window.protocol("WM_DELETE_WINDOW", onClosing)
+        self.choose_game_window.protocol("WM_DELETE_WINDOW", on_closing)
         self.choose_game_window.minsize(300,35)
 
         self.preset_var = tk.StringVar(self)
@@ -381,13 +381,13 @@ class BethiniApp(tk.Tk):
             self.choose_game_var = app_config.get_value('General','sAppName')
             if self.choose_game_var != game:
                 self.sme(f'Change of game from {self.chooseGameVar} to {game}')
-                raise Exception("App/Game specified in " + MyAppNameConfig + " differs from the game chosen, so it will be changed to the one you chose.")
+                raise Exception("App/Game specified in " + my_app_config + " differs from the game chosen, so it will be changed to the one you chose.")
         except:
             self.sme('Change of game/application', exception=1)
             app_config.assign_setting_value('General','sAppName', game)
             from_choose_game_window = True
 
-        tk.Tk.wm_title(self, MyAppName + " - " + game)
+        tk.Tk.wm_title(self, my_app_name + " - " + game)
 
         ##############
         # app globals
@@ -439,7 +439,7 @@ class BethiniApp(tk.Tk):
         filemenu.add_separator()
         filemenu.add_command(label="Choose game", command = lambda: self.choose_game(forced=1))
         filemenu.add_separator()
-        filemenu.add_command(label="Exit", command=onClosing)
+        filemenu.add_command(label="Exit", command=on_closing)
         editmenu = tk.Menu(menubar, tearoff=0)
         editmenu.add_command(label="Preferences", command = self.show_preferences)
         editmenu.add_command(label="Setup", command = self.show_setup)
@@ -468,7 +468,7 @@ class BethiniApp(tk.Tk):
         about_frame_real = ttk.Frame(about_frame)
 
         about_label = ttk.Label(about_frame_real,
-                               text=f'About {MyAppName}\n\n{MyAppName} was created by DoubleYou.\n\nLicensing is CC by-NC-SA.',
+                               text=f'About {my_app_name}\n\n{my_app_name} was created by DoubleYou.\n\nLicensing is CC by-NC-SA.',
                                justify=tk.CENTER)
 
         about_frame.pack(fill=tk.BOTH, expand=True)
@@ -486,7 +486,7 @@ class BethiniApp(tk.Tk):
 
     def save_ini_files(self):
         #self.openINIs = {
-        #    MyAppNameConfig : {
+        #    my_app_config : {
         #        'located': {
         #            '1': {
         #                'at': '',
@@ -507,7 +507,7 @@ class BethiniApp(tk.Tk):
             for n in range(len(location_list)):
                 this_location = the_opened_inis[each_ini]['located'][str(n+1)].get('at')
                 this_ini_object = the_opened_inis[each_ini]['located'][str(n+1)].get('object')
-                if each_ini == MyAppNameConfig:
+                if each_ini == my_app_config:
                     continue
                 if not this_ini_object.has_been_modified:
                     self.sme(f'{each_ini} has not been modified, so there is no reason to resave it.')
@@ -515,28 +515,28 @@ class BethiniApp(tk.Tk):
                 if messagebox.askyesno(f"Save {each_ini}", f"Do you want to save {this_location}{each_ini}?"):
                     #we need to make a backup of each save before actually saving.
                     if each_ini != 'theme.ini':
-                        first_time_backup_trigger = removeExcessDirFiles(f'{this_location}{MyAppName} backups',
+                        first_time_backup_trigger = remove_excess_directory_files(f'{this_location}{my_app_name} backups',
                                                                       int(app_config.get_value('General', 'iMaxBackups', '-1')),
                                                                       files_to_remove)
                         if first_time_backup_trigger:
                             first_time_backup = True
                         if first_time_backup:
-                            the_backup_directory = f'{this_location}\\{MyAppName} backups\\First-Time-Backup\\'
+                            the_backup_directory = f'{this_location}\\{my_app_name} backups\\First-Time-Backup\\'
                             if not os.path.isdir(the_backup_directory):
                                 os.makedirs(the_backup_directory)
                             if os.path.exists(f"{the_backup_directory}{each_ini}"):
                                 self.sme(f'{the_backup_directory}{each_ini} exists, so it will not be overwritten.')
                             else:
                                 copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
-                            copyfile(MyAppNameLog, f"{the_backup_directory}log.log")
-                        the_backup_directory = f'{this_location}\\{MyAppName} backups\\{logDirectoryDate}\\'
+                            copyfile(my_app_log, f"{the_backup_directory}log.log")
+                        the_backup_directory = f'{this_location}\\{my_app_name} backups\\{log_directory_date}\\'
                         if not os.path.isdir(the_backup_directory):
                             os.makedirs(the_backup_directory)
                         if os.path.exists(f"{the_backup_directory}{each_ini}"):
                             self.sme(f'{the_backup_directory}{each_ini} exists, so it will not be overwritten.')
                         else:
                             copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
-                        copyfile(MyAppNameLog, f"{the_backup_directory}log.log")
+                        copyfile(my_app_log, f"{the_backup_directory}log.log")
                     this_ini_object.save_ini_file(1)
                     files_saved = True
                     self.sme(f"{this_location}{each_ini} saved.")
@@ -566,7 +566,7 @@ class BethiniApp(tk.Tk):
         the_opened_inis = self.open_inis
 
         for each_ini in the_opened_inis:
-            if each_ini == MyAppNameConfig or each_ini == 'theme.ini':
+            if each_ini == my_app_config or each_ini == 'theme.ini':
                 continue
             elif APP.inis(each_ini):
                 location_list = list(the_opened_inis[each_ini]['located'].keys())
@@ -1576,7 +1576,7 @@ class BethiniApp(tk.Tk):
                     value = float(self.dependent_settings_dictionary[each_setting][masterSetting].get('value'))
                     current_value = float(self.widget_type_switcher(masterSetting))
                     var = 'float'
-                the_operator = operatorDict[the_operator]
+                the_operator = operator_dictionary[the_operator]
                 second_tk_widget = self.setting_dictionary[each_setting].get('second_tk_widget')
                 if the_operator(current_value, value):
                     self.setting_dictionary[each_setting]['tk_widget'].configure(state='normal')
@@ -1594,7 +1594,7 @@ class BethiniApp(tk.Tk):
                     self.settings_that_settings_depend_on[masterSetting] = {}
 
                 self.settings_that_settings_depend_on[masterSetting][each_setting] = {
-                    'theOperator': operatorDict[self.dependent_settings_dictionary[each_setting][masterSetting].get('operator')],
+                    'theOperator': operator_dictionary[self.dependent_settings_dictionary[each_setting][masterSetting].get('operator')],
                     'value': value,
                     'var': var,
                     'setToOff': set_to_off
@@ -1651,7 +1651,7 @@ class BethiniApp(tk.Tk):
             ini_location == ''
         elif ini_location == 'sTheme':
             theme_dir = app_config.get_value('General', 'sTheme', 'Default')
-            ini_location = f'{cwd}\\theme\\{theme_dir}\\'
+            ini_location = f'{current_working_directory}\\theme\\{theme_dir}\\'
         else:
             ini_location = app_config.get_value('Directories', ini_location)
         return ini_location
@@ -1681,7 +1681,7 @@ class BethiniApp(tk.Tk):
                     currentSection = targetSections[ININumber]
 
                     # This looks for a default value in the settings.json
-                    if INI == MyAppNameConfig or INI == 'theme.ini':
+                    if INI == my_app_config or INI == 'theme.ini':
                         defaultValue = "Does Not Exist"
                     else:
                         defaultValue = APP.get_value(currentSetting, "default")
@@ -1742,44 +1742,50 @@ class BethiniApp(tk.Tk):
             self.open_inis[INI]['located'][wID]['object'] = ModifyINI(location + INI)
             return self.open_inis[INI]['located'][wID]['object']
 
-def onClosing():
+def on_closing():
+    """Initialized upon closing the app. Asks if the user wants to save INI files if any INI files have been modified before quitting."""
     if messagebox.askyesno("Quit?", "Do you want to quit?"):
         if app_config.has_been_modified:
             app_config.save_ini_file(1)
         window.save_ini_files()
         window.quit()
 
-def removeExcessDirFiles(theDir, maxToKeep, filesToRemove):
+def remove_excess_directory_files(directory, max_to_keep, files_to_remove):
+    """Removes excess logs/backups.
+    directory: the directory to remove files from
+    max_to_keep: the maximum amount of directories that will be excluded from removal
+    files_to_remove: list of files that will be removed
+    """
     try:
-        sub = os.listdir(theDir)
+        subdirectories = os.listdir(directory)
     except OSError as e:
-        sm(f"Info: {theDir} : {e.strerror}")
+        sm(f"Info: {directory} : {e.strerror}")
         return True
-    sub.sort(reverse=True)
-    if 'First-Time-Backup' in sub:
-        sub.remove('First-Time-Backup')
-    if maxToKeep > -1:
-        for n in range(len(sub)):
-            if n < maxToKeep:
-                sm(sub[n] + ' will be kept.')
+    subdirectories.sort(reverse=True)
+    if 'First-Time-Backup' in subdirectories:
+        subdirectories.remove('First-Time-Backup')
+    if max_to_keep > -1:
+        for n in range(len(subdirectories)):
+            if n < max_to_keep:
+                sm(subdirectories[n] + ' will be kept.')
             else:
-                dir_path = f'{theDir}\\' + sub[n]
+                dir_path = f'{directory}\\' + subdirectories[n]
                 try:
-                    for file in filesToRemove:
+                    for file in files_to_remove:
                         try:
                             os.remove(f'{dir_path}\\{file}')
                         except OSError as e:
                             sm(f'Error: {dir_path}\\{file} : {e.strerror}')
                     os.rmdir(dir_path)
-                    sm(sub[n] + ' was removed.')
+                    sm(subdirectories[n] + ' was removed.')
                 except OSError as e:
                     sm(f"Error: {dir_path} : {e.strerror}")
     return False
 
-cwd = os.getcwd()
+current_working_directory = os.getcwd()
 
 #This dictionary maps the operator modules to specific text.
-operatorDict = {
+operator_dictionary = {
     'greater-than': gt,
     'greater-or-equal-than': ge,
     'less-than': lt,
@@ -1789,21 +1795,21 @@ operatorDict = {
     }
 
 #Specify the name of the application.
-MyAppName = "Bethini Pie"
-MyAppShortName = "Bethini"
+my_app_name = "Bethini Pie"
+my_app_short_name = "Bethini"
 
 if __name__ == '__main__':
     #Make logs.
     today = datetime.now()
-    logDirectoryDate = today.strftime("%Y %b %d %a - %H.%M.%S")
-    MyAppNameLogDirectory = f'logs\\{logDirectoryDate}'
-    MyAppNameLog = f'{MyAppNameLogDirectory}\\log.log'
-    os.makedirs(MyAppNameLogDirectory)
-    logging.basicConfig(filename=MyAppNameLog, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+    log_directory_date = today.strftime("%Y %b %d %a - %H.%M.%S")
+    my_app_log_directory = f'logs\\{log_directory_date}'
+    my_app_log = f'{my_app_log_directory}\\log.log'
+    os.makedirs(my_app_log_directory)
+    logging.basicConfig(filename=my_app_log, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
     #Get app config settings.
-    MyAppNameConfig = f'{MyAppShortName}.ini'
-    app_config = ModifyINI(MyAppNameConfig)
+    my_app_config = f'{my_app_short_name}.ini'
+    app_config = ModifyINI(my_app_config)
     iMaxLogs = app_config.get_value('General', 'iMaxLogs', '5')
     app_config.assign_setting_value('General', 'iMaxLogs', iMaxLogs)
     app_config.assign_setting_value('General', 'iMaxBackups', app_config.get_value('General', 'iMaxBackups', '5'))
@@ -1811,10 +1817,10 @@ if __name__ == '__main__':
     theme = app_config.get_value('General', 'sTheme', default='Default')
 
     #Remove excess log files.
-    removeExcessDirFiles(f'{cwd}\\logs', int(iMaxLogs), ['log.log'])
+    remove_excess_directory_files(f'{current_working_directory}\\logs', int(iMaxLogs), ['log.log'])
 
     #Check to make sure the theme actually exists.
-    if os.path.isfile(f'{cwd}\\theme\\{theme}\\theme.ini'):
+    if os.path.isfile(f'{current_working_directory}\\theme\\{theme}\\theme.ini'):
         sm(f'The theme called \"{theme}\" exists.')
     else:
         #If the theme doesn't exist, revert to Default theme.
@@ -1823,33 +1829,33 @@ if __name__ == '__main__':
     app_config.assign_setting_value('General', 'sTheme', theme)
 
     #Open Theme config.
-    ThemeConfig = ModifyINI(f'theme\\{theme}\\theme.ini')
-    defaultFontName = 'Segoe UI' #Set the default font name.
-    defaultFontSize = 10 #Set the default font size.
+    theme_config = ModifyINI(f'theme\\{theme}\\theme.ini')
+    default_font_name = 'Segoe UI' #Set the default font name.
+    default_font_size = 10 #Set the default font size.
 
     #Set the font names and sizes.
-    smallFontSize = ThemeConfig.get_value('Fonts','iSmallFontSize', defaultFontSize)
-    smallFont = (ThemeConfig.get_value('Fonts','sSmallFontName', defaultFontName), smallFontSize)
+    small_font_size = theme_config.get_value('Fonts','iSmallFontSize', default_font_size)
+    smallFont = (theme_config.get_value('Fonts','sSmallFontName', default_font_name), small_font_size)
 
     #Set the theme colors.
-    buttonBarColor = ThemeConfig.get_value('Colors','sButtonBarColor','#969696')
-    containerColor = ThemeConfig.get_value('Colors','sContainerColor','#555555')
-    subContainerColor = ThemeConfig.get_value('Colors','sSubContainerColor','#A5A5A5')
-    dropdownColor = ThemeConfig.get_value('Colors','sDropDownColor','#BEBEBE')
-    fieldColor = ThemeConfig.get_value('Colors','sFieldColor','#FFFFFF')
-    indicatorColor = ThemeConfig.get_value('Colors','sIndicatorColor','#FFFFFF')
-    textColor = ThemeConfig.get_value('Colors','sTextColor','#000000')
+    button_bar_color = theme_config.get_value('Colors','sButtonBarColor','#969696')
+    container_color = theme_config.get_value('Colors','sContainerColor','#555555')
+    subContainerColor = theme_config.get_value('Colors','sSubContainerColor','#A5A5A5')
+    dropdownColor = theme_config.get_value('Colors','sDropDownColor','#BEBEBE')
+    fieldColor = theme_config.get_value('Colors','sFieldColor','#FFFFFF')
+    indicatorColor = theme_config.get_value('Colors','sIndicatorColor','#FFFFFF')
+    textColor = theme_config.get_value('Colors','sTextColor','#000000')
 
-    textColorDisabled = ThemeConfig.get_value('Colors','sTextColorDisabled','#7F7F7F')
-    textColorPressed = ThemeConfig.get_value('Colors','sTextColorPressed','#323232')
-    textColorActive = ThemeConfig.get_value('Colors','sTextColorActive','#000000')
+    textColorDisabled = theme_config.get_value('Colors','sTextColorDisabled','#7F7F7F')
+    textColorPressed = theme_config.get_value('Colors','sTextColorPressed','#323232')
+    textColorActive = theme_config.get_value('Colors','sTextColorActive','#000000')
 
-    backgroundColorDisabled = ThemeConfig.get_value('Colors','sBackgroundColorDisabled','#E1E1E1')
-    backgroundColorPressed = ThemeConfig.get_value('Colors','sBackgroundColorPressed','#828282')
-    backgroundColorActive = ThemeConfig.get_value('Colors','sBackgroundColorActive','#A5A5A5')
+    backgroundColorDisabled = theme_config.get_value('Colors','sBackgroundColorDisabled','#E1E1E1')
+    backgroundColorPressed = theme_config.get_value('Colors','sBackgroundColorPressed','#828282')
+    backgroundColorActive = theme_config.get_value('Colors','sBackgroundColorActive','#A5A5A5')
 
     #Start the app class
     window = BethiniApp()
-    window.protocol("WM_DELETE_WINDOW", onClosing)
+    window.protocol("WM_DELETE_WINDOW", on_closing)
     window.mainloop()
 
