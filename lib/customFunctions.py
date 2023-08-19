@@ -95,19 +95,6 @@ class Info:
 
         return documents_directory
 
-    def get_mo_profiles(game_name):
-        mod_organizer_ini_location = CustomFunctions.getMODirectory(game_name)[0] + 'ModOrganizer.ini'
-        profiles = []
-        profiles_directory = ""
-        if 'Not Detected' not in mod_organizer_ini_location:
-            mod_organizer_ini = ModifyINI(mod_organizer_ini_location)
-            base_directory = mod_organizer_ini.get_value('Settings','base_directory',
-                                                        default=lambda: os.path.split(mod_organizer_ini_location)[0]).replace('\\\\','\\').replace('/','\\')
-            profiles_directory = mod_organizer_ini.get_value('Settings','profiles_directory',
-                                                            default=f'{base_directory}\\profiles').replace('\\\\','\\').replace('/','\\')
-            profiles = os.listdir(profiles_directory)
-        return [profiles_directory, profiles]
-
     def game_documents_name(game_name):
         game_name_documents_location_dict = {"Skyrim Special Edition": "Skyrim Special Edition",
                                          "Skyrim": "Skyrim",
@@ -262,79 +249,8 @@ class CustomFunctions:
     def getINILocations(gameName):
         gameDocumentsLocation = Info.game_documents_name(gameName)
         INILocation = [Info.get_documents_directory() + f'\\My Games\\{gameDocumentsLocation}\\']
-        getProfiles = Info.get_mo_profiles(gameName)
-        profiles = getProfiles[1]
-        profiles_directory = getProfiles[0]
-        for profile in profiles:
-            INILocation.append(f'{profiles_directory}\\{profile}\\')
         INILocation.append('Browse...')
         return INILocation
-
-    def getMODirectory(gameName):
-        #This custom function is used to detect the location of Mod Organizer
-
-        ModOrganizerINILocationFromConfig = ModifyINI("Bethini.ini").get_value("Directories", "s" + gameName + "ModOrganizerINIPath", default="Not Detected")
-
-        pathValue = "Not Detected"
-        gameReg = Info.nxmhandler_game_reference(gameName)
-
-        #Look up the nxm link (download with mod manager links on the
-        #NexusMods.com sites) handler to find Mod Organizer location
-        try:
-            nxm = QueryValue(OpenKey(ConnectRegistry(None, HKEY_CLASSES_ROOT), r'nxm\shell\open\command'),"")
-            sm(f'NXM links point to {nxm}')
-            if 'nxmhandler' in nxm:
-                nxmhandler = nxm.split('\"')[1]
-                nxmhandlers = nxmhandler.replace("nxmhandler.exe","nxmhandlers.ini")
-                if os.path.isfile(nxmhandlers):
-                    nxmhandlersINI = ModifyINI(nxmhandlers)
-                    sm(f'nxmhandlers.ini found here: {nxmhandlers}')
-        except:
-            sm('NXM links are probably not set up.', exception=1)
-        
-        try:
-            nxmhandlersINI
-        except:
-            #nxmhandlers.ini not found.  Check for the AppData location.
-            sm('nxmhandlers.ini not found. Checking AppData location.', exception=1)
-            AppDataLocation = str(pathlib.Path.home()) + r"\AppData\Local\ModOrganizer\nxmhandler.ini"
-            if os.path.isfile(AppDataLocation):
-                nxmhandlers = AppDataLocation
-                nxmhandlersINI = ModifyINI(nxmhandlers)
-                sm(f'nxmhandler.ini found in {nxmhandlers}')
-        try:
-            size = int(nxmhandlersINI.get_value('handlers', 'size')) + 1
-            for n in range(size):
-                key = str(n) + '\\games'
-                value = nxmhandlersINI.get_value('handlers', key)
-                if gameReg != "skyrimse":
-                    value = value.replace('skyrimse','')
-                if gameReg in value:
-                    pathKey = str(n) + '\\executable'
-                    pathValue = os.path.split(nxmhandlersINI.get_value('handlers', pathKey).replace('\\\\','\\'))[0]
-                    pathValue += '\\'
-                    sm(f'Mod Organizer appears to be located at {pathValue}')
-        except:
-            sm('There is probably no nxmhandler.ini.', exception=1)
-
-        ModOrganizerINILocation = 'Not Detected'
-        if os.path.isfile(f'{pathValue}ModOrganizer.ini'):
-            ModOrganizerINILocation = f'{pathValue}ModOrganizer.ini'
-            sm(f'Found {ModOrganizerINILocation}')
-        elif os.path.isfile(str(pathlib.Path.home()) + f"\\AppData\\Local\\ModOrganizer\\{gameReg}\\ModOrganizer.ini"):
-            ModOrganizerINILocation = str(pathlib.Path.home()) + f"\\AppData\\Local\\ModOrganizer\\{gameReg}\\ModOrganizer.ini"
-            sm(f'Found {ModOrganizerINILocation}')
-        if ModOrganizerINILocation != 'Not Detected':
-            ModOrganizerINILocation = os.path.split(ModOrganizerINILocation)[0]
-            ModOrganizerINILocation += '\\'
-        else:
-            sm('Failed to locate ModOrganizer.ini')
-            ModOrganizerINILocation = ModOrganizerINILocationFromConfig
-            
-        if ModOrganizerINILocation != ModOrganizerINILocationFromConfig and ModOrganizerINILocationFromConfig != "Not Detected":
-            return [ModOrganizerINILocationFromConfig,ModOrganizerINILocation,"Browse..."]
-
-        return [ModOrganizerINILocation,"Browse...","Manual..."]
 
 if __name__ == '__main__':
     print('This is the customFunctions module.')
