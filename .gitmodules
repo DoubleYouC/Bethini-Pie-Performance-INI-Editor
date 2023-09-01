@@ -4,3 +4,6 @@
 [submodule "apps/Skyrim Special Edition"]
 	path = apps/Skyrim Special Edition
 	url = https://github.com/DoubleYouC/Bethini-Pie-Skyrim-Special-Edition-Plugin.git
+[submodule "apps/Starfield"]
+	path = apps/Starfield
+	url = https://github.com/DoubleYouC/Bethini-Pie-Starfield-Plugin.git
