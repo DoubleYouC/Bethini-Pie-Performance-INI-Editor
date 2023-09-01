@@ -98,6 +98,7 @@ class Info:
     def game_documents_name(game_name):
         game_name_documents_location_dict = {"Skyrim Special Edition": "Skyrim Special Edition",
                                          "Skyrim": "Skyrim",
+                                         "Starfield": "Starfield",
                                          "Fallout 3": "Fallout3",
                                          "Fallout New Vegas": "FalloutNV",
                                          "Fallout 4": "Fallout4",
