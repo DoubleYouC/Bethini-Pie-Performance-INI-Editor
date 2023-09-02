@@ -346,3 +346,4 @@ healthchecksdb
 /.vscode/.ropeproject
 /env
 /media
+/freezeit.py
