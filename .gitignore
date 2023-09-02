@@ -345,3 +345,4 @@ ASALocalRun/
 healthchecksdb
 /.vscode/.ropeproject
 /env
+/media
