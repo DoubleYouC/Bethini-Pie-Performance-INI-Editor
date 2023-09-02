@@ -984,6 +984,8 @@ class bethini_app(tk.Tk):
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"].set('#FFFFFF')
         elif color_value_type == 'rgb':
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"].set('(255, 255, 255)')
+        elif color_value_type == 'rgba':
+            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"].set('(255, 255, 255, 255)')
         elif color_value_type == 'rgb 1':
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"].set('(1.0000, 1.0000, 1.0000)')
         elif color_value_type == 'decimal':
@@ -1193,6 +1195,19 @@ class bethini_app(tk.Tk):
                     this_value += ')'
                     print(this_value)
                     new_color = rgb_to_hex(ast.literal_eval(this_value))
+            elif color_value_type == 'rgba':
+                rgb_type = self.setting_dictionary[each_setting].get("rgbType")
+                if rgb_type == 'multiple settings':
+                    this_value = tuple(int(i) for i in setting_value)
+                    new_color = rgb_to_hex(this_value[0:3])
+                    this_value = str(this_value)
+                else:
+                    this_value = '('
+                    for n in range(len(setting_value)):
+                        this_value += setting_value[n]
+                    this_value += ')'
+                    print(this_value)
+                    new_color = rgb_to_hex(ast.literal_eval(this_value)[0:3])
             elif color_value_type == 'rgb 1':
                 rgb_type = self.setting_dictionary[each_setting].get("rgbType")
                 if rgb_type == 'multiple settings':
