@@ -440,7 +440,7 @@ class bethini_app(tk.Tk):
         editmenu.add_command(label="Setup", command = self.show_setup)
         helpmenu = tk.Menu(menubar, tearoff=0)
         helpmenu.add_command(label="Visit Web Page",
-                             command = lambda: webbrowser.open_new_tab('http://www.nexusmods.com/skyrimspecialedition/mods/4875/'))
+                             command = lambda: webbrowser.open_new_tab('https://www.nexusmods.com/site/mods/631/'))
         helpmenu.add_command(label="Get Support",
                              command = lambda: webbrowser.open_new_tab('https://stepmodifications.org/forum/forum/200-Bethini-support/'))
         helpmenu.add_command(label="About", command = self.about)
