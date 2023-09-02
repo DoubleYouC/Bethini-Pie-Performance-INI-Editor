@@ -249,7 +249,15 @@ class CustomFunctions:
 
     def getINILocations(gameName):
         gameDocumentsLocation = Info.game_documents_name(gameName)
-        INILocation = [Info.get_documents_directory() + f'\\My Games\\{gameDocumentsLocation}\\']
+        documents_directory = Info.get_documents_directory()
+        INILocation = [f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\']
+        app = AppName(gameName)
+        ini_files = app.what_ini_files_are_used()
+        for file in ini_files:
+            if file == 'theme.ini':
+                continue
+            if not os.path.exists(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\{file}'):
+                pathlib.Path(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\{file}').touch()
         INILocation.append('Browse...')
         return INILocation
 
