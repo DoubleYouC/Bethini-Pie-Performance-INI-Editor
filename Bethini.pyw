@@ -264,13 +264,19 @@ class bethini_app(tk.Tk):
         if color_value_type == 'rgb':
             old_color = rgb_to_hex(ast.literal_eval(old_color))
         elif color_value_type == 'rgba':
-            (255, 255, 255, 170)
-            old_color_original = rgba_to_hex(ast.literal_eval(old_color))
+            #(255, 255, 255, 170)
+            old_color_original = ast.literal_eval(old_color)
+            old_color_hex = rgba_to_hex(old_color_original)
             #ffffffaa
-            old_color = old_color_original[0:7]
+            old_color = old_color_hex[0:7]
             #ffffff
-            alpha = int(round(ast.literal_eval(old_color)[3] / 2.55,0))
-            #67
+            alpha = old_color_original[3]
+            #170
+            try:
+                new_alpha = tk.simpledialog.askinteger("Alpha", "Alpha transparency (0 - 255):", initialvalue=alpha, minvalue = 0, maxvalue = 255)
+                sm(f"New alpha: {new_alpha}")
+            except:
+                new_alpha = alpha
         elif color_value_type == 'rgb 1':
             #"(1.0000, 1.0000, 1.0000)"
             #(255, 255, 255)
@@ -294,11 +300,6 @@ class bethini_app(tk.Tk):
         if color_value_type == 'rgb':
             button_to_modify.var.set(str(hex_to_rgb(new_color)).replace(' ',''))
         elif color_value_type == 'rgba':
-            try:
-                new_alpha = tk.simpledialog.askinteger("Alpha", "Alpha transparency (0 - 255):", initialvalue=alpha, minvalue = 0, maxvalue = 255)
-                sm(f"New alpha: {new_alpha}")
-            except:
-                new_alpha = alpha
             new_color_tuple = hex_to_rgb(new_color)
             new_color_list = list(new_color_tuple)
             new_color_list.append(new_alpha)
@@ -1494,7 +1495,7 @@ class bethini_app(tk.Tk):
                 elif color_value_type == 'decimal':
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                     self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
-                elif color_value_type == 'rgb' or color_value_type == 'rgb 1':
+                elif color_value_type == 'rgb' or color_value_type == 'rgb 1' or color_value_type == 'rgba':
                     if len(theSettings) > 1:
                         theValue = str(ast.literal_eval(this_value)[n])
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)

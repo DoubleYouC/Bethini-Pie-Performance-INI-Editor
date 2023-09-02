@@ -146,7 +146,7 @@ class AppName:
                 ini = ini_setting.get('ini', self.default_ini)
                 the_value = str(ini_setting['value'].get('fixedDefault',
                                                          ini_setting['value'].get('default')))
-                always_print[ini_setting['name']]={
+                always_print[ini_setting['name']+':'+ini_setting['section']]={
                     'ini': ini,
                     'section': ini_setting['section'],
                     'value': the_value
@@ -164,7 +164,7 @@ class AppName:
 
                 the_value = str(ini_setting['value'].get('default'))
 
-                can_remove[ini_setting['name']] = {
+                can_remove[ini_setting['name']+':'+ini_setting['section']] = {
                     'ini': ini,
                     'section': ini_setting['section'],
                     'value': the_value
