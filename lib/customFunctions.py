@@ -7,13 +7,12 @@
 
 import os
 import logging
-import pathlib
 import ctypes.wintypes
 import tkinter as tk
 import shutil
 from tkinter import filedialog
 from tkinter import simpledialog
-from winreg import QueryValue, QueryValueEx, OpenKey, ConnectRegistry, HKEY_CLASSES_ROOT, HKEY_LOCAL_MACHINE
+from winreg import QueryValueEx, OpenKey, ConnectRegistry, HKEY_LOCAL_MACHINE
 
 from lib.app import AppName
 from lib.ModifyINI import ModifyINI
@@ -28,6 +27,9 @@ def sm(message, debug=False, exception=False):
 
 def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % rgb
+
+def rgba_to_hex(rgba):
+    return '#%02x%02x%02x%02x' % rgba
 
 def hex_to_rgb(value):
     value = value.lstrip('#')
@@ -259,7 +261,7 @@ class CustomFunctions:
             if file == 'theme.ini':
                 continue
             if not os.path.exists(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\{file}'):
-                pathlib.Path(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\{file}').touch()
+                open(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\{file}', 'w')
         INILocation.append('Browse...')
         return INILocation
 

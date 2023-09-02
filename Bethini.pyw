@@ -28,7 +28,7 @@ from lib.app import AppName
 from lib.AutoScrollbar import AutoScrollbar
 from lib.tooltips import Hovertip
 from lib.ModifyINI import ModifyINI
-from lib.customFunctions import CustomFunctions, sm, browse_to_location, rgb_to_hex, hex_to_rgb, hex_to_decimal, decimal_to_rgb
+from lib.customFunctions import CustomFunctions, sm, browse_to_location, rgb_to_hex, rgba_to_hex,hex_to_rgb, hex_to_decimal, decimal_to_rgb
 
 #This dictionary maps the operator modules to specific text.
 operator_dictionary = {
@@ -260,8 +260,17 @@ class bethini_app(tk.Tk):
         #This allows us to have our very convenient tkinter colorchooser dialog
         #window modify a button
         old_color = button_to_modify.var.get()
+        #old_color is in format (255, 255, 255)
         if color_value_type == 'rgb':
             old_color = rgb_to_hex(ast.literal_eval(old_color))
+        elif color_value_type == 'rgba':
+            (255, 255, 255, 170)
+            old_color_original = rgba_to_hex(ast.literal_eval(old_color))
+            #ffffffaa
+            old_color = old_color_original[0:7]
+            #ffffff
+            alpha = int(round(ast.literal_eval(old_color)[3] / 2.55,0))
+            #67
         elif color_value_type == 'rgb 1':
             #"(1.0000, 1.0000, 1.0000)"
             #(255, 255, 255)
@@ -284,6 +293,17 @@ class bethini_app(tk.Tk):
         button_to_modify.configure(bg=new_color, activebackground=new_color, fg=the_text_color)
         if color_value_type == 'rgb':
             button_to_modify.var.set(str(hex_to_rgb(new_color)).replace(' ',''))
+        elif color_value_type == 'rgba':
+            try:
+                new_alpha = tk.simpledialog.askinteger("Alpha", "Alpha transparency (0 - 255):", initialvalue=alpha, minvalue = 0, maxvalue = 255)
+                sm(f"New alpha: {new_alpha}")
+            except:
+                new_alpha = alpha
+            new_color_tuple = hex_to_rgb(new_color)
+            new_color_list = list(new_color_tuple)
+            new_color_list.append(new_alpha)
+            new_color_tuple = tuple(new_color_list)
+            button_to_modify.var.set(str(new_color_tuple).replace(' ',''))
         elif color_value_type == 'rgb 1':
             #(255, 255, 255)
             #"(1.0000, 1.0000, 1.0000)"
@@ -585,7 +605,8 @@ class bethini_app(tk.Tk):
 
     def apply_ini_dict(self, ini_dict):
         for each_setting in ini_dict:
-            if each_setting in APP.bethini['presetsIgnoreTheseSettings']:
+            target_setting = each_setting.split(':')[0]
+            if target_setting in APP.bethini['presetsIgnoreTheseSettings']:
                 continue
             target_ini = ini_dict[each_setting]['ini']
             target_section = ini_dict[each_setting]['section']
@@ -596,11 +617,12 @@ class bethini_app(tk.Tk):
                 ini_location = app_config.get_value('Directories', ini_location)
             the_target_ini = open_ini(str(ini_location), str(target_ini))
 
-            the_target_ini.assign_setting_value(target_section, each_setting, this_value)
-            self.sme(target_ini + " [" + target_section + "] " + each_setting + "=" + this_value)
+            the_target_ini.assign_setting_value(target_section, target_setting, this_value)
+            self.sme(target_ini + " [" + target_section + "] " + target_setting + "=" + this_value)
 
     def remove_ini_dict(self, ini_dict):
         for each_setting in ini_dict:
+            target_setting = each_setting.split(':')[0]
             target_ini = ini_dict[each_setting]['ini']
             target_section = ini_dict[each_setting]['section']
             this_value = str(ini_dict[each_setting]['value'])
@@ -610,11 +632,11 @@ class bethini_app(tk.Tk):
                 ini_location = app_config.get_value('Directories', ini_location)
             the_target_ini = open_ini(str(ini_location), str(target_ini))
 
-            current_value = the_target_ini.get_value(target_section, each_setting, this_value)
+            current_value = the_target_ini.get_value(target_section, target_setting, this_value)
 
             if current_value == this_value:
-                the_target_ini.remove_setting(target_section, each_setting)
-                self.sme(f"{target_ini} [{target_section}] {each_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed")
+                the_target_ini.remove_setting(target_section, target_setting)
+                self.sme(f"{target_ini} [{target_section}] {target_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed")
 
     def create_tab_image(self, each_tab):
         try:
