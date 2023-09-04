@@ -542,7 +542,10 @@ class bethini_app(tk.Tk):
                             if os.path.exists(f"{the_backup_directory}{each_ini}"):
                                 self.sme(f'{the_backup_directory}{each_ini} exists, so it will not be overwritten.')
                             else:
-                                copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
+                                try:
+                                    copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
+                                except FileNotFoundError:
+                                    self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
                             copyfile(my_app_log, f"{the_backup_directory}log.log")
                         the_backup_directory = f'{this_location}\\{my_app_name} backups\\{log_directory_date}\\'
                         if not os.path.isdir(the_backup_directory):
@@ -550,7 +553,10 @@ class bethini_app(tk.Tk):
                         if os.path.exists(f"{the_backup_directory}{each_ini}"):
                             self.sme(f'{the_backup_directory}{each_ini} exists, so it will not be overwritten.')
                         else:
-                            copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
+                            try:
+                                copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
+                            except FileNotFoundError:
+                                self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
                         copyfile(my_app_log, f"{the_backup_directory}log.log")
                     this_ini_object.save_ini_file(1)
                     files_saved = True
@@ -636,8 +642,11 @@ class bethini_app(tk.Tk):
             current_value = the_target_ini.get_value(target_section, target_setting, this_value)
 
             if current_value == this_value:
-                the_target_ini.remove_setting(target_section, target_setting)
-                self.sme(f"{target_ini} [{target_section}] {target_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed")
+                remove_setting = the_target_ini.remove_setting(target_section, target_setting)
+                if remove_setting == f"No section: {target_section}":
+                    self.sme(f"No section {target_section} exists for {target_setting} in {the_target_ini}.")
+                else:
+                    self.sme(f"{target_ini} [{target_section}] {target_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed")
 
     def create_tab_image(self, each_tab):
         try:
