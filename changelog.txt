@@ -1,0 +1,32 @@
+v4.2
+Bethini Pie update notes:
+-Bugfix: Added exception handling for missing files.
+-Bugfix: Restoring backups to multiple ini files locations now works.
+
+Starfield plugin update notes:
+-Bugfix: Boost Shaking description was wrong.
+-Updated color settings to proper rgb format.
+-Added Ultra.ini to the ini list.
+-Selection of game path changed to the directory folders themselves to avoid issues for Gamepass users.
+-Added preset ini file settings.
+
+v4.1
+Bethini Pie update notes:
+-Bugfix: Duplicate settings in different sections could cause some settings to not be applied during preset creation.
+-Bugfix: Create necessary files/directories if they are missing.
+-Enhancement: New setting type for color settings with alpha.
+
+Starfield plugin update notes:
+-Fixed positioning of some elements where words were cut off.
+-Added Anisotropic Filtering dropdown under Basic.
+-Added Boost Shaking toggle under General.
+-Added Selection Color under Interface.
+-Added Decals quality dropdown under Visuals.
+-Added Geometry quality dropdown under Visuals.
+-Added Terrain quality dropdown under Visuals.
+-Added Transparency quality dropdown under Visuals.
+-Added View Distance quality dropdown under Visuals.
+-Added Atmospheric Scattering quality dropdown under Visuals.
+-Added Dynamic Resolution quality dropdown under Visuals.
+-Added Post Effects quality dropdown under Visuals.
+-Changed Variable Rate Shading toggle into Variable Rate Shading quality dropdown under Visuals.
