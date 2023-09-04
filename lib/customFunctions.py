@@ -203,8 +203,11 @@ class CustomFunctions:
             for file in files_to_replace:
                 initial_file = files_to_replace[file].get('InitialFile')
                 new_file = files_to_replace[file].get('NewFile')
-                shutil.copyfile(f"{new_file}", f"{initial_file}")
-                sm(f'{initial_file} was replaced with backup from {new_file}.')
+                try:
+                    shutil.copyfile(f"{new_file}", f"{initial_file}")
+                    sm(f'{initial_file} was replaced with backup from {new_file}.')
+                except FileNotFoundError:
+                    sm(f'Restoring {new_file} to {initial_file} failed due to {new_file} not existing.', True, True)
         return
 
     def getBackups(game_name):
