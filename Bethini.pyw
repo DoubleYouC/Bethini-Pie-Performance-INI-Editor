@@ -6,6 +6,7 @@
 #
 
 import ast
+import configparser
 import os
 import math
 import logging
@@ -1311,8 +1312,12 @@ class bethini_app(tk.Tk):
                             continue
                         else:
                             theValue = this_value[n][0]
-                            the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
-                            self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + theValue)
+                            try:
+                                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
+                                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
+                            except AttributeError:
+                                self.sme(f"Failed to assign {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue} because the {targetINIs[n]} has an issue.", True)
+                            
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + theValue)
                     else:
@@ -1463,8 +1468,11 @@ class bethini_app(tk.Tk):
                 ini_location = self.getINILocation(targetINIs[n])
                 the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
 
-                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
+                try:
+                    the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
+                    self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
+                except AttributeError as e:
+                    self.sme(f"Failed to set {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value} because the {targetINIs[n]} has an issue.", True)
 
     def spinbox_assign_value(self, each_setting):
         targetINIs = self.setting_dictionary[each_setting].get('targetINIs')
@@ -1728,7 +1736,11 @@ class bethini_app(tk.Tk):
                     #target_ini = ModifyINI(str(ini_location) + str(INI))
 
                     target_ini = open_ini(str(ini_location), str(INI))
-                    value = str(target_ini.get_value(currentSection, currentSetting, default=defaultValue))
+                    try:
+                        value = str(target_ini.get_value(currentSection, currentSetting, default=defaultValue))
+                    except AttributeError:
+                        self.sme(f"There was a problem with the existing {target_ini} [{currentSection}] {currentSetting}, so {defaultValue} will be used.", True)
+                        value = defaultValue
                     settingValues.append(value)
             if settingValues != []:
                 #Check to see if the settings correspond with specified
@@ -1818,7 +1830,10 @@ def open_ini(location, ini):
                 }
             }
         }
-    open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(location + ini)
+    try:
+        open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(location + ini)
+    except configparser.MissingSectionHeaderError as e:
+        sm(f"Error: {e.strerror}")
     return open_inis[ini]['located'][open_ini_id]['object']
 
 if __name__ == '__main__':
