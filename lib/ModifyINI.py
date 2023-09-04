@@ -3,7 +3,8 @@ Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
 or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA."""
 
-from collections import OrderedDict #This is allowing us to sort the INI files
+from collections import OrderedDict
+import configparser #This is allowing us to sort the INI files
 
 from lib.customConfigParser import customConfigParser
 
@@ -68,10 +69,13 @@ class ModifyINI:
     def get_settings(self, section, original_case=False):
         """Retrieves all settings within the given section."""
         section = self.get_existing_section(section)
-        if original_case:
-            settings = self.config.options(section)
-        else:
-            settings = self.case_insensitive_config.options(section)
+        try:
+            if original_case:
+                settings = self.config.options(section)
+            else:
+                settings = self.case_insensitive_config.options(section)
+        except configparser.NoSectionError:
+            return []
         return settings
 
     def assign_setting_value(self, section, setting, value):
@@ -97,9 +101,12 @@ class ModifyINI:
         """Removes the specified setting."""
         existing_section = self.get_existing_section(section)
         existing_setting = self.get_existing_setting(existing_section, setting)
-        self.config.remove_option(existing_section, existing_setting)
-        self.case_insensitive_config.remove_option(existing_section, existing_setting)
-        self.has_been_modified = True
+        try:
+            self.config.remove_option(existing_section, existing_setting)
+            self.case_insensitive_config.remove_option(existing_section, existing_setting)
+            self.has_been_modified = True
+        except configparser.NoSectionError:
+            return f"No section: {section}"
 
     def remove_section(self, section):
         """Removes the specified section."""
