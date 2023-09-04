@@ -151,36 +151,20 @@ class CustomFunctions:
         sm(f'Restoring backup from {choice}.')
         app = AppName(game_name)
         ini_files = app.what_ini_files_are_used()
-
-        game_documents_name = Info.game_documents_name(game_name)
-        if game_documents_name != '':
-            default_ini_location = Info.get_documents_directory() + f'\\My Games\\{game_documents_name}\\'
-        else:
-            default_ini_location = ''
-        ini_path = ModifyINI("Bethini.ini").get_value("Directories",
-                                                    "s" + game_name + "INIPath",
-                                                    default=default_ini_location)
-        backup_directory = f'{ini_path}Bethini Pie backups\\{choice}\\'
-
+        
         ini_files_with_location = {}
+        
+        Bethini_key = ModifyINI("Bethini.ini")
+        
         for ini in ini_files:
-            bethini_key = app.inis(ini)
-            if bethini_key == '':
-                #if the location is the working directory
-                ini_location = ''
-            else:
-                #if the location is specified in the BethINI.ini file.
-                if ini == 'theme.ini':
-                    continue
-                else:
-                    ini_location = ModifyINI("Bethini.ini").get_value('Directories',
-                                                                     bethini_key, default_ini_location)
-            ini_files_with_location[ini] = ini_location
+            if ini == 'theme.ini': continue
+            ini_files_with_location[ini] = app.inis(ini)
 
         files_to_replace = {}
         for ini in ini_files_with_location:
-            file_to_replace = ini_files_with_location[ini] + ini
-            backup_file = backup_directory + ini
+            ini_location = Bethini_key.get_value("Directories", ini_files_with_location[ini])
+            file_to_replace = f'{ini_location}{ini}'
+            backup_file = f'{ini_location}Bethini Pie backups\\{choice}\\{ini}'
             files_to_replace[ini] = {"InitialFile": file_to_replace,
                                  "NewFile": backup_file}
 
