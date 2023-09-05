@@ -7,3 +7,6 @@
 [submodule "apps/Starfield"]
 	path = apps/Starfield
 	url = https://github.com/DoubleYouC/Bethini-Pie-Starfield-Plugin.git
+[submodule "apps/Fallout New Vegas"]
+	path = apps/Fallout New Vegas
+	url = https://github.com/DoubleYouC/Bethini-Pie-Fallout-New-Vegas-Plugin.git
