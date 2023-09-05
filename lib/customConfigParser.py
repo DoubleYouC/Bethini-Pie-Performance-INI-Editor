@@ -102,7 +102,16 @@ class customConfigParser(configparser.RawConfigParser):
                     optname = None
                 # no section header in the file?
                 elif cursect is None:
-                    raise configparser.MissingSectionHeaderError(fpname, lineno, line)
+                    # Typically you raise a MissingSectionHeaderError when the input file is missing a section hearder
+                    # But given the fact that users could have corrupt one with invalid settings, add a dummy TotallyFakeSectionHeader
+                    # will fix the problem, and our code later in the pipeline removes invalid sections.
+                    cursect = self._dict()
+                    sectname = 'TotallyFakeSectionHeader'
+                    self._sections[sectname] = cursect
+                    self._proxies[sectname] = configparser.SectionProxy(self, sectname)
+                    elements_added.add(sectname)
+                    optname = None
+                    #raise configparser.MissingSectionHeaderError(fpname, lineno, line)
                 # an option line?
                 else:
                     mo = self._optcre.match(value)
