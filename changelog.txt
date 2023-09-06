@@ -2,16 +2,38 @@ v4.2
 Bethini Pie update notes:
 -Bugfix: Added exception handling for missing files.
 -Bugfix: Restoring backups to multiple ini files locations now works.
--Bugfix: Failure to fix corrupt ini files automatically.
+-Bugfix: Now fixes the errors in corrupt INI files from many Starfield Nexus "mods."
+-Themes: All themes have a No Tab Images version.
+-Themes: All themes now have a Shadows tab image available.
 
 Starfield plugin update notes:
 -Bugfix: Boost Shaking description was wrong.
 -Bugfix: Duplicate "Dynamic Resolution" setting causing the toggle to not work.
--Removed all the quality settings from the Visuals tabs. These are now internalized within the preset system, and the individual settings exposed.
+-Bugfix: Couldn't type in custom FOV.
 -Updated color settings to proper rgb format.
 -Added Ultra.ini to the ini list.
 -Selection of game path changed to the directory folders themselves to avoid issues for Gamepass users.
 -Added preset ini file settings.
+-Added Dynamic Resolution Scale slider.
+-Added Message of the Day toggle.
+-Added Language dropdown.
+-Added English Voices toggle.
+-Added Remove Borders toggle.
+-Added Sprint Fix toggle.
+-Added Save on Quit to Main Menu toggle.
+-Added Disable Combat Dialogue toggle.
+-Added NPCs Use Ammo toggle.
+-Add Tutorials toggle.
+-Added Over-Encumbered Reminder timer edit box.
+-Added Papyrus settings.
+-Rearranged Interface to look better.
+-Removed all the quality settings from the Visuals tabs. These are now internalized within the preset system, and the individual settings exposed.
+-Added Volumetric Lighting toggle.
+-Added revised Motion Blur dropdown.
+-Added 9 Decal settings.
+-Added 26 individual shadow settings.
+
+
 
 v4.1
 Bethini Pie update notes:
