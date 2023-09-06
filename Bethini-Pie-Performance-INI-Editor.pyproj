@@ -43,6 +43,7 @@
     <Content Include="Bethini.ini" />
     <Content Include="Bethini.spec" />
     <Content Include="Icon.ico" />
+    <Content Include="requirements.txt" />
     <Content Include="theme\Dark Blue\Basic.png" />
     <Content Include="theme\Dark Blue\Blank.png" />
     <Content Include="theme\Dark Blue\General.png" />
