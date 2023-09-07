@@ -1,3 +1,10 @@
+v4.3
+Starfield plugin update notes:
+-Bugfix: English Voices toggle was non-functional.
+-Bugfix: Dynamic Resolution Scale slider only adjusted the minimum.
+-Bugfix: Add Xbox uPersistentUuidData settings.
+-Presets were updated.
+
 v4.2
 Bethini Pie update notes:
 -Bugfix: Added exception handling for missing files.
