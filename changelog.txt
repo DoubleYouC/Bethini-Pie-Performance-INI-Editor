@@ -1,4 +1,7 @@
 v4.3
+Fallout 4 plugin update notes:
+-Added Flickering Light Distance.
+
 Starfield plugin update notes:
 -Bugfix: English Voices toggle was non-functional.
 -Bugfix: Dynamic Resolution Scale slider only adjusted the minimum.
