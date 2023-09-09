@@ -1,3 +1,14 @@
+v4.4
+Skyrim Special Edition plugin initial release.
+
+Fallout 4 plugin update notes:
+-Added Field of View settings.
+-Fixed nonfunctional Pipboy Flashlight Color Fix
+
+Starfield plugin update notes:
+-Added Gamma slider.
+-Presets were updated.
+
 v4.3
 Fallout 4 plugin update notes:
 -Added Flickering Light Distance.
