@@ -1,3 +1,39 @@
+v4.5
+Skyrim Special Edition plugin update notes:
+-Bugfix: Neverfade Distance tooltip description was wrong.
+-Increase Bloom Boost slider min/max to -10/10.
+
+Starfield plugin update notes:
+-Bugfix: Removed fMinDynamicResolutionScale errantly being set when adjusting Render Resolution Scale.
+-bSaveGameOnQuitToMainMenu:General actually entirely disables exit saves for Starfield, so it has been renamed from "Save on Quit to Main Menu" to Exit Saves and the description updated.
+-Changed Over-Encumbered Reminder to a combobox.
+-Changed "Disable Combat Dialogue" to "Combat Dialogue"
+-Removed Sprint Fix. Doesn't appear to do anything.
+-Added Mipmap Bias dropdown.
+-Added Autosaves toggle.
+-Added Save on Pause toggle.
+-Added Missing Content Warning toggle.
+-Added Scripted Autosaves toggle.
+-Added Scripted Force Saves toggle.
+-Added Controller Vibration toggle.
+-Added Crosshair toggle.
+-Added HUD Opacity slider.
+-Added Disable Grass toggle.
+-Added Terrain Tint toggle.
+-Added Grass Fade Start slider.
+-Added Grass Fade Range slider.
+-Added Random Cull Factor slider.
+-Added Random Cull Start Distance slider.
+-Added Culling Footprint slider.
+-Added Volumetric Lighting dropdown.
+-Added Phase Function dropdown.
+-Added Half Resolution Fog Map Blur toggle.
+-Added Volumetric Indirect Fallback toggle.
+-Added Level 1 Block Distance slider.
+-Added Level 2 Block Distance slider.
+-Added Level 4 Block Distance slider.
+-Added Far Distance slider.
+
 v4.4
 Skyrim Special Edition plugin initial release.
 
