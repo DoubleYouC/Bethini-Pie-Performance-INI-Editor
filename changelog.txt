@@ -1,3 +1,18 @@
+v4.6
+Starfield plugin update notes:
+-Moved Motion Blur to Basic
+-Moved Film Grain to Basic
+-Moved Depth of Field to Basic
+-Added Starting Console Command entry
+-Added Variable Rate Shading toggle
+-Added VRS Variance Cutoff dropdown
+-Added multiple Terrain settings
+-Added multiple Ambient Occlusion settings
+-Added multiple Indirect Lighting settings
+-Added multiple Particle Lighting settings
+-Updated Presets
+-Made Dynamic Shadow Map Count slider have a minimum of 12 due to report of lower values causing CTD.
+
 v4.5
 Skyrim Special Edition plugin update notes:
 -Bugfix: Neverfade Distance tooltip description was wrong.
