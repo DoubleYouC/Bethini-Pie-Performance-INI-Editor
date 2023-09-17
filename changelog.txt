@@ -1,7 +1,8 @@
 v4.7
 Bethini Pie update notes:
 -Upgraded sliders. They will look better, function more accurately, and no longer cause issues when manually editing the values.
--Add 'fixedDefault' values if they are missing entirely from the user's ini files (if they feed Bethini a blank ini)
+-Add 'fixedDefault' values if they are missing entirely from the user's ini files (if the user feeds Bethini a blank ini).
+-Prevent blank Ultra.ini file being created in some cases.
 
 Starfield plugin update notes:
 -Add Reflection settings
