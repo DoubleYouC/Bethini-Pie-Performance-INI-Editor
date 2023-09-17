@@ -5,7 +5,10 @@ Bethini Pie update notes:
 -Prevent blank Ultra.ini file being created in some cases.
 
 Starfield plugin update notes:
--Add Reflection settings
+-Added Reflection settings
+-Added Console Hotkeys toggle.
+-Added Console INI entry.
+-Added Crowd Density dropdown.
 -Updated presets
 
 v4.6
