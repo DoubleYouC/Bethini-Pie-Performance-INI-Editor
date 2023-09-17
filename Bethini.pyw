@@ -531,6 +531,7 @@ class bethini_app(tk.Tk):
         first_time_backup = False
         files_saved = False
         self.remove_invalid_settings()
+        self.apply_ini_dict(APP.preset_values('fixedDefault'), only_if_missing=True)
         ini_list = list(open_inis.keys())
         files_to_remove = ini_list[2:]
         files_to_remove.append('log.log')
@@ -627,10 +628,10 @@ class bethini_app(tk.Tk):
                                         this_ini_object.remove_section(section)
                                         self.sme(f'{section} was removed because it was empty.')
 
-    def apply_ini_dict(self, ini_dict):
+    def apply_ini_dict(self, ini_dict, only_if_missing=False):
         for each_setting in ini_dict:
             target_setting = each_setting.split(':')[0]
-            if target_setting in APP.bethini['presetsIgnoreTheseSettings']:
+            if target_setting in APP.bethini['presetsIgnoreTheseSettings'] and not only_if_missing:
                 continue
             target_ini = ini_dict[each_setting]['ini']
             target_section = ini_dict[each_setting]['section']
@@ -641,6 +642,9 @@ class bethini_app(tk.Tk):
                 ini_location = app_config.get_value('Directories', ini_location)
             the_target_ini = open_ini(str(ini_location), str(target_ini))
 
+            # Check if we are only supposed to add the value if the value is missing
+            if only_if_missing and (the_target_ini.get_value(target_section, target_setting, "Not Present") != "Not Present"):
+                continue
             the_target_ini.assign_setting_value(target_section, target_setting, this_value)
             self.sme(target_ini + " [" + target_section + "] " + target_setting + "=" + this_value)
 
