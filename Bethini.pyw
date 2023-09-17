@@ -75,6 +75,22 @@ current_working_directory = os.getcwd()
 my_app_name = "Bethini Pie"
 my_app_short_name = "Bethini"
 
+class Scalar(ttk.Scale):
+    """ ttk.Scale with limited decimal places """
+
+    def __init__(self, *args, **kwargs):
+        self.decimal_places = kwargs.pop('decimal_places')
+        self.chain = kwargs.pop('command', lambda *a: None)
+        super(Scalar, self).__init__(*args, command=self._value_changed, **kwargs)
+
+    def _value_changed(self, new_value):
+        decimal_places = int(self.decimal_places)
+        new_value = round(float(new_value), decimal_places)
+        if decimal_places == 0:
+            new_value = int(new_value)
+        self.winfo_toplevel().globalsetvar(self.cget('variable'), (new_value))
+        self.chain(new_value)
+
 class bethini_app(tk.Tk):
     #This is the main app, the glue that creates the GUI.
 
@@ -909,16 +925,14 @@ class bethini_app(tk.Tk):
         id_ = "TkSlider"
         from_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("from")
         to_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("to")
-        resolution_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("resolution")
-        digits_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("digits")
+        decimal_places = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("decimal places")
         length_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("length")
 
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"] = tk.StringVar(self)
 
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = tk.Scale(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        from_=from_value, to=to_value, resolution=resolution_value, showvalue=0, digits=digits_value, orient=tk.HORIZONTAL, relief=tk.FLAT,
-                                                                                                                        highlightthickness=0, bg=sub_container_color, length=length_value, font=smallFont, activebackground=background_color_active,
-                                                                                                                        troughcolor=field_color,
+        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = Scalar(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
+                                                                                                                        from_=from_value, to=to_value, orient=tk.HORIZONTAL,
+                                                                                                                        length=length_value, decimal_places=decimal_places,
                                                                                                                         variable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
 
         width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("width")
@@ -1470,7 +1484,7 @@ class bethini_app(tk.Tk):
 
                 try:
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                    self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
+                    self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
                 except AttributeError as e:
                     self.sme(f"Failed to set {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value} because the {targetINIs[n]} has an issue.", True)
 
