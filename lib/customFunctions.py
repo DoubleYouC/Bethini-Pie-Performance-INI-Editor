@@ -247,6 +247,8 @@ class CustomFunctions:
         for file in ini_files:
             if file == 'theme.ini':
                 continue
+            if file == 'Ultra.ini':
+                continue
             if not os.path.exists(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\{file}'):
                 open(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\{file}', 'w')
         INILocation.append('Browse...')
