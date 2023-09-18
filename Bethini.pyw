@@ -190,6 +190,7 @@ class bethini_app(tk.Tk):
         self.the_canvas.configure(yscrollcommand=self.vsb.set, xscrollcommand=self.hsb.set)
 
         self.container = ttk.Frame(self.the_canvas)
+        self.container.bind_all('<Control-s>', self.save_ini_files)
 
         #self.titleBar.pack(expand=False, fill=tk.X)
         #self.closeButton.pack(side=tk.RIGHT)
@@ -464,6 +465,7 @@ class bethini_app(tk.Tk):
         if not from_choose_game_window:
             self.deiconify()
         self.createTabs(from_choose_game_window)
+        
 
     def menu(self):
         menubar = tk.Menu(self)
@@ -517,7 +519,7 @@ class bethini_app(tk.Tk):
         self.deiconify()
         self.updateValues()
 
-    def save_ini_files(self):
+    def save_ini_files(self, keyevent="None"):
         #self.openINIs = {
         #    my_app_config : {
         #        'located': {
