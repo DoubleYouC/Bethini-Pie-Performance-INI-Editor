@@ -2,8 +2,10 @@ v4.8
 Bethini Pie update notes:
 -Added Ctrl+S hotkey for saving.
 -Added support for '#' as a comment character.
+-Overhauled appearance and made DPI Aware.
 
 Starfield plugin update notes:
+-Added Photo Mode Folder entry.
 -Expanded Far Distance slider to 12000.
 -Major overhaul of the settings.json to account for the full dump of valid inis and their values.
 -Updated presets.
