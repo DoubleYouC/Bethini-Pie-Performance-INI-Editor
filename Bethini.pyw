@@ -621,7 +621,7 @@ class bethini_app(tk.Tk):
                             self.sme(f'{section} was removed because it was empty.')
                         else:
                             for each_setting in settings:
-                                if ';' in each_setting:
+                                if ';' in each_setting or '#' in each_setting:
                                     self.sme(f'{each_setting}:{section} will be preserved, as it is a comment.')
                                 elif not APP.does_setting_exist(each_ini, section, each_setting):
                                     sm(this_ini_object.remove_setting(section, each_setting))
