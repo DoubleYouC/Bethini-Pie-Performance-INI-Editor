@@ -1,3 +1,13 @@
+v4.8
+Bethini Pie update notes:
+-Added Ctrl+S hotkey for saving.
+-Added support for '#' as a comment character.
+
+Starfield plugin update notes:
+-Expanded Far Distance slider to 12000.
+-Major overhaul of the settings.json to account for the full dump of valid inis and their values.
+-Updated presets.
+
 v4.7
 Bethini Pie update notes:
 -Upgraded sliders. They will look better, function more accurately, and no longer cause issues when manually editing the values.
