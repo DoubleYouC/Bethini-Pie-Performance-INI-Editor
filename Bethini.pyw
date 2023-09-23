@@ -31,6 +31,9 @@ from lib.tooltips import Hovertip
 from lib.ModifyINI import ModifyINI
 from lib.customFunctions import CustomFunctions, sm, browse_to_location, rgb_to_hex, rgba_to_hex,hex_to_rgb, hex_to_decimal, decimal_to_rgb
 
+from ctypes import windll
+windll.shcore.SetProcessDpiAwareness(1)
+
 #This dictionary maps the operator modules to specific text.
 operator_dictionary = {
     'greater-than': gt,
@@ -144,7 +147,7 @@ class bethini_app(tk.Tk):
 
         # ttk style overrides
         self.s = ttk.Style()
-        self.s.theme_use('alt')
+        self.s.theme_use('vista')
         self.s.configure(".", background=sub_container_color, font=smallFont,
                          foreground=text_color, fieldbackground=field_color, arrowcolor=text_color)
         self.s.map('.',
@@ -155,11 +158,11 @@ class bethini_app(tk.Tk):
                                ('pressed', '!focus', background_color_pressed),
                                ('active', background_color_active)])
 
-        arrow_size = int(round(int(small_font_size)*1.33,0))
+        #arrow_size = int(round(int(small_font_size)*1.33,0))
 
         self.s.configure('TCheckbutton', indicatorcolor=indicator_color)
-        self.s.configure('TCombobox', arrowsize=arrow_size)
-        self.s.configure('TSpinbox', arrowsize=arrow_size, background=dropdown_color)
+        #self.s.configure('TCombobox', arrowsize=arrow_size)
+        self.s.configure('TSpinbox', background=dropdown_color)
         self.s.configure('TMenubutton', background=dropdown_color)
         self.s.configure('TCombobox', background=dropdown_color)
         self.s.configure('TNotebook', background=container_color)
@@ -247,8 +250,8 @@ class bethini_app(tk.Tk):
         self.the_canvas.configure(scrollregion=self.the_canvas.bbox('all'))
 
     def sub_container_configure(self, event):
-        the_width = event.width + 17# + 35
-        the_height = event.height + 21# + 65
+        the_width = event.width + 40
+        the_height = event.height + 65
         self.geometry(f'{the_width}x{the_height}')
 
     def start_progress(self):
@@ -673,7 +676,7 @@ class bethini_app(tk.Tk):
 
     def create_tab_image(self, each_tab):
         try:
-            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "theme\\" + theme + "\\" + self.tab_dictionary[each_tab]["Name"] + ".png")
+            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "theme\\" + theme + "\\" + self.tab_dictionary[each_tab]["Name"] + ".png", height=16, width=16)
         except:
             self.sme('No theme image for tab.', exception=1)
             self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "theme\\" + theme + "\\Blank.png")
@@ -1589,7 +1592,7 @@ class bethini_app(tk.Tk):
                 preferencesWindow.withdraw()
             else:
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(self.sub_container)
-                self.sub_container.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.TOP)
+                self.sub_container.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.LEFT)
 
             #self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(self.subContainer)
             #self.subContainer.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.TOP)
