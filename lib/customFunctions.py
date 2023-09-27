@@ -12,7 +12,6 @@ import tkinter as tk
 import shutil
 from tkinter import filedialog
 from tkinter import simpledialog
-from winreg import QueryValueEx, OpenKey, ConnectRegistry, HKEY_LOCAL_MACHINE
 
 from lib.app import AppName
 from lib.ModifyINI import ModifyINI
@@ -24,6 +23,11 @@ def sm(message, debug=False, exception=False):
     elif exception:
         logging.debug(message, exc_info=True)
         print(message)
+        
+try:
+    from winreg import QueryValueEx, OpenKey, ConnectRegistry, HKEY_LOCAL_MACHINE
+except ModuleNotFoundError:
+    sm('winreg module not found')
 
 def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % rgb
@@ -220,21 +224,26 @@ class CustomFunctions:
         WIDTH, HEIGHT = root.winfo_screenwidth(), root.winfo_screenheight()
         return str(WIDTH) + "x" + str(HEIGHT)
 
-    def getBethesdaGameFolder(gameName):
-        gameFolder = 'Not Detected'
-        gameReg = Info.game_reg(gameName)
+    def getBethesdaGameFolder(game_name):
+        game_folder = ModifyINI("Bethini.ini").get_value("Directories", "s" + game_name + "Path", default='Not Detected')
+        if game_folder != 'Not Detected':
+            return game_folder
+        gameReg = Info.game_reg(game_name)
 
         try:
-            gameFolder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\Bethesda Softworks\\{gameReg}'),"installed path")[0]
+            game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\Bethesda Softworks\\{gameReg}'),"installed path")[0]
         except:
             sm('Did not find game folder in the registry (no WOW6432Node location).', exception=1)
-        if gameFolder == 'Not Detected':
+        if game_folder == 'Not Detected':
             try:
-                gameFolder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\WOW6432Node\\Bethesda Softworks\\{gameReg}'),"installed path")[0]
+                game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\WOW6432Node\\Bethesda Softworks\\{gameReg}'),"installed path")[0]
             except:
                 sm('Did not find game folder in the registry.', exception=1)
 
-        return gameFolder
+        return game_folder
+    
+    def getGamePath(game_name):
+        return ModifyINI("Bethini.ini").get_value("Directories", "s" + game_name + "Path", default='Not Detected')
 
     def getINILocations(gameName):
         gameDocumentsLocation = Info.game_documents_name(gameName)
