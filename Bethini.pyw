@@ -398,7 +398,7 @@ class bethini_app(tk.Tk):
             if forced == 1:
                 self.sme('Force choose game/application.')
                 raise Exception("Forcing you to choose")
-            if app_config.get_value('General', 'bAlwaysSelectGame', '0') == '1':
+            if app_config.get_value('General', 'bAlwaysSelectGame', '1') == '1':
                 self.sme('Force choose game/application at startup.')
                 GAME_NAME #By calling the global variable GAME_NAME before it has been created,
                          #we raise
@@ -406,9 +406,13 @@ class bethini_app(tk.Tk):
                          #at startup.
             #raise Exception("Forcing you to choose")
             self.choose_game_done(choose_game_var)
-        except:
+        except NameError:
             self.sme('Choose game/application.', exception=1)
             self.choose_game_window.deiconify()
+        except Exception as e:
+            self.sme('An unhandled exception occurred.', exception=1)
+            messagebox.showerror(title='Unhandled excetption', message=f'An unhandled exception occurred.\n{e}')
+            exit()
 
     def choose_game_done(self, game, from_choose_game_window=False):
         self.choose_game_window.withdraw()
