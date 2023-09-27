@@ -10,6 +10,7 @@ import configparser
 import os
 import math
 import logging
+from re import S
 import webbrowser
 from shutil import copyfile
 from datetime import datetime
@@ -219,25 +220,52 @@ class bethini_app(tk.Tk):
         #called first, so we select or return to the game/app we want to work with
 
         self.choose_game_window = tk.Toplevel(self)
-        self.choose_game_window.title('Choose Game')
+        self.choose_game_window.title('Bethini Pie')
 
         self.choose_game_frame = ttk.Frame(self.choose_game_window)
 
         self.choose_game_frame_2 = ttk.Frame(self.choose_game_frame)
 
-        self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Game/Application")
+        self.label_Bethini = ttk.Label(self.choose_game_frame_2, text="Bethini Pie", font=('Segoe UI', '20'))
+        self.label_Pie = ttk.Label(self.choose_game_frame_2, text="Performance INI Editor\nby DoubleYou", font=('Segoe UI', '15'), foreground='#555', justify='center')
+        self.label_link = ttk.Label(self.choose_game_frame_2, text="https://www.nexusmods.com/site/mods/631", font=('Segoe UI', '12'), cursor='hand2', foreground='blue')
+
+        self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=('Segoe UI', '15'))
+
+        self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode='browse', show='tree', columns=('Name'))
+        self.choose_game_tree.column('#0', width=0, stretch=tk.NO)
+        self.choose_game_tree.column('Name', anchor=tk.W)
+
+        self.s.configure('choose_game_button.TButton', font=('Segoe UI', '14'))
+        self.choose_game_button = ttk.Button(self.choose_game_frame_2, text='Select Game', style='choose_game_button.TButton',
+                                             command=lambda: self.choose_game_done(self.choose_game_tree.focus()))
+        
+        self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=('Segoe UI', '12'), foreground='#555', justify='center')
+ 
 
         options = os.listdir('apps/')
-        self.choose_game_var = tk.StringVar(self)
-        self.choose_game_dropdown = ttk.OptionMenu(self.choose_game_frame_2,
-                                                 self.choose_game_var, "None", *options,
-                                                 command= lambda g: self.choose_game_done(g, True))
-        self.choose_game_dropdown.var = self.choose_game_var
+        for option in options:
+            self.choose_game_tree.insert('', 'end', id=option, text=option, values=[option])
+
+        # self.choose_game_var = tk.StringVar(self)
+        # self.choose_game_dropdown = ttk.OptionMenu(self.choose_game_frame_2,
+        #                                          self.choose_game_var, "None", *options,
+        #                                          command= lambda g: self.choose_game_done(g, True))
+        # self.choose_game_dropdown.var = self.choose_game_var
 
         self.choose_game_frame.pack(fill=tk.BOTH, expand=True)
         self.choose_game_frame_2.pack(anchor=tk.CENTER, expand=True)
-        self.choose_game_label.pack(side=tk.LEFT, anchor=tk.CENTER, padx=5, pady=5)
-        self.choose_game_dropdown.pack(anchor=tk.CENTER, padx=5, pady=5)
+        
+        self.label_Bethini.pack(padx=5, pady=5)
+        self.label_Pie.pack(padx=5, pady=15)
+        self.label_link.pack(padx=25, pady=5)
+        self.label_link.bind("<Button-1>", lambda e: webbrowser.open_new_tab('https://www.nexusmods.com/site/mods/631'))
+        self.choose_game_label.pack(padx=5, pady=2)
+        self.choose_game_tree.pack()
+        
+        # self.choose_game_dropdown.pack(padx=5, pady=5)
+        self.choose_game_button.pack(pady=15)
+        self.choose_game_tip.pack(pady=10)
         self.choose_game_window.protocol("WM_DELETE_WINDOW", on_closing)
         self.choose_game_window.minsize(300,35)
 
@@ -397,7 +425,7 @@ class bethini_app(tk.Tk):
             choose_game_var = app_config.get_value('General','sAppName')
             if forced == 1:
                 self.sme('Force choose game/application.')
-                raise Exception("Forcing you to choose")
+                raise NameError
             if app_config.get_value('General', 'bAlwaysSelectGame', '1') == '1':
                 self.sme('Force choose game/application at startup.')
                 GAME_NAME #By calling the global variable GAME_NAME before it has been created,
@@ -415,6 +443,8 @@ class bethini_app(tk.Tk):
             exit()
 
     def choose_game_done(self, game, from_choose_game_window=False):
+        if game == '':
+            return
         self.choose_game_window.withdraw()
 
         # Once the app/game is selected, this loads it.
@@ -540,7 +570,11 @@ class bethini_app(tk.Tk):
         first_time_backup = False
         files_saved = False
         self.remove_invalid_settings()
-        self.apply_ini_dict(APP.preset_values('fixedDefault'), only_if_missing=True)
+        try:
+            self.apply_ini_dict(APP.preset_values('fixedDefault'), only_if_missing=True)
+        except NameError as e:
+            self.sme(f'NameError: {e}', True)
+            exit()
         ini_list = list(open_inis.keys())
         files_to_remove = ini_list[2:]
         files_to_remove.append('log.log')
