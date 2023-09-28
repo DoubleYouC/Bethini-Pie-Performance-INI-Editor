@@ -212,11 +212,6 @@ class CustomFunctions:
             backups = ["None found"]
         return ['Choose...', *backups]
 
-    def getThemes(gameName):
-        theme_dir = os.getcwd() + '\\theme'
-        themes = os.listdir(theme_dir)
-        return themes
-
     def getCurrentResolution(gameName):
         
         root = tk.Tk()
