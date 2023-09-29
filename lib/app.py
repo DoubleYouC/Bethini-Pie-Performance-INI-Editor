@@ -24,7 +24,7 @@ class AppName:
 
         ini_files = list(self.bethini["INIs"].keys())
         try:
-            self.default_ini = ini_files[2]
+            self.default_ini = ini_files[1]
         except IndexError:
             self.default_ini = None
 
