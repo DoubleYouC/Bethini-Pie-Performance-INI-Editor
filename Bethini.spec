@@ -22,7 +22,7 @@ def recurseDirs(directory):
 a = Analysis(['Bethini.pyw'],
              pathex=['S:\\Source\\Repos\\Bethini-Pie-Performance-INI-Editor'],
              binaries=[],
-             datas=recurseDirs(['apps', 'theme']),
+             datas=recurseDirs(['apps', 'icons']),
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
