@@ -133,22 +133,6 @@ class Info:
             game_reg = ''
         return game_reg
 
-    def nxmhandler_game_reference(game_name):
-        game_name_dict = {"Skyrim Special Edition": "skyrimse",
-                        "Skyrim": "skyrim",
-                        "Fallout 3": "fallout3",
-                        "Fallout New Vegas": "falloutnv",
-                        "Fallout 4": "fallout4",
-                        "Enderal": "enderal",
-                        "Oblivion": "oblivion"}
-        try:
-            game_reg = game_name_dict[game_name]
-            sm(f'{game_name} is in the gameNameDict as {game_reg}.')
-        except:
-            sm(f'{game_name} not in the gameNameDict', exception=1)
-            game_reg = ''
-        return game_reg
-
 class CustomFunctions:
 
     def restore_backup(game_name, choice):
@@ -161,7 +145,6 @@ class CustomFunctions:
         Bethini_key = ModifyINI("Bethini.ini")
         
         for ini in ini_files:
-            if ini == 'theme.ini': continue
             ini_files_with_location[ini] = app.inis(ini)
 
         files_to_replace = {}
@@ -213,7 +196,6 @@ class CustomFunctions:
         return ['Choose...', *backups]
 
     def getCurrentResolution(gameName):
-        
         root = tk.Tk()
         root.withdraw()
         WIDTH, HEIGHT = root.winfo_screenwidth(), root.winfo_screenheight()
@@ -249,8 +231,6 @@ class CustomFunctions:
         app = AppName(gameName)
         ini_files = app.what_ini_files_are_used()                 
         for file in ini_files:
-            if file == 'theme.ini':
-                continue
             if file == 'Ultra.ini':
                 continue
             if not os.path.exists(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\{file}'):
