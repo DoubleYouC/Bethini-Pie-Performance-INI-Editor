@@ -20,7 +20,9 @@ from operator import gt, ge, lt, le, ne, eq
 #S_IRGRP, #S_IROTH) Not currently used.
 
 import tkinter as tk
-from tkinter import ttk
+import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
+from ttkbootstrap.themes import standard as standThemes
 from tkinter import colorchooser
 from tkinter import messagebox
 
@@ -32,8 +34,6 @@ from lib.tooltips import Hovertip
 from lib.ModifyINI import ModifyINI
 from lib.customFunctions import CustomFunctions, sm, browse_to_location, rgb_to_hex, rgba_to_hex,hex_to_rgb, hex_to_decimal, decimal_to_rgb
 
-from ctypes import windll
-windll.shcore.SetProcessDpiAwareness(1)
 
 #This dictionary maps the operator modules to specific text.
 operator_dictionary = {
@@ -79,6 +79,18 @@ current_working_directory = os.getcwd()
 my_app_name = "Bethini Pie"
 my_app_short_name = "Bethini"
 
+def set_theme(style_object, root, theme_name):
+    """ Sets the theme. """
+    style_object.theme_use(theme_name)
+    style_object.configure('choose_game_button.TButton', font=('Segoe UI', '14'))
+    app_config.assign_setting_value('General', 'sTheme', theme_name)
+    
+def file_menu_choice(root, choice):
+    if choice == 'Save':
+        root.save_ini_files
+    elif choice == 'Choose Game':
+        root.choose_game(forced=1)
+
 class Scalar(ttk.Scale):
     """ ttk.Scale with limited decimal places """
 
@@ -95,16 +107,13 @@ class Scalar(ttk.Scale):
         self.winfo_toplevel().globalsetvar(self.cget('variable'), (new_value))
         self.chain(new_value)
 
-class bethini_app(tk.Tk):
+class bethini_app(ttk.Window):
     #This is the main app, the glue that creates the GUI.
 
     def __init__(self, *args, **kwargs):
         #You need args for lists and kwargs for dictionaries passed to tkinter
-        tk.Tk.__init__(self, *args, **kwargs)
-
-        #self.overrideredirect(True)
-        tk.Tk.iconbitmap(self, default='Icon.ico') #sets the app icon
-
+        ttk.Window.__init__(self, *args, **kwargs)
+        
         #variables
         self.setup_dictionary = {}
         self.tab_dictionary = {}
@@ -148,43 +157,8 @@ class bethini_app(tk.Tk):
 
         # ttk style overrides
         self.s = ttk.Style()
-        self.s.theme_use('vista')
-        self.s.configure(".", background=sub_container_color, font=smallFont,
-                         foreground=text_color, fieldbackground=field_color, arrowcolor=text_color)
-        self.s.map('.',
-                   foreground=[('disabled', text_color_disabled),
-                               ('pressed', text_color_pressed),
-                               ('active', text_color_active)],
-                   background=[('disabled', background_color_disabled),
-                               ('pressed', '!focus', background_color_pressed),
-                               ('active', background_color_active)])
 
-        #arrow_size = int(round(int(small_font_size)*1.33,0))
-
-        self.s.configure('TCheckbutton', indicatorcolor=indicator_color)
-        #self.s.configure('TCombobox', arrowsize=arrow_size)
-        self.s.configure('TSpinbox', background=dropdown_color)
-        self.s.configure('TMenubutton', background=dropdown_color)
-        self.s.configure('TCombobox', background=dropdown_color)
-        self.s.configure('TNotebook', background=container_color)
-        self.s.configure('TRadiobutton', indicatorcolor=indicator_color)
-        self.s.configure('TNotebook.Tab', background=button_bar_color, padding=[10,5])
-
-        self.s.map('TNotebook.Tab',
-                   background=[('!selected', background_color_disabled)])
-
-        self.option_add("*TCombobox*Font", smallFont)
-        self.option_add("*TCombobox*Listbox*background", dropdown_color)
-        self.option_add("*TCombobox*Listbox*foreground", text_color)
-        self.option_add("*Menu*Font", smallFont)
-        self.option_add("*Menu*background", dropdown_color)
-        self.option_add("*Menu*foreground", text_color)
-
-        #self.titleBar = tk.Frame(self, bg=container_color, relief='raised', bd=2)
-        #self.closeButton = ttk.Button(self.titleBar, text='✕', command=onClosing)
-
-        self.the_canvas = tk.Canvas(self, borderwidth=0, background=container_color,
-                                   height=0, highlightthickness=0)
+        self.the_canvas = ttk.Canvas(self)
         self.hsbframeholder = ttk.Frame(self)
 
         self.vsb = AutoScrollbar(self, orient='vertical',
@@ -196,8 +170,6 @@ class bethini_app(tk.Tk):
         self.container = ttk.Frame(self.the_canvas)
         self.container.bind_all('<Control-s>', self.save_ini_files)
 
-        #self.titleBar.pack(expand=False, fill=tk.X)
-        #self.closeButton.pack(side=tk.RIGHT)
         self.hsbframeholder.pack(side=tk.BOTTOM, fill=tk.X)
         self.vsb.pack(side=tk.RIGHT, fill=tk.Y)
         self.hsb.pack(side=tk.BOTTOM, fill=tk.X)
@@ -216,10 +188,8 @@ class bethini_app(tk.Tk):
         self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode='indeterminate')
         self.start_progress()
         self.show_status_bar()
-        #upon initialization of the bethini_app class, self.chooseGame() is
-        #called first, so we select or return to the game/app we want to work with
 
-        self.choose_game_window = tk.Toplevel(self)
+        self.choose_game_window = ttk.Toplevel(self)
         self.choose_game_window.title('Bethini Pie')
 
         self.choose_game_frame = ttk.Frame(self.choose_game_window)
@@ -227,31 +197,35 @@ class bethini_app(tk.Tk):
         self.choose_game_frame_2 = ttk.Frame(self.choose_game_frame)
 
         self.label_Bethini = ttk.Label(self.choose_game_frame_2, text="Bethini Pie", font=('Segoe UI', '20'))
-        self.label_Pie = ttk.Label(self.choose_game_frame_2, text="Performance INI Editor\nby DoubleYou", font=('Segoe UI', '15'), foreground='#555', justify='center')
-        self.label_link = ttk.Label(self.choose_game_frame_2, text="https://www.nexusmods.com/site/mods/631", font=('Segoe UI', '12'), cursor='hand2', foreground='blue')
+        self.label_Pie = ttk.Label(self.choose_game_frame_2, text="Performance INI Editor\nby DoubleYou", font=('Segoe UI', '15'), justify='center', bootstyle="warning")
+        self.label_link = ttk.Label(self.choose_game_frame_2, text="https://www.nexusmods.com/site/mods/631", font=('Segoe UI', '12'), cursor='hand2', bootstyle="info")
 
         self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=('Segoe UI', '15'))
 
         self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode='browse', show='tree', columns=('Name'))
         self.choose_game_tree.column('#0', width=0, stretch=tk.NO)
-        self.choose_game_tree.column('Name', anchor=tk.W)
+        self.choose_game_tree.column('Name', anchor=tk.W, width=300)
 
         self.s.configure('choose_game_button.TButton', font=('Segoe UI', '14'))
         self.choose_game_button = ttk.Button(self.choose_game_frame_2, text='Select Game', style='choose_game_button.TButton',
                                              command=lambda: self.choose_game_done(self.choose_game_tree.focus()))
         
-        self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=('Segoe UI', '12'), foreground='#555', justify='center')
+        self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=('Segoe UI', '12'), justify='center', bootstyle="success")
+        self.preferences_frame = ttk.Frame(self.choose_game_frame_2)
+        self.theme_label = ttk.Label(self.preferences_frame, text="Theme:")
  
 
         options = os.listdir('apps/')
         for option in options:
             self.choose_game_tree.insert('', 'end', id=option, text=option, values=[option])
-
-        # self.choose_game_var = tk.StringVar(self)
-        # self.choose_game_dropdown = ttk.OptionMenu(self.choose_game_frame_2,
-        #                                          self.choose_game_var, "None", *options,
-        #                                          command= lambda g: self.choose_game_done(g, True))
-        # self.choose_game_dropdown.var = self.choose_game_var
+            
+        theme_names = standThemes.STANDARD_THEMES.keys()
+        
+        self.theme_name = tk.StringVar(self)
+        self.theme_dropdown = ttk.OptionMenu(self.choose_game_frame_2,
+                                             self.theme_name, app_config.get_value('General', 'sTheme', 'superhero'),                       *theme_names,
+                                             command= lambda t: set_theme(self.s, self, t))
+        self.theme_dropdown.var = self.theme_name
 
         self.choose_game_frame.pack(fill=tk.BOTH, expand=True)
         self.choose_game_frame_2.pack(anchor=tk.CENTER, expand=True)
@@ -260,10 +234,11 @@ class bethini_app(tk.Tk):
         self.label_Pie.pack(padx=5, pady=15)
         self.label_link.pack(padx=25, pady=5)
         self.label_link.bind("<Button-1>", lambda e: webbrowser.open_new_tab('https://www.nexusmods.com/site/mods/631'))
-        self.choose_game_label.pack(padx=5, pady=2)
-        self.choose_game_tree.pack()
         
-        # self.choose_game_dropdown.pack(padx=5, pady=5)
+        
+        self.theme_dropdown.pack(padx=5, pady=15)
+        self.choose_game_label.pack(padx=5, pady=2)
+        self.choose_game_tree.pack(padx=10)
         self.choose_game_button.pack(pady=15)
         self.choose_game_tip.pack(pady=10)
         self.choose_game_window.protocol("WM_DELETE_WINDOW", on_closing)
@@ -271,8 +246,6 @@ class bethini_app(tk.Tk):
 
         self.preset_var = tk.StringVar(self)
         self.preset_var.set('Bethini')
-
-        self.choose_game()
 
     def on_frame_configure(self, event):
         self.the_canvas.configure(scrollregion=self.the_canvas.bbox('all'))
@@ -524,7 +497,14 @@ class bethini_app(tk.Tk):
         menubar.add_cascade(label="File", menu=filemenu)
         menubar.add_cascade(label="Edit", menu=editmenu)
         menubar.add_cascade(label="Help", menu=helpmenu)
-        tk.Tk.config(self, menu=menubar)
+        ttk.Window.config(self, menu=menubar)
+
+        # menu_bar = ttk.Frame(self.container)
+        # file_menu_options = ['Save', 'Choose Game']
+        # file_menu_var = tk.StringVar(self)
+        # file_menu = ttk.OptionMenu(menu_bar, file_menu_var, 'File', *file_menu_options, command=lambda c: file_menu_choice(self,c))
+        # menu_bar.pack(anchor=tk.W)
+        # file_menu.pack(anchor=tk.W)
 
     def show_preferences(self):
         preferencesWindow.deiconify()
@@ -533,7 +513,7 @@ class bethini_app(tk.Tk):
         preferencesWindow.withdraw()
 
     def about(self):
-        about_window = tk.Toplevel(self)
+        about_window = ttk.Toplevel(self)
         about_window.title('About')
 
         about_frame = ttk.Frame(about_window)
@@ -590,25 +570,13 @@ class bethini_app(tk.Tk):
                     continue
                 if messagebox.askyesno(f"Save {each_ini}", f"Do you want to save {this_location}{each_ini}?"):
                     #we need to make a backup of each save before actually saving.
-                    if each_ini != 'theme.ini':
-                        first_time_backup_trigger = remove_excess_directory_files(f'{this_location}{my_app_name} backups',
-                                                                      int(app_config.get_value('General', 'iMaxBackups', '-1')),
-                                                                      files_to_remove)
-                        if first_time_backup_trigger:
-                            first_time_backup = True
-                        if first_time_backup:
-                            the_backup_directory = f'{this_location}\\{my_app_name} backups\\First-Time-Backup\\'
-                            if not os.path.isdir(the_backup_directory):
-                                os.makedirs(the_backup_directory)
-                            if os.path.exists(f"{the_backup_directory}{each_ini}"):
-                                self.sme(f'{the_backup_directory}{each_ini} exists, so it will not be overwritten.')
-                            else:
-                                try:
-                                    copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
-                                except FileNotFoundError:
-                                    self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
-                            copyfile(my_app_log, f"{the_backup_directory}log.log")
-                        the_backup_directory = f'{this_location}\\{my_app_name} backups\\{log_directory_date}\\'
+                    first_time_backup_trigger = remove_excess_directory_files(f'{this_location}{my_app_name} backups',
+                                                                    int(app_config.get_value('General', 'iMaxBackups', '-1')),
+                                                                    files_to_remove)
+                    if first_time_backup_trigger:
+                        first_time_backup = True
+                    if first_time_backup:
+                        the_backup_directory = f'{this_location}\\{my_app_name} backups\\First-Time-Backup\\'
                         if not os.path.isdir(the_backup_directory):
                             os.makedirs(the_backup_directory)
                         if os.path.exists(f"{the_backup_directory}{each_ini}"):
@@ -619,6 +587,17 @@ class bethini_app(tk.Tk):
                             except FileNotFoundError:
                                 self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
                         copyfile(my_app_log, f"{the_backup_directory}log.log")
+                    the_backup_directory = f'{this_location}\\{my_app_name} backups\\{log_directory_date}\\'
+                    if not os.path.isdir(the_backup_directory):
+                        os.makedirs(the_backup_directory)
+                    if os.path.exists(f"{the_backup_directory}{each_ini}"):
+                        self.sme(f'{the_backup_directory}{each_ini} exists, so it will not be overwritten.')
+                    else:
+                        try:
+                            copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
+                        except FileNotFoundError:
+                            self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
+                    copyfile(my_app_log, f"{the_backup_directory}log.log")
                     this_ini_object.save_ini_file(1)
                     files_saved = True
                     self.sme(f"{this_location}{each_ini} saved.")
@@ -646,7 +625,7 @@ class bethini_app(tk.Tk):
 
     def remove_invalid_settings(self):
         for each_ini in open_inis:
-            if each_ini == my_app_config or each_ini == 'theme.ini':
+            if each_ini == my_app_config:
                 continue
             elif APP.inis(each_ini):
                 location_list = list(open_inis[each_ini]['located'].keys())
@@ -714,10 +693,10 @@ class bethini_app(tk.Tk):
 
     def create_tab_image(self, each_tab):
         try:
-            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "theme\\" + theme + "\\" + self.tab_dictionary[each_tab]["Name"] + ".png", height=16, width=16)
+            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "icons\\" + self.tab_dictionary[each_tab]["Name"] + ".png", height=16, width=16)
         except:
-            self.sme('No theme image for tab.', exception=1)
-            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "theme\\" + theme + "\\Blank.png")
+            self.sme('No image for tab.', exception=1)
+            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "icons\\Blank.png")
 
     def label_frames_for_tab(self, each_tab):
         the_dict = self.tab_dictionary[each_tab]
@@ -768,7 +747,7 @@ class bethini_app(tk.Tk):
                 setting_label = ''
             setting_label_width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("customWidth")
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkLabel"] = ttk.Label(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                                   text=setting_label, font=smallFont, width=setting_label_width, anchor=tk.E)
+                                                                                                                                   text=setting_label, width=setting_label_width, anchor=tk.E)
             if setting_type in types_packed_left:
                 self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkLabel"].pack(anchor=tk.CENTER, side=tk.LEFT, padx=5, pady=5)
             else:
@@ -776,7 +755,7 @@ class bethini_app(tk.Tk):
         setting_description = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("Description")
         if setting_description:
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkDescriptionLabel"] = ttk.Label(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                                              text=setting_description, font=smallFont, justify="left", wraplength=900)
+                                                                                                                                              text=setting_description, justify="left", wraplength=900)
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkDescriptionLabel"].pack(anchor=tk.N)
         self.setting_type_switcher(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, setting_type)
 
@@ -823,7 +802,7 @@ class bethini_app(tk.Tk):
                                                                                                                               text=each_setting, variable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
                                                                                                                               onvalue=on_value, offvalue=off_value)
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].var = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"]
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor='w', padx=5, pady=3.5)
+        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor='w', padx=5, pady=6.5)
         self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
@@ -840,7 +819,7 @@ class bethini_app(tk.Tk):
         preset_id = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("preset id")
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Button(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
                                                                                                                          text=each_setting, command=lambda: self.set_preset(preset_id))
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=2)
+        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0)
         self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
 
@@ -851,7 +830,7 @@ class bethini_app(tk.Tk):
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Radiobutton(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
                                                                                                                               text=each_setting,
                                                                                                                               variable=self.preset_var, value=value)
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=4)
+        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=7)
         self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
@@ -948,12 +927,12 @@ class bethini_app(tk.Tk):
         if validate:
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"] = self.register(self.validate)
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Entry(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        width=entry_width, validate='key', font=smallFont,
+                                                                                                                        width=entry_width, validate='key',
                                                                                                                         validatecommand=(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"],'%P','%s',validate),
                                                                                                                         textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
         else:
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Entry(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        width=entry_width, font=smallFont,
+                                                                                                                        width=entry_width,
                                                                                                                         textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
@@ -994,12 +973,12 @@ class bethini_app(tk.Tk):
         if validate:
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"] = self.register(self.validate)
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["second_tk_widget"] = ttk.Spinbox(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        width=width, validate='key', increment=increment_value, from_=from_value, to=to_value, font=smallFont,
+                                                                                                                        width=width, validate='key', increment=increment_value, from_=from_value, to=to_value,
                                                                                                                         validatecommand=(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"],'%P','%s',validate),
                                                                                                                         textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
         else:
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["second_tk_widget"] = ttk.Spinbox(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        width=width, increment=increment_value, from_=from_value, to=to_value, font=smallFont,
+                                                                                                                        width=width, increment=increment_value, from_=from_value, to=to_value,
                                                                                                                         textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
 
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["second_tk_widget"].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
@@ -1029,12 +1008,12 @@ class bethini_app(tk.Tk):
         if validate:
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"] = self.register(self.validate)
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Spinbox(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        from_=from_value, to=to_value, increment=increment, width=width, validate='key', font=smallFont,
+                                                                                                                        from_=from_value, to=to_value, increment=increment, width=width, validate='key',
                                                                                                                         validatecommand=(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"],'%P','%s',validate),
                                                                                                                         textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
         else:
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Spinbox(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        from_=from_value, to=to_value, increment=increment, width=width, font=smallFont,
+                                                                                                                        from_=from_value, to=to_value, increment=increment, width=width,
                                                                                                                         textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
@@ -1064,7 +1043,6 @@ class bethini_app(tk.Tk):
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"].set('16777215')
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = tk.Button(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
                                                                                                                         textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
-                                                                                                                        font=smallFont,
                                                                                                                         command=lambda: self.choose_color(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_],
                                                                                                                                                          color_value_type))
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].var = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"]
@@ -1585,7 +1563,7 @@ class bethini_app(tk.Tk):
                 
     def createTabs(self, fromChooseGameWindow=False):
         global PREVIEW_WINDOW
-        PREVIEW_WINDOW = tk.Toplevel(self, bg=sub_container_color)
+        PREVIEW_WINDOW = ttk.Toplevel(self)
         PREVIEW_WINDOW.title('Preview')
         global PREVIEW_FRAME
         PREVIEW_FRAME = ttk.Frame(PREVIEW_WINDOW)
@@ -1603,7 +1581,7 @@ class bethini_app(tk.Tk):
             self.create_tab_image(each_tab)
             if self.tab_dictionary[each_tab]['Name'] == 'Setup':
                 global SETUP_WINDOW
-                self.tab_dictionary[each_tab]['SetupWindow'] = tk.Toplevel(self, bg=sub_container_color)
+                self.tab_dictionary[each_tab]['SetupWindow'] = ttk.Toplevel(self)
                 SETUP_WINDOW = self.tab_dictionary[each_tab]['SetupWindow']
                 SETUP_WINDOW.title('Setup')
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(SETUP_WINDOW)
@@ -1617,7 +1595,7 @@ class bethini_app(tk.Tk):
                     SETUP_WINDOW.withdraw()
             elif self.tab_dictionary[each_tab]['Name'] == 'Preferences':
                 global preferencesWindow
-                self.tab_dictionary[each_tab]['PreferencesWindow'] = tk.Toplevel(self, bg=sub_container_color)
+                self.tab_dictionary[each_tab]['PreferencesWindow'] = ttk.Toplevel(self)
                 preferencesWindow = self.tab_dictionary[each_tab]['PreferencesWindow']
                 preferencesWindow.title('Preferences')
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(preferencesWindow)
@@ -1757,9 +1735,6 @@ class bethini_app(tk.Tk):
         ini_location = APP.inis(ini)
         if ini_location == '':
             ini_location == ''
-        elif ini_location == 'sTheme':
-            theme_dir = app_config.get_value('General', 'sTheme', 'Default')
-            ini_location = f'{current_working_directory}\\theme\\{theme_dir}\\'
         else:
             ini_location = app_config.get_value('Directories', ini_location)
         return ini_location
@@ -1789,7 +1764,7 @@ class bethini_app(tk.Tk):
                     currentSection = targetSections[ININumber]
 
                     # This looks for a default value in the settings.json
-                    if INI == my_app_config or INI == 'theme.ini':
+                    if INI == my_app_config:
                         defaultValue = "Does Not Exist"
                     else:
                         defaultValue = APP.get_value(currentSetting, "default")
@@ -1913,46 +1888,14 @@ if __name__ == '__main__':
     app_config.assign_setting_value('General', 'iMaxLogs', iMaxLogs)
     app_config.assign_setting_value('General', 'iMaxBackups', app_config.get_value('General', 'iMaxBackups', '5'))
     
-    theme = app_config.get_value('General', 'sTheme', default='Default')
+    #theme
+    theme = app_config.get_value('General', 'sTheme', default='superhero')
+    if theme not in standThemes.STANDARD_THEMES.keys():
+        theme='superhero'
+    app_config.assign_setting_value('General', 'sTheme', theme)
 
     #Remove excess log files.
     remove_excess_directory_files(f'{current_working_directory}\\logs', int(iMaxLogs), ['log.log'])
-
-    #Check to make sure the theme actually exists.
-    if os.path.isfile(f'{current_working_directory}\\theme\\{theme}\\theme.ini'):
-        sm(f'The theme called \"{theme}\" exists.')
-    else:
-        #If the theme doesn't exist, revert to Default theme.
-        theme = 'Default'
-    #Make sure that the theme is specified in the config file.
-    app_config.assign_setting_value('General', 'sTheme', theme)
-    theme_dir = app_config.get_value('General', 'sTheme', 'Default')
-
-    #Open Theme config.
-    theme_config = ModifyINI(f'theme\\{theme}\\theme.ini')
-    default_font_name = 'Segoe UI' #Set the default font name.
-    default_font_size = 10 #Set the default font size.
-
-    #Set the font names and sizes.
-    small_font_size = theme_config.get_value('Fonts','iSmallFontSize', default_font_size)
-    smallFont = (theme_config.get_value('Fonts','sSmallFontName', default_font_name), small_font_size)
-
-    #Set the theme colors.
-    button_bar_color = theme_config.get_value('Colors','sButtonBarColor','#969696')
-    container_color = theme_config.get_value('Colors','sContainerColor','#555555')
-    sub_container_color = theme_config.get_value('Colors','sSubContainerColor','#A5A5A5')
-    dropdown_color = theme_config.get_value('Colors','sDropDownColor','#BEBEBE')
-    field_color = theme_config.get_value('Colors','sFieldColor','#FFFFFF')
-    indicator_color = theme_config.get_value('Colors','sIndicatorColor','#FFFFFF')
-    text_color = theme_config.get_value('Colors','sTextColor','#000000')
-
-    text_color_disabled = theme_config.get_value('Colors','sTextColorDisabled','#7F7F7F')
-    text_color_pressed = theme_config.get_value('Colors','sTextColorPressed','#323232')
-    text_color_active = theme_config.get_value('Colors','sTextColorActive','#000000')
-
-    background_color_disabled = theme_config.get_value('Colors','sBackgroundColorDisabled','#E1E1E1')
-    background_color_pressed = theme_config.get_value('Colors','sBackgroundColorPressed','#828282')
-    background_color_active = theme_config.get_value('Colors','sBackgroundColorActive','#A5A5A5')
     
     #Initialize open_inis dictionary to store list of opened INI files in.
     open_inis = {
@@ -1963,19 +1906,15 @@ if __name__ == '__main__':
                     'object': app_config
                 }
             }
-        },
-        'theme.ini': {
-            'located': {
-                '1': {
-                    'at': f'{current_working_directory}\\theme\\{theme_dir}\\',
-                    'object': theme_config
-                }
-            }
         }
     }
 
     #Start the app class
-    window = bethini_app()
+
+    window = bethini_app(themename=theme, iconphoto='Icons\\Icon.png')
+    window.choose_game()
+
+    
     window.protocol("WM_DELETE_WINDOW", on_closing)
     window.mainloop()
 
