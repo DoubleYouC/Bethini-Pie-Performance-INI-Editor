@@ -85,12 +85,6 @@ def set_theme(style_object, root, theme_name):
     style_object.theme_use(theme_name)
     style_object.configure('choose_game_button.TButton', font=('Segoe UI', '14'))
     app_config.assign_setting_value('General', 'sTheme', theme_name)
-    
-def file_menu_choice(root, choice):
-    if choice == 'Save':
-        root.save_ini_files
-    elif choice == 'Choose Game':
-        root.choose_game(forced=1)
 
 class Scalar(ttk.Scale):
     """ ttk.Scale with limited decimal places """
@@ -242,7 +236,7 @@ class bethini_app(ttk.Window):
         self.choose_game_tree.pack(padx=10)
         self.choose_game_button.pack(pady=15)
         self.choose_game_tip.pack(pady=10)
-        self.choose_game_window.protocol("WM_DELETE_WINDOW", on_closing)
+        self.choose_game_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(self))
         self.choose_game_window.minsize(300,35)
 
         self.preset_var = tk.StringVar(self)
@@ -414,7 +408,7 @@ class bethini_app(ttk.Window):
         except Exception as e:
             self.sme('An unhandled exception occurred.', exception=1)
             messagebox.showerror(title='Unhandled exception', message=f'An unhandled exception occurred.\n{e}\nThis program will now close. No files will be modified.')
-            exit()
+            self.quit()
 
     def choose_game_done(self, game, from_choose_game_window=False):
         if game == '':
@@ -485,7 +479,7 @@ class bethini_app(ttk.Window):
         filemenu.add_separator()
         filemenu.add_command(label="Choose game", command = lambda: self.choose_game(forced=1))
         filemenu.add_separator()
-        filemenu.add_command(label="Exit", command=on_closing)
+        filemenu.add_command(label="Exit", command= lambda: on_closing(self))
         editmenu = tk.Menu(menubar, tearoff=False)
         editmenu.add_command(label="Preferences", command = self.show_preferences)
         editmenu.add_command(label="Setup", command = self.show_setup)
@@ -554,7 +548,7 @@ class bethini_app(ttk.Window):
             self.apply_ini_dict(APP.preset_values('fixedDefault'), only_if_missing=True)
         except NameError as e:
             self.sme(f'NameError: {e}', True)
-            exit()
+            return
         ini_list = list(open_inis.keys())
         files_to_remove = ini_list[2:]
         files_to_remove.append('log.log')
@@ -1562,6 +1556,8 @@ class bethini_app(ttk.Window):
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
                 
     def createTabs(self, fromChooseGameWindow=False):
+        
+        # Preview Window
         global PREVIEW_WINDOW
         PREVIEW_WINDOW = ttk.Toplevel(self)
         PREVIEW_WINDOW.title('Preview')
@@ -1570,7 +1566,6 @@ class bethini_app(ttk.Window):
         PREVIEW_FRAME.pack(padx=5, pady=5)
         preview_close_button = ttk.Button(PREVIEW_WINDOW, text="Close", command=PREVIEW_WINDOW.withdraw)
         preview_close_button.pack(anchor=tk.SE, padx=5, pady=5)
-
         PREVIEW_WINDOW.protocol("WM_DELETE_WINDOW", PREVIEW_WINDOW.withdraw)
         PREVIEW_WINDOW.withdraw()
         
@@ -1609,12 +1604,12 @@ class bethini_app(ttk.Window):
             else:
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(self.sub_container)
                 self.sub_container.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.LEFT)
-
-            #self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(self.subContainer)
-            #self.subContainer.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.TOP)
             
             self.label_frames_for_tab(each_tab)
-
+        
+        
+        
+        
             
         self.stop_progress()
         if not fromChooseGameWindow:
@@ -1799,13 +1794,13 @@ class bethini_app(ttk.Window):
 
         return settingValues
 
-def on_closing():
+def on_closing(root):
     """Initialized upon closing the app. Asks if the user wants to save INI files if any INI files have been modified before quitting."""
     if messagebox.askyesno("Quit?", "Do you want to quit?"):
         if app_config.has_been_modified:
             app_config.save_ini_file(1)
-        window.save_ini_files()
-        window.quit()
+        root.save_ini_files()
+        root.quit()
 
 def remove_excess_directory_files(directory, max_to_keep, files_to_remove):
     """Removes excess logs/backups.
@@ -1922,6 +1917,6 @@ if __name__ == '__main__':
     window.choose_game()
 
     
-    window.protocol("WM_DELETE_WINDOW", on_closing)
+    window.protocol("WM_DELETE_WINDOW", lambda: on_closing(window))
     window.mainloop()
 
