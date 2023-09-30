@@ -7,6 +7,7 @@
 
 import ast
 import configparser
+from fileinput import fileno
 import os
 import math
 import logging
@@ -190,7 +191,7 @@ class bethini_app(ttk.Window):
         self.show_status_bar()
 
         self.choose_game_window = ttk.Toplevel(self)
-        self.choose_game_window.title('Bethini Pie')
+        self.choose_game_window.title(f'Bethini Pie {version}')
 
         self.choose_game_frame = ttk.Frame(self.choose_game_window)
 
@@ -412,7 +413,7 @@ class bethini_app(ttk.Window):
             self.choose_game_window.deiconify()
         except Exception as e:
             self.sme('An unhandled exception occurred.', exception=1)
-            messagebox.showerror(title='Unhandled excetption', message=f'An unhandled exception occurred.\n{e}')
+            messagebox.showerror(title='Unhandled exception', message=f'An unhandled exception occurred.\n{e}\nThis program will now close. No files will be modified.')
             exit()
 
     def choose_game_done(self, game, from_choose_game_window=False):
@@ -431,7 +432,7 @@ class bethini_app(ttk.Window):
             app_config.assign_setting_value('General','sAppName', game)
             from_choose_game_window = True
 
-        tk.Tk.wm_title(self, my_app_name + " - " + game)
+        tk.Tk.wm_title(self,f'{my_app_name} {version} - {game}')
 
         ##############
         # app globals
@@ -505,13 +506,6 @@ class bethini_app(ttk.Window):
         menubar.add_cascade(label="Help", menu=helpmenu)
         ttk.Window.config(self, menu=menubar)
 
-        # menu_bar = ttk.Frame(self.container)
-        # file_menu_options = ['Save', 'Choose Game']
-        # file_menu_var = tk.StringVar(self)
-        # file_menu = ttk.OptionMenu(menu_bar, file_menu_var, 'File', *file_menu_options, command=lambda c: file_menu_choice(self,c))
-        # menu_bar.pack(anchor=tk.W)
-        # file_menu.pack(anchor=tk.W)
-
     def show_preferences(self):
         preferencesWindow.deiconify()
 
@@ -526,7 +520,7 @@ class bethini_app(ttk.Window):
         about_frame_real = ttk.Frame(about_frame)
 
         about_label = ttk.Label(about_frame_real,
-                               text=f'About {my_app_name}\n\n{my_app_name} was created by DoubleYou.\n\nLicensing is CC by-NC-SA.',
+                               text=f'About {my_app_name} {version}\n\n{my_app_name} was created by DoubleYou.\n\nLicensing is CC by-NC-SA.',
                                justify=tk.CENTER)
 
         about_frame.pack(fill=tk.BOTH, expand=True)
@@ -1914,6 +1908,13 @@ if __name__ == '__main__':
             }
         }
     }
+    
+    #Get version
+    try:
+        changelog = open('changelog.txt', 'r')
+        version = changelog.readline().replace('\n','')
+    except FileNotFoundError:
+        version = ''
 
     #Start the app class
 

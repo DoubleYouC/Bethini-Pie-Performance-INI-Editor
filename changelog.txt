@@ -4,6 +4,7 @@ Bethini Pie update notes:
 -Improved exception handling.
 -New startup "Choose Game" window.
 -New theme system.
+-Added version number identification.
 
 Fallout 4 plugin update notes:
 -Bugfix: Load Loose Files was supposed to be applied when you use the Apply Recommended Tweaks button.
