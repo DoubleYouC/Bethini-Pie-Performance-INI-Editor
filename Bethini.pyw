@@ -198,7 +198,7 @@ class bethini_app(ttk.Window):
 
         self.label_Bethini = ttk.Label(self.choose_game_frame_2, text="Bethini Pie", font=('Segoe UI', '20'))
         self.label_Pie = ttk.Label(self.choose_game_frame_2, text="Performance INI Editor\nby DoubleYou", font=('Segoe UI', '15'), justify='center', bootstyle="warning")
-        self.label_link = ttk.Label(self.choose_game_frame_2, text="https://www.nexusmods.com/site/mods/631", font=('Segoe UI', '12'), cursor='hand2', bootstyle="info")
+        self.label_link = ttk.Label(self.choose_game_frame_2, text="www.nexusmods.com/site/mods/631", font=('Segoe UI', '10'), cursor='hand2', bootstyle="info")
 
         self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=('Segoe UI', '15'))
 
@@ -211,20 +211,19 @@ class bethini_app(ttk.Window):
                                              command=lambda: self.choose_game_done(self.choose_game_tree.focus()))
         
         self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=('Segoe UI', '12'), justify='center', bootstyle="success")
-        self.preferences_frame = ttk.Frame(self.choose_game_frame_2)
-        self.theme_label = ttk.Label(self.preferences_frame, text="Theme:")
- 
-
         options = os.listdir('apps/')
         for option in options:
             self.choose_game_tree.insert('', 'end', id=option, text=option, values=[option])
-            
-        theme_names = standThemes.STANDARD_THEMES.keys()
         
+        
+        self.preferences_frame = ttk.Frame(self.choose_game_frame_2)
+        
+        self.theme_label = ttk.Label(self.preferences_frame, text="Theme:")
+        theme_names = standThemes.STANDARD_THEMES.keys()
         self.theme_name = tk.StringVar(self)
-        self.theme_dropdown = ttk.OptionMenu(self.choose_game_frame_2,
-                                             self.theme_name, app_config.get_value('General', 'sTheme', 'superhero'),                       *theme_names,
-                                             command= lambda t: set_theme(self.s, self, t))
+        self.theme_dropdown = ttk.OptionMenu(self.preferences_frame,
+                                             self.theme_name, app_config.get_value('General', 'sTheme', 'superhero'), *theme_names,
+                                             command=lambda t: set_theme(self.s, self, t))
         self.theme_dropdown.var = self.theme_name
 
         self.choose_game_frame.pack(fill=tk.BOTH, expand=True)
@@ -235,7 +234,8 @@ class bethini_app(ttk.Window):
         self.label_link.pack(padx=25, pady=5)
         self.label_link.bind("<Button-1>", lambda e: webbrowser.open_new_tab('https://www.nexusmods.com/site/mods/631'))
         
-        
+        self.preferences_frame.pack()
+        self.theme_label.pack(side=tk.LEFT)
         self.theme_dropdown.pack(padx=5, pady=15)
         self.choose_game_label.pack(padx=5, pady=2)
         self.choose_game_tree.pack(padx=10)
@@ -399,7 +399,7 @@ class bethini_app(ttk.Window):
             if forced == 1:
                 self.sme('Force choose game/application.')
                 raise NameError
-            if app_config.get_value('General', 'bAlwaysSelectGame', '1') == '1':
+            if app_config.get_value('General', 'bAlwaysSelectGame', '1') != '0':
                 self.sme('Force choose game/application at startup.')
                 GAME_NAME #By calling the global variable GAME_NAME before it has been created,
                          #we raise
@@ -471,24 +471,29 @@ class bethini_app(ttk.Window):
         self.settings_that_settings_depend_on = {}
         self.tab = []
 
-        self.menu()
+        self.menu(self.s)
         if not from_choose_game_window:
             self.deiconify()
         self.createTabs(from_choose_game_window)
         
 
-    def menu(self):
+    def menu(self, style_object):
         menubar = tk.Menu(self)
-        filemenu = tk.Menu(menubar, tearoff=0)
+        filemenu = tk.Menu(menubar, tearoff=False)
         filemenu.add_command(label="Save", command = self.save_ini_files)
         filemenu.add_separator()
         filemenu.add_command(label="Choose game", command = lambda: self.choose_game(forced=1))
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=on_closing)
-        editmenu = tk.Menu(menubar, tearoff=0)
+        editmenu = tk.Menu(menubar, tearoff=False)
         editmenu.add_command(label="Preferences", command = self.show_preferences)
         editmenu.add_command(label="Setup", command = self.show_setup)
-        helpmenu = tk.Menu(menubar, tearoff=0)
+        theme_menu = tk.Menu(menubar, tearoff=False)
+        theme_names = list(standThemes.STANDARD_THEMES.keys())
+
+        for theme_name in theme_names:
+            theme_menu.add_command(label=theme_name, command = lambda t=theme_name: set_theme(style_object, self, t))
+        helpmenu = tk.Menu(menubar, tearoff=False)
         helpmenu.add_command(label="Visit Web Page",
                              command = lambda: webbrowser.open_new_tab('https://www.nexusmods.com/site/mods/631/'))
         helpmenu.add_command(label="Get Support",
@@ -496,6 +501,7 @@ class bethini_app(ttk.Window):
         helpmenu.add_command(label="About", command = self.about)
         menubar.add_cascade(label="File", menu=filemenu)
         menubar.add_cascade(label="Edit", menu=editmenu)
+        menubar.add_cascade(label="Theme", menu=theme_menu)
         menubar.add_cascade(label="Help", menu=helpmenu)
         ttk.Window.config(self, menu=menubar)
 
