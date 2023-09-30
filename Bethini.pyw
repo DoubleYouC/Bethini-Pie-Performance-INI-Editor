@@ -466,45 +466,49 @@ class bethini_app(ttk.Window):
         self.settings_that_settings_depend_on = {}
         self.tab = []
 
-        self.menu(self.s)
+        
         if not from_choose_game_window:
             self.deiconify()
         self.createTabs(from_choose_game_window)
+        self.menu(self.s)
         
 
     def menu(self, style_object):
         menubar = tk.Menu(self)
+        
+        # File
         filemenu = tk.Menu(menubar, tearoff=False)
         filemenu.add_command(label="Save", command = self.save_ini_files)
         filemenu.add_separator()
         filemenu.add_command(label="Choose game", command = lambda: self.choose_game(forced=1))
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command= lambda: on_closing(self))
+        
+        # Edit
         editmenu = tk.Menu(menubar, tearoff=False)
-        editmenu.add_command(label="Preferences", command = self.show_preferences)
+        editmenu.add_command(label="Preferences", command = preferencesWindow.deiconify)
         editmenu.add_command(label="Setup", command = self.show_setup)
+        
+        # Theme
         theme_menu = tk.Menu(menubar, tearoff=False)
         theme_names = list(standThemes.STANDARD_THEMES.keys())
-
         for theme_name in theme_names:
             theme_menu.add_command(label=theme_name, command = lambda t=theme_name: set_theme(style_object, self, t))
+        
+        # Help
         helpmenu = tk.Menu(menubar, tearoff=False)
         helpmenu.add_command(label="Visit Web Page",
                              command = lambda: webbrowser.open_new_tab('https://www.nexusmods.com/site/mods/631/'))
         helpmenu.add_command(label="Get Support",
                              command = lambda: webbrowser.open_new_tab('https://stepmodifications.org/forum/forum/200-Bethini-support/'))
         helpmenu.add_command(label="About", command = self.about)
+        
         menubar.add_cascade(label="File", menu=filemenu)
         menubar.add_cascade(label="Edit", menu=editmenu)
         menubar.add_cascade(label="Theme", menu=theme_menu)
         menubar.add_cascade(label="Help", menu=helpmenu)
+        
         ttk.Window.config(self, menu=menubar)
-
-    def show_preferences(self):
-        preferencesWindow.deiconify()
-
-    def withdraw_preferences(self):
-        preferencesWindow.withdraw()
 
     def about(self):
         about_window = ttk.Toplevel(self)
@@ -550,7 +554,7 @@ class bethini_app(ttk.Window):
             self.sme(f'NameError: {e}', True)
             return
         ini_list = list(open_inis.keys())
-        files_to_remove = ini_list[2:]
+        files_to_remove = ini_list[1:]
         files_to_remove.append('log.log')
         for each_ini in open_inis:
             location_list = list(open_inis[each_ini]['located'].keys())
@@ -1596,10 +1600,10 @@ class bethini_app(ttk.Window):
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(preferencesWindow)
                 self.tab_dictionary[each_tab]["TkFrameForTab"].pack()
 
-                preferences_ok_button = ttk.Button(preferencesWindow, text="OK", command=self.withdraw_preferences)
+                preferences_ok_button = ttk.Button(preferencesWindow, text="OK", command=preferencesWindow.withdraw)
                 preferences_ok_button.pack(anchor=tk.SE, padx=5, pady=5)
 
-                preferencesWindow.protocol("WM_DELETE_WINDOW", self.withdraw_preferences)
+                preferencesWindow.protocol("WM_DELETE_WINDOW", preferencesWindow.withdraw)
                 preferencesWindow.withdraw()
             else:
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(self.sub_container)
@@ -1607,10 +1611,6 @@ class bethini_app(ttk.Window):
             
             self.label_frames_for_tab(each_tab)
         
-        
-        
-        
-            
         self.stop_progress()
         if not fromChooseGameWindow:
             self.updateValues()
@@ -1863,6 +1863,7 @@ def open_ini(location, ini):
         }
     try:
         open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(location + ini)
+        #open_inis[ini]['located'][open_ini_id]['original'] = ModifyINI(location + ini)
     except configparser.MissingSectionHeaderError as e:
         sm(f"Error: {e.strerror}")
     return open_inis[ini]['located'][open_ini_id]['object']
