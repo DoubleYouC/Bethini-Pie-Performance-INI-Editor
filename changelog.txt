@@ -1,3 +1,35 @@
+v4.9
+Bethini Pie update notes:
+-Bugfix: Exiting without selecting a game could cause it to hang instead of exiting.
+-Improved exception handling.
+-New startup "Choose Game" window.
+-New theme system.
+
+Fallout 4 plugin update notes:
+-Bugfix: Load Loose Files was supposed to be applied when you use the Apply Recommended Tweaks button.
+-Bugfix: Fade In On Load wasn't being set properly.
+-Removed Default FOV and Default 1st Person FOV sliders, as they only cause issues.
+-Added 3rd Person Aim FOV.
+-Added Force Update Diffuse Only toggle.
+-Added Texture Upgrade/Degrade distance settings.
+-Added Precombines toggle.
+-Added Previs toggle.
+-Added Starting Console Command entry.
+-Added Console Hotkeys toggle.
+-Added Console INI entry.
+-Added Intro Music File entry.
+-Added Pipboy FX toggle.
+-Added Radial Blur toggle.
+-Added Focus Shadows Dialogue slider.
+-Changed Diable Combat Dialogue to simply Combat Dialogue to make it more clear.
+-Changed Over-Encumbered Reminder from and entry to a combobox widget.
+-Changed Intro Music toggle to set bPlayMainMenuMusic:General instead of sMainMenuMusic:General.
+
+Starfield plugin update notes:
+-Remember game path when switching between games.
+-Removed Anisotropic Filtering. The setting no longer works. If you want to use higher AF, force it in your graphics driver, but delete the %LocalAppData%\Starfield\Pipeline.cache file if you do so, or it will cause rendering bugs.
+-Removed Mipmap Bias. The game now manages this automatically.
+
 v4.8
 Bethini Pie update notes:
 -Added Ctrl+S hotkey for saving.
