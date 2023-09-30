@@ -10,6 +10,7 @@ Fallout 4 plugin update notes:
 -Bugfix: Load Loose Files was supposed to be applied when you use the Apply Recommended Tweaks button.
 -Bugfix: Fade In On Load wasn't being set properly.
 -Removed Default FOV and Default 1st Person FOV sliders, as they only cause issues.
+-Added Enable File Selection.
 -Added 3rd Person Aim FOV.
 -Added Force Update Diffuse Only toggle.
 -Added Texture Upgrade/Degrade distance settings.
