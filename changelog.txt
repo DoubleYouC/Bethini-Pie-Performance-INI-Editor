@@ -1,3 +1,7 @@
+v4.9.1
+Bethini Pie update notes:
+-Bugfix: Fixed bad padding value.
+
 v4.9
 Bethini Pie update notes:
 -Bugfix: Exiting without selecting a game could cause it to hang instead of exiting.

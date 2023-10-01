@@ -24,6 +24,7 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.themes import standard as standThemes
+from ttkbootstrap.icons import Icon
 from tkinter import colorchooser
 from tkinter import messagebox
 
@@ -469,7 +470,12 @@ class bethini_app(ttk.Window):
         
         if not from_choose_game_window:
             self.deiconify()
-        self.createTabs(from_choose_game_window)
+        try:
+            self.createTabs(from_choose_game_window)
+        except Exception as e:
+            self.sme('An unhandled exception occurred.', exception=1)
+            messagebox.showerror(title='Unhandled exception', message=f'An unhandled exception occurred.\n{e}\nThis program will now close. No files will be modified.')
+            self.quit()
         self.menu(self.s)
         
 
@@ -692,9 +698,13 @@ class bethini_app(ttk.Window):
     def create_tab_image(self, each_tab):
         try:
             self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "icons\\" + self.tab_dictionary[each_tab]["Name"] + ".png", height=16, width=16)
-        except:
-            self.sme('No image for tab.', exception=1)
-            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "icons\\Blank.png")
+        except tk.TclError as e:
+            self.sme(f'No image for tab.\n\n{e}', exception=1)
+            try:
+                self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "icons\\Blank.png")
+            except tk.TclError as e:
+                self.sme(f'Failed to load blank icon at {current_working_directory}\\icons\\Blank.png\n\n{e}', exception=1)
+                self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(data=Icon.warning)
 
     def label_frames_for_tab(self, each_tab):
         the_dict = self.tab_dictionary[each_tab]
@@ -800,7 +810,7 @@ class bethini_app(ttk.Window):
                                                                                                                               text=each_setting, variable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
                                                                                                                               onvalue=on_value, offvalue=off_value)
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].var = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"]
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor='w', padx=5, pady=6.5)
+        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor='w', padx=5, pady=7)
         self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
@@ -1602,12 +1612,15 @@ class bethini_app(ttk.Window):
 
                 preferences_ok_button = ttk.Button(preferencesWindow, text="OK", command=preferencesWindow.withdraw)
                 preferences_ok_button.pack(anchor=tk.SE, padx=5, pady=5)
+                preferencesWindow.minsize(300, 100)
 
                 preferencesWindow.protocol("WM_DELETE_WINDOW", preferencesWindow.withdraw)
                 preferencesWindow.withdraw()
+                
             else:
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(self.sub_container)
                 self.sub_container.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.LEFT)
+                
             
             self.label_frames_for_tab(each_tab)
         
@@ -1916,6 +1929,7 @@ if __name__ == '__main__':
 
     window = bethini_app(themename=theme, iconphoto='Icons\\Icon.png')
     window.choose_game()
+    window.minsize(400,200)
 
     
     window.protocol("WM_DELETE_WINDOW", lambda: on_closing(window))
