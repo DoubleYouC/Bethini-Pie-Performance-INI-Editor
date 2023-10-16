@@ -1,3 +1,15 @@
+v4.10
+Bethini Pie update notes:
+-Bugfix: Locale and date/time issues
+
+Starfield plugin update notes:
+-Corrected rgba default values.
+-Setup window now has a small explanation for Mod Organizer users.
+-FOV slider updated for latest game version.
+-Added Max Buffer Size (for the console) combobox.
+-Photo Mode Folder is now a combobox.
+-Photo Mode Folder is no longer set to "Photos" via the "Apply Recommended Tweaks" button, as Mod Organizer users will prefer to leave it at default.
+
 v4.9.1
 Bethini Pie update notes:
 -Bugfix: Fixed bad padding value.
