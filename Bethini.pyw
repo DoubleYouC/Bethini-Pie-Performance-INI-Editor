@@ -7,11 +7,9 @@
 
 import ast
 import configparser
-from fileinput import fileno
 import os
 import math
 import logging
-from re import S
 import webbrowser
 from shutil import copyfile
 from datetime import datetime
@@ -1826,7 +1824,7 @@ def remove_excess_directory_files(directory, max_to_keep, files_to_remove):
     except OSError as e:
         sm(f"Info: {directory} : {e.strerror}")
         return True
-    subdirectories.sort(reverse=True)
+    subdirectories.sort()
     if 'First-Time-Backup' in subdirectories:
         subdirectories.remove('First-Time-Backup')
     if max_to_keep > -1:
@@ -1884,7 +1882,7 @@ def open_ini(location, ini):
 if __name__ == '__main__':
     #Make logs.
     today = datetime.now()
-    log_directory_date = today.strftime("%Y %b %d %a - %H.%M.%S")
+    log_directory_date = today.strftime("%Y %m-%b %d %a - %H.%M.%S")
     my_app_log_directory = f'logs\\{log_directory_date}'
     my_app_log = f'{my_app_log_directory}\\log.log'
     os.makedirs(my_app_log_directory)
