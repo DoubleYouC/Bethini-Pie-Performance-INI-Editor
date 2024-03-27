@@ -8,6 +8,7 @@
 import ast
 import configparser
 import os
+import sys
 import math
 import logging
 import webbrowser
@@ -34,6 +35,13 @@ from lib.tooltips import Hovertip
 from lib.ModifyINI import ModifyINI
 from lib.customFunctions import CustomFunctions, sm, browse_to_location, rgb_to_hex, rgba_to_hex,hex_to_rgb, hex_to_decimal, decimal_to_rgb
 
+# configure logging
+log_fi: str = os.path.join("logs", f"{datetime.now().strftime("log_%Y_%m_%d_%H_%M_%S")}.log")
+logging.basicConfig(filename=log_fi, filemode='w', format='%(asctime)s [%(levelname)s]: %(message)s', datefmt='%Y.%m.%d %H:%M:%S', encoding='utf-8', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+_log_stdout = logging.StreamHandler(sys.stdout) # to console
+_log_stdout.setFormatter(logging.Formatter(fmt='%(asctime)s [%(levelname)s]: %(message)s', datefmt='%Y.%m.%d %H:%M:%S'))
+logger.addHandler(_log_stdout)
 
 #This dictionary maps the operator modules to specific text.
 operator_dictionary = {
@@ -588,8 +596,8 @@ class bethini_app(ttk.Window):
                                 copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
                             except FileNotFoundError:
                                 self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
-                        copyfile(my_app_log, f"{the_backup_directory}log.log")
-                    the_backup_directory = f'{this_location}\\{my_app_name} backups\\{log_directory_date}\\'
+                        copyfile(log_fi, f"{the_backup_directory}log.log")
+                    the_backup_directory = f'{this_location}\\{my_app_name} backups\\'
                     if not os.path.isdir(the_backup_directory):
                         os.makedirs(the_backup_directory)
                     if os.path.exists(f"{the_backup_directory}{each_ini}"):
@@ -599,7 +607,7 @@ class bethini_app(ttk.Window):
                             copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
                         except FileNotFoundError:
                             self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
-                    copyfile(my_app_log, f"{the_backup_directory}log.log")
+                    copyfile(log_fi, f"{the_backup_directory}log.log")
                     this_ini_object.save_ini_file(1)
                     files_saved = True
                     self.sme(f"{this_location}{each_ini} saved.")
@@ -1880,14 +1888,8 @@ def open_ini(location, ini):
     return open_inis[ini]['located'][open_ini_id]['object']
 
 if __name__ == '__main__':
-    #Make logs.
-    today = datetime.now()
-    log_directory_date = today.strftime("%Y %m-%b %d %a - %H.%M.%S")
-    my_app_log_directory = f'logs\\{log_directory_date}'
-    my_app_log = f'{my_app_log_directory}\\log.log'
-    os.makedirs(my_app_log_directory)
-    logging.basicConfig(filename=my_app_log, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
-
+    logger.info(f"Logging to '{log_fi}'")
+    
     #Get app config settings.
     my_app_config = f'{my_app_short_name}.ini'
     app_config = ModifyINI(my_app_config)
