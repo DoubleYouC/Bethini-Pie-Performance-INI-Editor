@@ -16,18 +16,12 @@ from tkinter import simpledialog
 from lib.app import AppName
 from lib.ModifyINI import ModifyINI
 
-def sm(message, debug=False, exception=False):
-    if not exception:
-        logging.info(message)
-        print(message)
-    elif exception:
-        logging.debug(message, exc_info=True)
-        print(message)
-        
+logger = logging.getLogger(__name__)
+
 try:
     from winreg import QueryValueEx, OpenKey, ConnectRegistry, HKEY_LOCAL_MACHINE
 except ModuleNotFoundError:
-    sm('winreg module not found')
+    logger.error('winreg module not found')
 
 def rgb_to_hex(rgb):
     return '#%02x%02x%02x' % rgb
@@ -70,7 +64,7 @@ def browse_to_location(choice, browse, function, game_name):
                 fp = open(openfilename,"r")
                 fp.close()
             except:
-                sm('Not Found', exception=1)
+                logger.error(f"file not found: {openfilename}")
                 return choice
             location = openfilename.replace('/','\\')
             if browse[0] == "directory":
@@ -78,14 +72,14 @@ def browse_to_location(choice, browse, function, game_name):
         return location
     elif choice == 'Manual...':
         manual = simpledialog.askstring("Manual entry", "Custom Value:")
-        sm(f"Manually entered a value of {manual}")
+        logger.debug(f"Manually entered a value of {manual}")
         if manual:
             return manual
         return choice
     else:
         if function:
             return_value_of_custom_function = getattr(CustomFunctions, function)(game_name,choice)
-            sm(f"Return value of {function}: {return_value_of_custom_function}")
+            logger.debug(f"Return value of {function}: {return_value_of_custom_function}")
         return choice
 
 class Info:
@@ -97,7 +91,7 @@ class Info:
         ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
 
         documents_directory = buf.value
-        sm(f'User documents location: {documents_directory}')
+        logger.debug(f'User documents location: {documents_directory}')
 
         return documents_directory
 
@@ -112,9 +106,9 @@ class Info:
                                          "Oblivion": "Oblivion"}
         try:
             game_documents_name = game_name_documents_location_dict[game_name]
-            sm(f'{game_name} Documents\\My Games folder is {game_documents_name}.')
+            logger.debug(f'{game_name} Documents\\My Games folder is {game_documents_name}.')
         except:
-            sm(f'{game_name} not in the list of known Documents\\My Games folders.', exception=1)
+            logger.error(f'{game_name} not in the list of known Documents\\My Games folders.')
             game_documents_name = ''
         return game_documents_name
 
@@ -129,14 +123,14 @@ class Info:
         try:
             game_reg = game_name_registry_dict[game_name]
         except:
-            sm(f'{game_name} not in the list of known registry locations.', exception=1)
+            logger.error(f'{game_name} not in the list of known registry locations.')
             game_reg = ''
         return game_reg
 
 class CustomFunctions:
 
     def restore_backup(game_name, choice):
-        sm(f'Restoring backup from {choice}.')
+        logger.info(f'Restoring backup from {choice}.')
         app = AppName(game_name)
         ini_files = app.what_ini_files_are_used()
         
@@ -176,9 +170,9 @@ class CustomFunctions:
                 new_file = files_to_replace[file].get('NewFile')
                 try:
                     shutil.copyfile(f"{new_file}", f"{initial_file}")
-                    sm(f'{initial_file} was replaced with backup from {new_file}.')
+                    logger.debug(f'{initial_file} was replaced with backup from {new_file}.')
                 except FileNotFoundError:
-                    sm(f'Restoring {new_file} to {initial_file} failed due to {new_file} not existing.', True, True)
+                    logger.error(f'Restoring {new_file} to {initial_file} failed due to {new_file} not existing.')
         return
 
     def getBackups(game_name):
@@ -210,12 +204,12 @@ class CustomFunctions:
         try:
             game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\Bethesda Softworks\\{gameReg}'),"installed path")[0]
         except:
-            sm('Did not find game folder in the registry (no WOW6432Node location).', exception=1)
+            logger.error('Did not find game folder in the registry (no WOW6432Node location).')
         if game_folder == 'Not Detected':
             try:
                 game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\WOW6432Node\\Bethesda Softworks\\{gameReg}'),"installed path")[0]
             except:
-                sm('Did not find game folder in the registry.', exception=1)
+                logger.error('Did not find game folder in the registry.')
 
         return game_folder
     

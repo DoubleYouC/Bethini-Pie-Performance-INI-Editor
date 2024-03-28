@@ -33,7 +33,7 @@ from lib.app import AppName
 from lib.AutoScrollbar import AutoScrollbar
 from lib.tooltips import Hovertip
 from lib.ModifyINI import ModifyINI
-from lib.customFunctions import CustomFunctions, sm, browse_to_location, rgb_to_hex, rgba_to_hex,hex_to_rgb, hex_to_decimal, decimal_to_rgb
+from lib.customFunctions import CustomFunctions, browse_to_location, rgb_to_hex, rgba_to_hex,hex_to_rgb, hex_to_decimal, decimal_to_rgb
 
 #This dictionary maps the operator modules to specific text.
 operator_dictionary = {
@@ -261,8 +261,11 @@ class bethini_app(ttk.Window):
         self.pw = ttk.Label(self.hsbframeholder, text='Loading... Please Wait... ')
         self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode='indeterminate')
 
-    def sme(self, message, exception=False):
-        sm(message, exception)
+    def sme(self, message: str, exception: bool=False):
+        if exception:
+            logger.error(message)
+        else:
+            logger.debug(message)
         self.statusbar_text.set(message)
         self.update()
 
@@ -290,7 +293,7 @@ class bethini_app(ttk.Window):
             #170
             try:
                 new_alpha = tk.simpledialog.askinteger("Alpha", "Alpha transparency (0 - 255):", initialvalue=alpha, minvalue = 0, maxvalue = 255)
-                sm(f"New alpha: {new_alpha}")
+                logger.debug(f"New alpha: {new_alpha}")
             except:
                 new_alpha = alpha
         elif color_value_type == 'rgb 1':
@@ -646,7 +649,7 @@ class bethini_app(ttk.Window):
                                 if ';' in each_setting or '#' in each_setting:
                                     self.sme(f'{each_setting}:{section} will be preserved, as it is a comment.')
                                 elif not APP.does_setting_exist(each_ini, section, each_setting):
-                                    sm(this_ini_object.remove_setting(section, each_setting))
+                                    logger.debug(this_ini_object.remove_setting(section, each_setting))
                                     self.sme(f'{each_setting}:{section} was removed because it is not recognized.')
                                     if this_ini_object.get_settings(section) == []:
                                         this_ini_object.remove_section(section)
@@ -1822,7 +1825,7 @@ def remove_excess_directory_files(directory, max_to_keep, files_to_remove):
     try:
         subdirectories = os.listdir(directory)
     except OSError as e:
-        sm(f"Info: {directory} : {e.strerror}")
+        logger.debug(f"Info: {directory} : {e.strerror}")
         return True
     subdirectories.sort()
     if 'First-Time-Backup' in subdirectories:
@@ -1830,7 +1833,7 @@ def remove_excess_directory_files(directory, max_to_keep, files_to_remove):
     if max_to_keep > -1:
         for n in range(len(subdirectories)):
             if n < max_to_keep:
-                sm(subdirectories[n] + ' will be kept.')
+                logger.debug(subdirectories[n] + ' will be kept.')
             else:
                 dir_path = f'{directory}\\' + subdirectories[n]
                 try:
@@ -1838,11 +1841,11 @@ def remove_excess_directory_files(directory, max_to_keep, files_to_remove):
                         try:
                             os.remove(f'{dir_path}\\{file}')
                         except OSError as e:
-                            sm(f'Error: {dir_path}\\{file} : {e.strerror}')
+                            logger.error(f'{dir_path}\\{file} : {e.strerror}')
                     os.rmdir(dir_path)
-                    sm(subdirectories[n] + ' was removed.')
+                    logger.debug(subdirectories[n] + ' was removed.')
                 except OSError as e:
-                    sm(f"Error: {dir_path} : {e.strerror}")
+                    logger.error(f"{dir_path} : {e.strerror}")
     return False
 
 def open_ini(location, ini):
@@ -1876,7 +1879,7 @@ def open_ini(location, ini):
         open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(location + ini)
         #open_inis[ini]['located'][open_ini_id]['original'] = ModifyINI(location + ini)
     except configparser.MissingSectionHeaderError as e:
-        sm(f"Error: {e.strerror}")
+        logger.error(f"{e.strerror}")
     return open_inis[ini]['located'][open_ini_id]['object']
 
 if __name__ == '__main__':
