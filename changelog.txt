@@ -1,3 +1,31 @@
+v4.11
+Skyrim Special Edition plugin update notes:
+-Bugfix: Remove Map Blur description was wrong
+-Subtitle Language changed to Text Language
+Fallout 4 plugin update notes:
+-Bugfix: Pip-Boy FX settings on and off values were switched
+-Bugfix: Poor preset's shadows were fixed
+-Added Text Language
+-Added Dialogue Camera
+-Added Crosshair
+-Added HUD Active Effects
+-Added Companion App
+-Added Constraint Width
+-Added Constraint Height
+-Added Constraint TLX
+-Added Constraint TLY
+-Added Controller
+-Added Controller Vibration
+-Added Controller Sensitivity
+-Added Controller Pip-Boy Cursor Speed
+-Improved Nvflex description
+-Corrected spelling of Pip-Boy
+-Renamed Show Quest Markers to Quest Markers
+-Renamed Show Floating Quest Markers to Floating Quest Markers
+-Renamed Show Compass to Compass
+-Shadow Splits now has the option of 1 in its dropdown
+-Settings definitions updated to include the Next Gen update changes
+
 v4.10
 Bethini Pie update notes:
 -Bugfix: Locale and date/time issues
