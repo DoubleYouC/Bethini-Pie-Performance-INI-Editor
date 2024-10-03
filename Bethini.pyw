@@ -646,8 +646,9 @@ class bethini_app(ttk.Window):
                                 if ';' in each_setting or '#' in each_setting:
                                     self.sme(f'{each_setting}:{section} will be preserved, as it is a comment.')
                                 elif not APP.does_setting_exist(each_ini, section, each_setting):
-                                    sm(this_ini_object.remove_setting(section, each_setting))
-                                    self.sme(f'{each_setting}:{section} was removed because it is not recognized.')
+                                    #sm(this_ini_object.remove_setting(section, each_setting))
+                                    #Disabling the removal of unknown settings.
+                                    self.sme(f'{each_setting}:{section} {each_ini} appears to be invalid.')
                                     if this_ini_object.get_settings(section) == []:
                                         this_ini_object.remove_section(section)
                                         self.sme(f'{section} was removed because it was empty.')
