@@ -1,3 +1,47 @@
+v4.12
+Bethini Pie update notes:
+-Bugfix: Fix missing font for Linux users. (#8, #9, #10)
+
+Skyrim Special Edition plugin update notes:
+-Bugfix: Difficulty settings used Fallout 4 names instead of their Skyrim equivalents.
+-Presets ignore bFreebiesSeen
+
+Starfield plugin update notes:
+-Updated for official update 1.14.70
+-Bugfix: Fixed incorrect sResourceIndexFileList default value (#16)
+-Don't add Starfield.ini settings to StarfieldCustom.ini by default
+-Removed Aspect Ration dropdown, since the official default value is now expanded enough to not really need it
+-Updated Upscaling dropdown
+-Updated Gamma slider to also set the UI Gamma as well, since that is the same as the in-game settings menu behavior
+
+v4.11
+Skyrim Special Edition plugin update notes:
+-Bugfix: Remove Map Blur description was wrong
+-Subtitle Language changed to Text Language
+Fallout 4 plugin update notes:
+-Bugfix: Pip-Boy FX settings on and off values were switched
+-Bugfix: Poor preset's shadows were fixed
+-Added Text Language
+-Added Dialogue Camera
+-Added Crosshair
+-Added HUD Active Effects
+-Added Companion App
+-Added Constraint Width
+-Added Constraint Height
+-Added Constraint TLX
+-Added Constraint TLY
+-Added Controller
+-Added Controller Vibration
+-Added Controller Sensitivity
+-Added Controller Pip-Boy Cursor Speed
+-Improved Nvflex description
+-Corrected spelling of Pip-Boy
+-Renamed Show Quest Markers to Quest Markers
+-Renamed Show Floating Quest Markers to Floating Quest Markers
+-Renamed Show Compass to Compass
+-Shadow Splits now has the option of 1 in its dropdown
+-Settings definitions updated to include the Next Gen update changes
+
 v4.10
 Bethini Pie update notes:
 -Bugfix: Locale and date/time issues
