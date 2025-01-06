@@ -11,7 +11,7 @@ class customConfigParser(configparser.RawConfigParser):
                                               allow_no_value=True, strict=False)
         #comment_prefixes=None is necessary to preserve comments.
 
-    def _read(self, fp, fpname):
+    def _read(self, fp, fpname) -> None:
         """Parse a sectioned configuration file.
 
         Each section in a configuration file contains a header, indicated by
