@@ -1889,8 +1889,8 @@ if __name__ == '__main__':
     log_directory_date: str = f'{datetime.now().strftime("%Y %m-%b %d %a - %H.%M.%S")}'
     my_app_log_directory = os.path.join("logs",log_directory_date)  # TODO refactor usage of the_backup_directory
     my_app_log: str = os.path.join(my_app_log_directory, f"log.log")
-    fmt: str = '%(asctime)s %(name)s [%(levelname)s]: %(message)s'
-    datefmt: str  = '%Y.%m.%d %H:%M:%S'
+    fmt: str = '%(asctime)s  [%(levelname)s]  %(filename)s  %(funcName)s:%(lineno)s:  %(message)s'
+    datefmt: str  = '%Y-%m-%d %H:%M:%S'
     
     if not os.path.exists(my_app_log_directory):
         os.makedirs(my_app_log_directory)
