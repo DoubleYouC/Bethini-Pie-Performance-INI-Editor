@@ -54,10 +54,7 @@ def decimal_to_rgb(decimal):
 def browse_to_location(choice, browse, function, game_name):
     if choice == 'Browse...':
         if browse[2] == 'directory':
-            location = filedialog.askdirectory()
-            location = location.replace('/','\\')
-            if location != '' and location[-1] != '\\':
-                location += '\\'
+            location = os.path.join(os.path.normpath(filedialog.askdirectory()), "")
         else:
             openfilename = filedialog.askopenfilename(filetypes=[(browse[1], browse[1])])
             try:
@@ -66,9 +63,10 @@ def browse_to_location(choice, browse, function, game_name):
             except:
                 logger.error(f"file not found: {openfilename}")
                 return choice
-            location = openfilename.replace('/','\\')
+            location = os.path.normpath(openfilename)
             if browse[0] == "directory":
-                location = os.path.split(location)[0] + '\\'
+                location = os.path.join(os.path.split(location)[0], "")
+        logger.debug(f"location set to '{location}'")
         return location
     elif choice == 'Manual...':
         manual = simpledialog.askstring("Manual entry", "Custom Value:")
