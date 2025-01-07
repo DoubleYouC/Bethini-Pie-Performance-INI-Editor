@@ -10,7 +10,6 @@ import configparser
 import os
 import sys
 import math
-import logging
 import webbrowser
 from shutil import copyfile
 from datetime import datetime
@@ -18,6 +17,25 @@ from operator import gt, ge, lt, le, ne, eq
 #from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
 #This is for changing file read-only access via os.chmod(filename, S_IREAD,
 #S_IRGRP, #S_IROTH) Not currently used.
+
+import logging
+
+# configure logging
+LOG_DIR_DATE: str = f'{datetime.now().strftime("%Y %m-%b %d %a - %H.%M.%S")}' # TODO refactor usage of 'the_backup_directory'
+APP_LOG_DIR = os.path.join("logs",LOG_DIR_DATE)  
+APP_LOG_FILE: str = os.path.join("logs", LOG_DIR_DATE, "log.log")
+
+fmt: str = '%(asctime)s  [%(levelname)s]  %(filename)s  %(funcName)s:%(lineno)s:  %(message)s'
+datefmt: str  = '%Y-%m-%d %H:%M:%S'
+if not os.path.exists(APP_LOG_DIR):
+    os.makedirs(APP_LOG_DIR)
+    
+logging.basicConfig(filename=APP_LOG_FILE, filemode='w', format=fmt, datefmt=datefmt, encoding='utf-8', level=logging.DEBUG)
+logger = logging.getLogger() # this is the root logger
+_log_stdout = logging.StreamHandler(sys.stdout) # to console
+_log_stdout.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
+logger.addHandler(_log_stdout)
+logger.info(f"Logging to '{APP_LOG_FILE}'")
 
 import tkinter as tk
 import ttkbootstrap as ttk
@@ -591,8 +609,8 @@ class bethini_app(ttk.Window):
                                 copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
                             except FileNotFoundError:
                                 self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
-                        copyfile(my_app_log, f"{the_backup_directory}log.log")
-                    the_backup_directory = os.path.join(this_location, f'{my_app_name} backups', log_directory_date)
+                        copyfile(APP_LOG_FILE, f"{the_backup_directory}log.log")
+                    the_backup_directory = os.path.join(this_location, f'{my_app_name} backups', LOG_DIR_DATE)
                     if not os.path.isdir(the_backup_directory):
                         os.makedirs(the_backup_directory)
                     if os.path.exists(f"{the_backup_directory}{each_ini}"):
@@ -602,7 +620,7 @@ class bethini_app(ttk.Window):
                             copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
                         except FileNotFoundError:
                             self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
-                    copyfile(my_app_log, f"{the_backup_directory}log.log")
+                    copyfile(APP_LOG_FILE, f"{the_backup_directory}log.log")
                     this_ini_object.save_ini_file(1)
                     files_saved = True
                     self.sme(f"{this_location}{each_ini} saved.")
@@ -1884,24 +1902,7 @@ def open_ini(location, ini):
     return open_inis[ini]['located'][open_ini_id]['object']
 
 if __name__ == '__main__':
-    
-    # configure logging
-    log_directory_date: str = f'{datetime.now().strftime("%Y %m-%b %d %a - %H.%M.%S")}'
-    my_app_log_directory = os.path.join("logs",log_directory_date)  # TODO refactor usage of the_backup_directory
-    my_app_log: str = os.path.join(my_app_log_directory, f"log.log")
-    fmt: str = '%(asctime)s  [%(levelname)s]  %(filename)s  %(funcName)s:%(lineno)s:  %(message)s'
-    datefmt: str  = '%Y-%m-%d %H:%M:%S'
-    
-    if not os.path.exists(my_app_log_directory):
-        os.makedirs(my_app_log_directory)
         
-    logging.basicConfig(filename=my_app_log, filemode='w', format=fmt, datefmt=datefmt, encoding='utf-8', level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
-    _log_stdout = logging.StreamHandler(sys.stdout) # to console
-    _log_stdout.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
-    logger.addHandler(_log_stdout)
-    logger.info(f"Logging to '{my_app_log}'")
-    
     #Get app config settings.
     my_app_config = f'{my_app_short_name}.ini'
     app_config = ModifyINI(my_app_config)
