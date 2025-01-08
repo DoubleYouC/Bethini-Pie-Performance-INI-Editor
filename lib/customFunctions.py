@@ -104,9 +104,9 @@ class Info:
                                          "Oblivion": "Oblivion"}
         try:
             game_documents_name = game_name_documents_location_dict[game_name]
-            logger.debug(f'{game_name} Documents\\My Games folder is {game_documents_name}.')
+            logger.debug(f'{game_name} {os.path.join("Documents", "My Games")} folder is {game_documents_name}.')
         except:
-            logger.error(f'{game_name} not in the list of known Documents\\My Games folders.')
+            logger.error(f'{game_name} not in the list of known {os.path.join("Documents", "My Games")} folders.')
             game_documents_name = ''
         return game_documents_name
 
@@ -143,7 +143,7 @@ class CustomFunctions:
         for ini in ini_files_with_location:
             ini_location = Bethini_key.get_value("Directories", ini_files_with_location[ini])
             file_to_replace = f'{ini_location}{ini}'
-            backup_file = f'{ini_location}Bethini Pie backups\\{choice}\\{ini}'
+            backup_file = os.path.join(ini_location, "Bethini Pie backups", choice, ini)
             files_to_replace[ini] = {"InitialFile": file_to_replace,
                                  "NewFile": backup_file}
 
@@ -176,7 +176,7 @@ class CustomFunctions:
     def getBackups(game_name):
         gameDocumentsName = Info.game_documents_name(game_name)
         if gameDocumentsName != '':
-            defaultINILocation = Info.get_documents_directory() + f'\\My Games\\{gameDocumentsName}\\'
+            defaultINILocation = os.path.join(Info.get_documents_directory(), 'My Games', gameDocumentsName)
         else:
             defaultINILocation = ''
         INIPath = ModifyINI("Bethini.ini").get_value("Directories", "s" + game_name + "INIPath", default=defaultINILocation)
@@ -200,7 +200,7 @@ class CustomFunctions:
         gameReg = Info.game_reg(game_name)
 
         try:
-            game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\Bethesda Softworks\\{gameReg}'),"installed path")[0]
+            game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\Bethesda Softworks\\{gameReg}'),"installed path")[0] # This is not a file system path, don't use os.path
         except:
             logger.error('Did not find game folder in the registry (no WOW6432Node location).')
         if game_folder == 'Not Detected':
@@ -217,16 +217,16 @@ class CustomFunctions:
     def getINILocations(gameName):
         gameDocumentsLocation = Info.game_documents_name(gameName)
         documents_directory = Info.get_documents_directory()
-        INILocation = [f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\']
-        if not os.path.exists(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\'):
-            os.mkdir(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\')
+        INILocation = [os.path.join(documents_directory, 'My Games', gameDocumentsLocation)]
+        if not os.path.exists(os.path.join(documents_directory, 'My Games', gameDocumentsLocation)):
+            os.makedirs(os.path.join(documents_directory, 'My Games', gameDocumentsLocation), exist_ok=True)
         app = AppName(gameName)
         ini_files = app.what_ini_files_are_used()                 
         for file in ini_files:
             if file == 'Ultra.ini':
                 continue
-            if not os.path.exists(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\{file}'):
-                open(f'{documents_directory}\\My Games\\{gameDocumentsLocation}\\{file}', 'w')
+            if not os.path.exists(os.path.join(documents_directory, 'My Games', gameDocumentsLocation, file)):
+                open(os.path.join(documents_directory, 'My Games', gameDocumentsLocation, file))    # TODO this line needs refactoring, unused filehandle
         INILocation.append('Browse...')
         return INILocation
 
