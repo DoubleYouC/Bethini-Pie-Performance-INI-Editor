@@ -329,10 +329,7 @@ class bethini_app(ttk.Window):
 
         rgb = hex_to_rgb(new_color)
         luminance = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2]
-        if luminance < 128:
-            the_text_color = '#FFFFFF'
-        else:
-            the_text_color = '#000000'
+        the_text_color = '#FFFFFF' if luminance < 128 else '#000000'
         button_to_modify.configure(bg=new_color, activebackground=new_color, fg=the_text_color)
         if color_value_type == 'rgb':
             button_to_modify.var.set(str(hex_to_rgb(new_color)).replace(' ',''))
@@ -761,10 +758,7 @@ class bethini_app(ttk.Window):
     def setting_label(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting):
         setting_type = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("type")
         if setting_type not in types_without_label:
-            if setting_type:
-                setting_label = each_setting
-            else:
-                setting_label = ''
+            setting_label = each_setting if setting_type else ''
             setting_label_width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("customWidth")
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkLabel"] = ttk.Label(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
                                                                                                                                    text=setting_label, width=setting_label_width, anchor=tk.E)
@@ -1102,10 +1096,7 @@ class bethini_app(ttk.Window):
                     else:
                         this_value.append(0)
 
-                if all(this_value):
-                    this_value = on_value
-                else:
-                    this_value = off_value
+                this_value = on_value if all(this_value) else off_value
                 self.setting_dictionary[each_setting]["tk_var"].set(this_value)
             try:
                 logger.debug(f"{each_setting} = {this_value}")
@@ -1288,10 +1279,7 @@ class bethini_app(ttk.Window):
             tk_widget = self.setting_dictionary[each_setting].get("tk_widget")
             rgb = hex_to_rgb(new_color)
             luminance = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2]
-            if luminance < 128:
-                the_text_color = '#FFFFFF'
-            else:
-                the_text_color = '#000000'
+            the_text_color = '#FFFFFF' if luminance < 128 else '#000000'
             tk_widget.configure(bg=new_color, activebackground=new_color, fg=the_text_color)
             logger.debug(f"{each_setting} = {this_value}")
             self.setting_dictionary[each_setting]['valueSet'] = True
@@ -1776,10 +1764,7 @@ class bethini_app(ttk.Window):
                     currentSection = targetSections[ININumber]
 
                     # This looks for a default value in the settings.json
-                    if INI == my_app_config:
-                        defaultValue = "Does Not Exist"
-                    else:
-                        defaultValue = APP.get_value(currentSetting, "default")
+                    defaultValue = "Does Not Exist" if my_app_config == INI else APP.get_value(currentSetting, "default")
 
                     #target_ini = ModifyINI(str(ini_location) + str(INI))
 
