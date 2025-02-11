@@ -437,7 +437,7 @@ class bethini_app(ttk.Window):
         try:
             self.choose_game_var = app_config.get_value('General','sAppName')
             if self.choose_game_var != game:
-                self.sme(f'Change of game from {self.chooseGameVar} to {game}')
+                self.sme(f'Change of game from {self.choose_game_var} to {game}')
                 raise Exception("App/Game specified in " + my_app_config + " differs from the game chosen, so it will be changed to the one you chose.")
         except:
             self.sme('Change of game/application', exception=1)
@@ -867,7 +867,7 @@ class bethini_app(ttk.Window):
         #custom functions allow us to auto-detect certain
         #predefined options that can then easily be selected.
 
-        if type(options) == str:
+        if isinstance(options, str):
             if 'FUNC' in options:
                 option_string = APP.custom(options)
                 if '{}' in option_string:
@@ -1749,11 +1749,7 @@ class bethini_app(ttk.Window):
 
     def getINILocation(self, ini):
         ini_location = APP.inis(ini)
-        if ini_location == '':
-            ini_location == ''
-        else:
-            ini_location = app_config.get_value('Directories', ini_location)
-        return ini_location
+        return '' if not ini_location else app_config.get_value('Directories', ini_location)
 
     def get_setting_values(self, targetINIs, targetSections, theSettings, setting_choices=None, delimiter=None):
         #This function returns the current value of the each_setting.
@@ -1921,8 +1917,8 @@ if __name__ == '__main__':
 
     #Get version
     try:
-        changelog = open('changelog.txt')
-        version = changelog.readline().replace('\n','')
+        with open('changelog.txt') as changelog:
+            version = changelog.readline().replace('\n','')
     except FileNotFoundError:
         version = ''
 
