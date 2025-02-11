@@ -109,7 +109,7 @@ class Scalar(ttk.Scale):
     def __init__(self, *args, **kwargs):
         self.decimal_places = kwargs.pop('decimal_places')
         self.chain = kwargs.pop('command', lambda *a: None)
-        super(Scalar, self).__init__(*args, command=self._value_changed, **kwargs)
+        super().__init__(*args, command=self._value_changed, **kwargs)
 
     def _value_changed(self, new_value):
         decimal_places = int(self.decimal_places)
@@ -429,7 +429,7 @@ class bethini_app(ttk.Window):
             self.quit()
 
     def choose_game_done(self, game, from_choose_game_window=False):
-        if game == '':
+        if not game:
             return
         self.choose_game_window.withdraw()
 
@@ -646,7 +646,7 @@ class bethini_app(ttk.Window):
         for each_ini in open_inis:
             if each_ini == my_app_config:
                 continue
-            elif APP.inis(each_ini):
+            if APP.inis(each_ini):
                 location_list = list(open_inis[each_ini]['located'].keys())
                 for n in range(len(location_list)):
                     this_ini_object = open_inis[each_ini]['located'][str(n+1)].get('object')
@@ -1430,8 +1430,7 @@ class bethini_app(ttk.Window):
                 elif setting_choices:
                     if this_value not in setting_choices:
                         return
-                    else:
-                        theValue = setting_choices[this_value][n]
+                    theValue = setting_choices[this_value][n]
                 elif file_format:
                     if file_format == 'directory':
                         if this_value == '\\':
@@ -1530,7 +1529,7 @@ class bethini_app(ttk.Window):
                 try:
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                     self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
-                except AttributeError as e:
+                except AttributeError:
                     self.sme(f"Failed to set {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value} because the {targetINIs[n]} has an issue.", True)
 
     def spinbox_assign_value(self, each_setting):
@@ -1712,33 +1711,30 @@ class bethini_app(ttk.Window):
             try:
                 if valueChangedTo == '':
                     return True
-                elif str(abs(int(valueChangedTo))).isdigit():
+                if str(abs(int(valueChangedTo))).isdigit():
                     return True
-                else:
-                    self.sme(badValue)
-                    return False
+                self.sme(badValue)
+                return False
             except:
                 self.sme(badValue)
                 return False
         elif validate == 'whole':
             if valueChangedTo == '':
                 return True
-            elif valueChangedTo.isdigit():
+            if valueChangedTo.isdigit():
                 return True
-            else:
-                self.sme(badValue)
-                return False
+            self.sme(badValue)
+            return False
         elif validate == 'counting':
             if valueChangedTo == '':
                 return True
-            elif valueChangedTo == '0':
+            if valueChangedTo == '0':
                 self.sme(badValue)
                 return False
-            elif valueChangedTo.isdigit():
+            if valueChangedTo.isdigit():
                 return True
-            else:
-                self.sme(badValue)
-                return False
+            self.sme(badValue)
+            return False
         elif validate == 'float':
             if valueChangedTo == '':
                 return True
@@ -1904,7 +1900,7 @@ if __name__ == '__main__':
 
     #theme
     theme = app_config.get_value('General', 'sTheme', default='superhero')
-    if theme not in standThemes.STANDARD_THEMES.keys():
+    if theme not in standThemes.STANDARD_THEMES:
         theme='superhero'
     app_config.assign_setting_value('General', 'sTheme', theme)
 
@@ -1925,7 +1921,7 @@ if __name__ == '__main__':
 
     #Get version
     try:
-        changelog = open('changelog.txt', 'r')
+        changelog = open('changelog.txt')
         version = changelog.readline().replace('\n','')
     except FileNotFoundError:
         version = ''
