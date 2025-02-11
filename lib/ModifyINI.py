@@ -9,6 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from lib.customConfigParser import customConfigParser
+import operator
 
 class ModifyINI:
     """This class gives us an easy way to modify the various INI files in a more
@@ -118,9 +119,9 @@ class ModifyINI:
         """Sorts all sections and settings."""
         for section in self.config._sections:
             self.config._sections[section] = OrderedDict(sorted(self.config._sections[section].items(),
-                                                                key=lambda t: t[0]))
+                                                                key=operator.itemgetter(0)))
         self.config._sections = OrderedDict(sorted(self.config._sections.items(),
-                                                   key=lambda t: t[0]))
+                                                   key=operator.itemgetter(0)))
         self.has_been_modified = True
 
     def save_ini_file(self, sort=False):
