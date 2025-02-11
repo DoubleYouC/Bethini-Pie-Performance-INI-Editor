@@ -53,11 +53,7 @@ class AppName:
         """Returns the INI settings name used in Bethini.ini to store the location
         of the given ini file."""
         try:
-            if ini == '':
-                ini_location = ''
-            else:
-                ini_location = self.bethini["INIs"][ini]
-            return ini_location
+            return '' if not ini else self.bethini["INIs"][ini]
         except KeyError:
             return False
 

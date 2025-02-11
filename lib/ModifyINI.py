@@ -72,10 +72,7 @@ class ModifyINI:
         """Retrieves all settings within the given section."""
         section = self.get_existing_section(section)
         try:
-            if original_case:
-                settings = self.config.options(section)
-            else:
-                settings = self.case_insensitive_config.options(section)
+            settings = self.config.options(section) if original_case else self.case_insensitive_config.options(section)
         except configparser.NoSectionError:
             return []
         return settings
