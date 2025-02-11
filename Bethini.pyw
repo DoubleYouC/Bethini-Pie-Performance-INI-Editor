@@ -1428,9 +1428,8 @@ class bethini_app(ttk.Window):
                         return
                     theValue = setting_choices[this_value][n]
                 elif file_format:
-                    if file_format == 'directory':
-                        if this_value == '\\':
-                            this_value = this_value[:-1]
+                    if file_format == 'directory' and this_value == '\\':
+                        this_value = this_value[:-1]
                     theValue = this_value
                 else:
                     theValue = this_value
@@ -1473,12 +1472,11 @@ class bethini_app(ttk.Window):
             for each_partial_setting in partial:
                 if each_partial_setting == each_setting:
                     theValueStr += '{}'
+                #self.widget_type_switcher(each_partial_setting)
+                elif self.setting_dictionary[each_partial_setting]['valueSet']:
+                    theValueStr += self.setting_dictionary[each_partial_setting]['tk_var'].get()
                 else:
-                    #self.widget_type_switcher(each_partial_setting)
-                    if self.setting_dictionary[each_partial_setting]['valueSet']:
-                        theValueStr += self.setting_dictionary[each_partial_setting]['tk_var'].get()
-                    else:
-                        return
+                    return
 
         if targetINIs:
             tk_var = self.setting_dictionary[each_setting].get('tk_var')
