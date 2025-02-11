@@ -1558,10 +1558,7 @@ class bethini_app(ttk.Window):
                 ini_location = self.getINILocation(targetINIs[n])
                 the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
 
-                if color_value_type == 'hex':
-                    the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                    self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
-                elif color_value_type == 'decimal':
+                if color_value_type in {'hex', 'decimal'}:
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                     self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
                 elif color_value_type in {'rgb', 'rgb 1', 'rgba'}:
