@@ -36,7 +36,7 @@ def hex_to_rgb(value):
         v = int(value, 16)*17
         return v, v, v
     if lv == 3:
-        return tuple(int(value[i:i + 1], 16)*17 for i in range(0, 3))
+        return tuple(int(value[i:i + 1], 16)*17 for i in range(3))
     return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 def hex_to_decimal(hex_):
@@ -58,7 +58,7 @@ def browse_to_location(choice, browse, function, game_name):
         else:
             openfilename = filedialog.askopenfilename(filetypes=[(browse[1], browse[1])])
             try:
-                fp = open(openfilename,"r")
+                fp = open(openfilename)
                 fp.close()
             except:
                 logger.error(f"file not found: {openfilename}")
@@ -68,7 +68,7 @@ def browse_to_location(choice, browse, function, game_name):
                 location = os.path.join(os.path.split(location)[0], "")
         logger.debug(f"location set to '{location}'")
         return location
-    elif choice == 'Manual...':
+    if choice == 'Manual...':
         manual = simpledialog.askstring("Manual entry", "Custom Value:")
         logger.debug(f"Manually entered a value of {manual}")
         if manual:

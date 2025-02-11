@@ -184,9 +184,7 @@ class AppName:
             'Fill': 'Both',
             'Expand': 1
             }
-        pack_settings = self.bethini['displayTabs'][tab][label_frame].get('Pack',
-                                                                          default_pack_settings)
-        return pack_settings
+        return self.bethini['displayTabs'][tab][label_frame].get('Pack', default_pack_settings)
 
     def number_of_vertically_stacked_settings(self, tab, label_frame):
         """Returns the maximum number of vertically stacked settings desired for the label frame."""

@@ -41,7 +41,7 @@ class customConfigParser(configparser.RawConfigParser):
         for lineno, line in enumerate(fp, start=1):
             comment_start = sys.maxsize
             # strip inline comments
-            inline_prefixes = {p: -1 for p in self._inline_comment_prefixes}
+            inline_prefixes = dict.fromkeys(self._inline_comment_prefixes, -1)
             while comment_start == sys.maxsize and inline_prefixes:
                 next_prefixes = {}
                 for prefix, index in inline_prefixes.items():
