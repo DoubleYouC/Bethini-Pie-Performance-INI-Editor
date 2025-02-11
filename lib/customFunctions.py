@@ -24,10 +24,10 @@ except ModuleNotFoundError:
     logger.error('winreg module not found')
 
 def rgb_to_hex(rgb):
-    return '#%02x%02x%02x' % rgb
+    return '#{:02x}{:02x}{:02x}'.format(*rgb)
 
 def rgba_to_hex(rgba):
-    return '#%02x%02x%02x%02x' % rgba
+    return '#{:02x}{:02x}{:02x}{:02x}'.format(*rgba)
 
 def hex_to_rgb(value):
     value = value.lstrip('#')
