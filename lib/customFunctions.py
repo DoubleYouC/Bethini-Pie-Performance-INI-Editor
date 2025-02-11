@@ -147,7 +147,7 @@ class CustomFunctions:
             files_to_replace[ini] = {"InitialFile": file_to_replace,
                                  "NewFile": backup_file}
 
-        if choice == "Choose..." or choice == "None found":
+        if choice in {"Choose...", "None found"}:
             return
         else:
             #An example of filesToReplace

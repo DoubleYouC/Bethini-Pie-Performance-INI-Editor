@@ -123,8 +123,8 @@ class AppName:
         preset_dict = {}
         for ini_setting in self.data["iniValues"]:
             preset_value = ini_setting['value'].get(preset)
-            if preset_value or preset_value == 0 or preset_value == '':
-            #if a preset value was specified
+            if preset_value or preset_value in {0, ''}:
+                #if a preset value was specified
                 ini = ini_setting.get('ini', self.default_ini)
                 preset_dict[ini_setting['name']+':'+ini_setting['section']]={
                     'ini': ini,
