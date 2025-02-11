@@ -131,11 +131,11 @@ class CustomFunctions:
         logger.info(f'Restoring backup from {choice}.')
         app = AppName(game_name)
         ini_files = app.what_ini_files_are_used()
-        
+
         ini_files_with_location = {}
-        
+
         Bethini_key = ModifyINI("Bethini.ini")
-        
+
         for ini in ini_files:
             ini_files_with_location[ini] = app.inis(ini)
 
@@ -157,9 +157,9 @@ class CustomFunctions:
             #            'InitialFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Skyrim.ini',
             #            'NewFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\Skyrim.ini'
             #        },
-            #    'SkyrimPrefs.ini': 
+            #    'SkyrimPrefs.ini':
             #        {
-            #            'InitialFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\SkyrimPrefs.ini', 
+            #            'InitialFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\SkyrimPrefs.ini',
             #            'NewFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\SkyrimPrefs.ini'
             #        }
             #}
@@ -210,7 +210,7 @@ class CustomFunctions:
                 logger.error('Did not find game folder in the registry.')
 
         return game_folder
-    
+
     def getGamePath(game_name):
         return ModifyINI("Bethini.ini").get_value("Directories", "s" + game_name + "Path", default='Not Detected')
 
@@ -221,7 +221,7 @@ class CustomFunctions:
         if not os.path.exists(os.path.join(documents_directory, 'My Games', gameDocumentsLocation)):
             os.makedirs(os.path.join(documents_directory, 'My Games', gameDocumentsLocation), exist_ok=True)
         app = AppName(gameName)
-        ini_files = app.what_ini_files_are_used()                 
+        ini_files = app.what_ini_files_are_used()
         for file in ini_files:
             if file == 'Ultra.ini':
                 continue
