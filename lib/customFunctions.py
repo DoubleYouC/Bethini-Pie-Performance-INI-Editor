@@ -58,8 +58,8 @@ def browse_to_location(choice, browse, function, game_name):
         else:
             openfilename = filedialog.askopenfilename(filetypes=[(browse[1], browse[1])])
             try:
-                fp = open(openfilename)
-                fp.close()
+                with open(openfilename) as _fp:
+                    pass
             except:
                 logger.error(f"file not found: {openfilename}")
                 return choice
@@ -226,7 +226,8 @@ class CustomFunctions:
             if file == 'Ultra.ini':
                 continue
             if not os.path.exists(os.path.join(documents_directory, 'My Games', gameDocumentsLocation, file)):
-                open(os.path.join(documents_directory, 'My Games', gameDocumentsLocation, file))    # TODO this line needs refactoring, unused filehandle
+                with open(os.path.join(documents_directory, 'My Games', gameDocumentsLocation, file)) as _fp:    # TODO this line needs refactoring, unused filehandle
+                    pass
         INILocation.append('Browse...')
         return INILocation
 
