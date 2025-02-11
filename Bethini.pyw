@@ -1358,7 +1358,7 @@ class bethini_app(ttk.Window):
                 ini_location = self.getINILocation(targetINIs[n])
                 the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
                 #1
-                if this_value == on_value or this_value == off_value:
+                if this_value in (on_value, off_value):
                     if type(this_value[n]) is list:
                         if setting_value[n] in this_value[n]:
                             theValue = setting_value[n]
@@ -1415,7 +1415,7 @@ class bethini_app(ttk.Window):
                 ini_location = self.getINILocation(targetINIs[n])
                 the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
                 #1280x720
-                if this_value == 'Manual...' or this_value == 'Browse...':
+                if this_value in {'Manual...', 'Browse...'}:
                     theValue = ''
                 elif delimiter:
                     listOfValues = this_value.split(delimiter)
@@ -1566,7 +1566,7 @@ class bethini_app(ttk.Window):
                 elif color_value_type == 'decimal':
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                     self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
-                elif color_value_type == 'rgb' or color_value_type == 'rgb 1' or color_value_type == 'rgba':
+                elif color_value_type in {'rgb', 'rgb 1', 'rgba'}:
                     if len(theSettings) > 1:
                         theValue = str(ast.literal_eval(this_value)[n])
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
@@ -1669,7 +1669,7 @@ class bethini_app(ttk.Window):
 
                 the_operator = self.dependent_settings_dictionary[each_setting][masterSetting].get('operator')
                 set_to_off = self.dependent_settings_dictionary[each_setting][masterSetting].get('setToOff', False)
-                if the_operator == 'equal' or the_operator == 'not-equal':
+                if the_operator in {'equal', 'not-equal'}:
                     value = self.dependent_settings_dictionary[each_setting][masterSetting].get('value')
                     current_value = self.widget_type_switcher(masterSetting)
                     var = 'string'
