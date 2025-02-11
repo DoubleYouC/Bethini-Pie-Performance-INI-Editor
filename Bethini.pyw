@@ -783,6 +783,7 @@ class bethini_app(ttk.Window):
         func = self.widget_type_value.get(id_, "Invalid")
         if func != "Invalid":
             return func(each_setting)
+        return None
 
     def add_to_setting_dictionary(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_):
         stuff_to_add_to_setting_dictionary = {
@@ -1104,6 +1105,7 @@ class bethini_app(ttk.Window):
                 return this_value
             except:
                 logger.warning(f'No value set for checkbox {each_setting}.')
+        return None
 
     def dropdown_value(self, each_setting):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
@@ -1145,6 +1147,7 @@ class bethini_app(ttk.Window):
             logger.debug(f"{each_setting} = {this_value}")
             self.setting_dictionary[each_setting]['valueSet'] = True
             return this_value
+        return None
 
     def combobox_value(self, each_setting):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
@@ -1164,6 +1167,7 @@ class bethini_app(ttk.Window):
             logger.debug(f"{each_setting} = {this_value}")
             self.setting_dictionary[each_setting]['valueSet'] = True
             return this_value
+        return None
 
     def entry_value(self, each_setting):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
@@ -1191,6 +1195,7 @@ class bethini_app(ttk.Window):
                 return this_value
             except:
                 logger.warning(f'No value set for entry {each_setting}.')
+        return None
 
     def slider_value(self, each_setting):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
@@ -1214,6 +1219,7 @@ class bethini_app(ttk.Window):
                 return this_value
             except:
                 logger.warning(f'no value set for slider {each_setting}')
+        return None
 
     def spinbox_value(self, each_setting):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
@@ -1228,6 +1234,7 @@ class bethini_app(ttk.Window):
                 return this_value
             except:
                 logger.warning(f'no value set for spinbox {each_setting}')
+        return None
 
     def color_value(self, each_setting):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
@@ -1284,6 +1291,7 @@ class bethini_app(ttk.Window):
             logger.debug(f"{each_setting} = {this_value}")
             self.setting_dictionary[each_setting]['valueSet'] = True
             return this_value
+        return None
 
     def check_dependents(self, each_setting):
         for each_dependent_setting in self.settings_that_settings_depend_on[each_setting]:
