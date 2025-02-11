@@ -133,10 +133,9 @@ class customConfigParser(configparser.RawConfigParser):
                             # Check if this optname already exists
                             if (optname not in cursect):
                                 cursect[optname] = [optval]
-                        else:
+                        elif (optname not in cursect):
                             # valueless option handling
-                            if (optname not in cursect):
-                                cursect[optname] = None
+                            cursect[optname] = None
                     else:
                         # a non-fatal parsing error occurred. set up the
                         # exception but keep going. the exception will be
