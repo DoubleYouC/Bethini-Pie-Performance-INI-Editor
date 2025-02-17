@@ -9,7 +9,7 @@ from idlelib.tooltip import OnHoverTooltipBase
 
 class Hovertip(OnHoverTooltipBase):
     """A tooltip that pops up when a mouse hovers over an anchor widget."""
-    def __init__(self, anchor_widget, text, preview_list, wrap_length=250):
+    def __init__(self, anchor_widget, text, preview_list, wrap_length=250) -> None:
         """Create a text tooltip with a mouse hover delay.
 
         anchor_widget: the widget next to which the tooltip will be shown
@@ -28,13 +28,13 @@ class Hovertip(OnHoverTooltipBase):
 
         self.anchor_widget.bind("<Button-3>", self.show_preview)
 
-    def showcontents(self):
+    def showcontents(self) -> None:
         label = tk.Label(self.tipwindow, text=self.text, justify=tk.LEFT,
                          background="#fff", relief=tk.SOLID, borderwidth=1,
                          font=('Segoe UI','10'), wraplength=self.wrap_length)
         label.pack()
 
-    def show_preview(self, event=None):
+    def show_preview(self, event=None) -> None:
         """Displays the preview window"""
         print(event)
         for widget in self.preview_frame.winfo_children():
@@ -47,7 +47,7 @@ class Hovertip(OnHoverTooltipBase):
         tooltip_label.pack(anchor=tk.NW)
         self.preview_window.deiconify()
 
-    def show_photo(self):
+    def show_photo(self) -> None:
         """Packs the image in the preview window."""
         preview_image = Image.open(self.photo_for_setting)
         tk_image = ImageTk.PhotoImage(preview_image)

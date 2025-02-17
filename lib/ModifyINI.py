@@ -18,8 +18,8 @@ class ModifyINI:
     This by nature allows us to make the changes in how we use the confiparser
     apply to every instance of modifying the INI files."""
     def __init__(self, ini_to_manage: str, preserve_case: bool =True) -> None:
-        self.ini_to_manage: str = ini_to_manage
-        self.config: customConfigParser = customConfigParser()
+        self.ini_to_manage = ini_to_manage
+        self.config = customConfigParser()
         if preserve_case:
             self.config.optionxform = lambda option: option
         logger.info(f"Successfully read {self.config.read(self.ini_to_manage)}") # returns list of successfully read files
@@ -65,7 +65,7 @@ class ModifyINI:
             return self.case_insensitive_config.get(section, setting, fallback=default)
         return default
 
-    def get_sections(self):
+    def get_sections(self) -> list[str]:
         """Retrieves all sections."""
         return self.case_insensitive_config.sections()
 
@@ -78,7 +78,7 @@ class ModifyINI:
             return []
         return settings
 
-    def assign_setting_value(self, section, setting, value):
+    def assign_setting_value(self, section, setting, value) -> bool:
         """Assigns the specified value to the specified setting only if
         different. Returns true if the value was changed."""
 
@@ -97,7 +97,7 @@ class ModifyINI:
             return True
         return False
 
-    def remove_setting(self, section, setting):
+    def remove_setting(self, section, setting) -> str | None:
         """Removes the specified setting."""
         existing_section = self.get_existing_section(section)
         existing_setting = self.get_existing_setting(existing_section, setting)
@@ -108,14 +108,14 @@ class ModifyINI:
         except configparser.NoSectionError:
             return f"No section: {section}"
 
-    def remove_section(self, section):
+    def remove_section(self, section) -> None:
         """Removes the specified section."""
         existing_section = self.get_existing_section(section)
         self.config.remove_section(existing_section)
         self.case_insensitive_config.remove_section(existing_section)
         self.has_been_modified = True
 
-    def sort(self):
+    def sort(self) -> None:
         """Sorts all sections and settings."""
         for section in self.config._sections:
             self.config._sections[section] = OrderedDict(sorted(self.config._sections[section].items(),
@@ -124,7 +124,7 @@ class ModifyINI:
                                                    key=operator.itemgetter(0)))
         self.has_been_modified = True
 
-    def save_ini_file(self, sort=False):
+    def save_ini_file(self, sort=False) -> None:
         """Writes the file."""
         if sort:
             self.sort()

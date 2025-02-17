@@ -17,11 +17,11 @@ class AppName:
     """This class handles the different apps/games supported, which are placed in
     the apps folder."""
 
-    def __init__(self, appname):
+    def __init__(self, appname: str) -> None:
         with open(os.path.join('apps', appname, 'settings.json'), encoding='utf-8') as app_json:
-            self.data = json.load(app_json)
+            self.data: dict = json.load(app_json)
         with open(os.path.join('apps', appname, 'Bethini.json'), encoding='utf-8') as bethini:
-            self.bethini = json.load(bethini)
+            self.bethini: dict = json.load(bethini)
 
         ini_files = list(self.bethini["INIs"].keys())
         try:
@@ -106,7 +106,7 @@ class AppName:
         """Returns the value for the given setting and value type."""
         return self.setting_values[setting][value_type]
 
-    def does_setting_exist(self, ini, section, setting):
+    def does_setting_exist(self, ini, section, setting) -> bool:
         """Checks if the given setting for the given
         section and ini file exists in settings.json."""
         section = section.lower()

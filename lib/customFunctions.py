@@ -15,6 +15,7 @@ from tkinter import simpledialog
 
 from lib.app import AppName
 from lib.ModifyINI import ModifyINI
+from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -23,13 +24,13 @@ try:
 except ModuleNotFoundError:
     logger.error('winreg module not found')
 
-def rgb_to_hex(rgb):
+def rgb_to_hex(rgb: tuple[int, int, int]) -> str:
     return '#{:02x}{:02x}{:02x}'.format(*rgb)
 
-def rgba_to_hex(rgba):
+def rgba_to_hex(rgba: tuple[int, int, int, int]) -> str:
     return '#{:02x}{:02x}{:02x}{:02x}'.format(*rgba)
 
-def hex_to_rgb(value):
+def hex_to_rgb(value: str) -> tuple[int, int, int] | tuple[int, ...]:
     value = value.lstrip('#')
     lv = len(value)
     if lv == 1:
@@ -39,19 +40,17 @@ def hex_to_rgb(value):
         return tuple(int(value[i:i + 1], 16)*17 for i in range(3))
     return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
-def hex_to_decimal(hex_):
+def hex_to_decimal(hex_) -> str:
     return str(int(str(hex_).lstrip('#'),16))
 
-def decimal_to_rgb(decimal):
+def decimal_to_rgb(decimal) -> tuple[int, int, int]:
     decimal = int(decimal)
     blue = decimal & 255
     green = (decimal >> 8) & 255
     red = (decimal >> 16) & 255
     return (red, green, blue)
 
-
-
-def browse_to_location(choice, browse, function, game_name):
+def browse_to_location(choice: str, browse: tuple[str, ...], function: Callable, game_name) -> str:
     if choice == 'Browse...':
         if browse[2] == 'directory':
             location = os.path.join(os.path.normpath(filedialog.askdirectory()), "")
@@ -93,7 +92,7 @@ class Info:
 
         return documents_directory
 
-    def game_documents_name(game_name):
+    def game_documents_name(game_name: str) -> str:
         game_name_documents_location_dict = {"Skyrim Special Edition": "Skyrim Special Edition",
                                          "Skyrim": "Skyrim",
                                          "Starfield": "Starfield",
@@ -110,7 +109,7 @@ class Info:
             game_documents_name = ''
         return game_documents_name
 
-    def game_reg(game_name):
+    def game_reg(game_name: str) -> str:
         game_name_registry_dict = {"Skyrim Special Edition": "Skyrim Special Edition",
                                 "Skyrim": "skyrim",
                                 "Fallout 3": "fallout3",
@@ -127,7 +126,7 @@ class Info:
 
 class CustomFunctions:
 
-    def restore_backup(game_name, choice):
+    def restore_backup(game_name: str, choice: str) -> None:
         logger.info(f'Restoring backup from {choice}.')
         app = AppName(game_name)
         ini_files = app.what_ini_files_are_used()
@@ -173,7 +172,7 @@ class CustomFunctions:
                     logger.error(f'Restoring {new_file} to {initial_file} failed due to {new_file} not existing.')
         return
 
-    def getBackups(game_name):
+    def getBackups(game_name: str) -> list[str]:
         gameDocumentsName = Info.game_documents_name(game_name)
         if gameDocumentsName != '':
             defaultINILocation = os.path.join(Info.get_documents_directory(), 'My Games', gameDocumentsName)
@@ -187,13 +186,13 @@ class CustomFunctions:
             backups = ["None found"]
         return ['Choose...', *backups]
 
-    def getCurrentResolution(gameName):
+    def getCurrentResolution(gameName: str) -> str:
         root = tk.Tk()
         root.withdraw()
         WIDTH, HEIGHT = root.winfo_screenwidth(), root.winfo_screenheight()
         return str(WIDTH) + "x" + str(HEIGHT)
 
-    def getBethesdaGameFolder(game_name):
+    def getBethesdaGameFolder(game_name: str):
         game_folder = ModifyINI("Bethini.ini").get_value("Directories", "s" + game_name + "Path", default='Not Detected')
         if game_folder != 'Not Detected':
             return game_folder
@@ -211,10 +210,10 @@ class CustomFunctions:
 
         return game_folder
 
-    def getGamePath(game_name):
+    def getGamePath(game_name: str):
         return ModifyINI("Bethini.ini").get_value("Directories", "s" + game_name + "Path", default='Not Detected')
 
-    def getINILocations(gameName):
+    def getINILocations(gameName: str) -> list[str]:
         gameDocumentsLocation = Info.game_documents_name(gameName)
         documents_directory = Info.get_documents_directory()
         INILocation = [os.path.join(documents_directory, 'My Games', gameDocumentsLocation)]

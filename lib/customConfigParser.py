@@ -6,7 +6,7 @@ import sys
 class customConfigParser(configparser.RawConfigParser):
     """Our custom configparser will not remove comments when the file is written.
     Also, it does not raise errors if duplicate options are detected."""
-    def __init__(self):
+    def __init__(self) -> None:
         configparser.RawConfigParser.__init__(self, comment_prefixes=None, delimiters='=',
                                               allow_no_value=True, strict=False)
         #comment_prefixes=None is necessary to preserve comments.
