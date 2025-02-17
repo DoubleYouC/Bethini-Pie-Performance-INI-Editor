@@ -423,10 +423,10 @@ class bethini_app(ttk.Window):
             #raise Exception("Forcing you to choose")
             self.choose_game_done(choose_game_var)
         except NameError:
-            self.sme('Choose game/application.', exception=1)
+            self.sme('Choose game/application.', exception=True)
             self.choose_game_window.deiconify()
         except Exception as e:
-            self.sme('An unhandled exception occurred.', exception=1)
+            self.sme('An unhandled exception occurred.', exception=True)
             messagebox.showerror(title='Unhandled exception', message=f'An unhandled exception occurred.\n{e}\nThis program will now close. No files will be modified.')
             self.quit()
 
@@ -442,7 +442,7 @@ class bethini_app(ttk.Window):
                 self.sme(f'Change of game from {self.choose_game_var} to {game}')
                 raise Exception("App/Game specified in " + my_app_config + " differs from the game chosen, so it will be changed to the one you chose.")
         except:
-            self.sme('Change of game/application', exception=1)
+            self.sme('Change of game/application', exception=True)
             app_config.assign_setting_value('General','sAppName', game)
             from_choose_game_window = True
 
@@ -490,7 +490,7 @@ class bethini_app(ttk.Window):
         try:
             self.createTabs(from_choose_game_window)
         except Exception as e:
-            self.sme('An unhandled exception occurred.', exception=1)
+            self.sme('An unhandled exception occurred.', exception=True)
             messagebox.showerror(title='Unhandled exception', message=f'An unhandled exception occurred.\n{e}\nThis program will now close. No files will be modified.')
             self.quit()
         self.menu(self.s)
@@ -619,7 +619,7 @@ class bethini_app(ttk.Window):
                         except FileNotFoundError:
                             self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
                     copyfile(APP_LOG_FILE, f"{the_backup_directory}log.log")
-                    this_ini_object.save_ini_file(1)
+                    this_ini_object.save_ini_file(sort=True)
                     files_saved = True
                     self.sme(f"{this_location}{each_ini} saved.")
         if not files_saved:
@@ -717,11 +717,11 @@ class bethini_app(ttk.Window):
         try:
             self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = os.path.join("icons", f"{self.tab_dictionary[each_tab]['Name']}.png"), height=16, width=16)
         except tk.TclError as e:
-            self.sme(f'No image for tab "{each_tab}": {e}', exception=1)
+            self.sme(f'No image for tab "{each_tab}": {e}', exception=True)
             try:
                 self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = os.path.join("icons", "Blank.png"))
             except tk.TclError as e:
-                self.sme(f'Failed to load blank icon at {os.path.join(current_working_directory, "icons", "Blank.png")}\n\n{e}', exception=1)
+                self.sme(f'Failed to load blank icon at {os.path.join(current_working_directory, "icons", "Blank.png")}\n\n{e}', exception=True)
                 self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(data=Icon.warning)
 
     def label_frames_for_tab(self, each_tab) -> None:
@@ -1354,7 +1354,7 @@ class bethini_app(ttk.Window):
                 if type(this_value[n]) is tuple:
                     this_value[n] = list(this_value[n])
         except:
-            self.sme(f'{this_value} .... Make sure that the {each_setting} checkbutton Onvalue and Offvalue are lists within lists in the json.', exception=1)
+            self.sme(f'{this_value} .... Make sure that the {each_setting} checkbutton Onvalue and Offvalue are lists within lists in the json.', exception=True)
 
         #print(this_value, onvalue, off_value)
 
@@ -1808,7 +1808,7 @@ def on_closing(root) -> None:
     """Initialized upon closing the app. Asks if the user wants to save INI files if any INI files have been modified before quitting."""
     if messagebox.askyesno("Quit?", "Do you want to quit?"):
         if app_config.has_been_modified:
-            app_config.save_ini_file(1)
+            app_config.save_ini_file(sort=True)
         root.save_ini_files()
         root.quit()
 
