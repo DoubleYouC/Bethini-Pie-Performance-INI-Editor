@@ -401,13 +401,13 @@ class bethini_app(ttk.Window):
 
         Hovertip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text, [PREVIEW_WINDOW, PREVIEW_FRAME, photo_for_setting], tooltip_wrap_length)
 
-    def choose_game(self, forced: int=0) -> None:
+    def choose_game(self, forced: bool=False) -> None:
         self.withdraw()
         # The Choose App/Game dialog window.  The window is skipped here if
         # sAppName is already set in the Bethini.ini file.
         try:
             choose_game_var = app_config.get_value('General','sAppName')
-            if forced == 1:
+            if forced:
                 self.sme('Force choose game/application.')
                 raise NameError
             if app_config.get_value('General', 'bAlwaysSelectGame', '1') != '0':
@@ -500,7 +500,7 @@ class bethini_app(ttk.Window):
         filemenu = tk.Menu(menubar, tearoff=False)
         filemenu.add_command(label="Save", command = self.save_ini_files)
         filemenu.add_separator()
-        filemenu.add_command(label="Choose game", command = lambda: self.choose_game(forced=1))
+        filemenu.add_command(label="Choose game", command = lambda: self.choose_game(forced=True))
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command= lambda: on_closing(self))
 
