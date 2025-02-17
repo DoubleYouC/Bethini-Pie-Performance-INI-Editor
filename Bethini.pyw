@@ -294,7 +294,7 @@ class bethini_app(ttk.Window):
     def show_status_bar(self) -> None:
         self.statusbar.pack(anchor='w', side=tk.BOTTOM, fill=tk.X)
 
-    def choose_color(self, button_to_modify: ttk.Button, color_value_type: str='hex'):
+    def choose_color(self, button_to_modify: tk.Button, color_value_type: str='hex'):
         #This allows us to have our very convenient tkinter colorchooser dialog
         #window modify a button
         old_color = button_to_modify.var.get()
@@ -551,7 +551,7 @@ class bethini_app(ttk.Window):
         self.deiconify()
         self.updateValues()
 
-    def save_ini_files(self, keyevent="None") -> None:
+    def save_ini_files(self, event: 'tk.Event[tk.Misc] | None' = None) -> None:
         #self.openINIs = {
         #    my_app_config : {
         #        'located': {
