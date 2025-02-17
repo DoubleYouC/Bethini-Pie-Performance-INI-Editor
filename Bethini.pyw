@@ -1853,7 +1853,7 @@ def open_ini(location, ini):
         open_inis[ini]['located'][open_ini_id] = {
             'at':location
             }
-        open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(location + ini)
+        open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(os.path.join(location, ini))
         return open_inis[ini]['located'][open_ini_id]['object']
     #if the ini has not been opened before
     open_ini_id = "1"
@@ -1865,7 +1865,7 @@ def open_ini(location, ini):
             }
         }
     try:
-        open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(location + ini)
+        open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(os.path.join(location, ini))
         #open_inis[ini]['located'][open_ini_id]['original'] = ModifyINI(location + ini)
     except configparser.MissingSectionHeaderError as e:
         logger.error(f"{e.strerror}")
