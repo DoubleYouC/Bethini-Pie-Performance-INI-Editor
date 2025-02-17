@@ -535,7 +535,7 @@ class bethini_app(ttk.Window):
         about_frame_real = ttk.Frame(about_frame)
 
         about_label = ttk.Label(about_frame_real,
-                               text=f'About {my_app_name} {version}\n\n{my_app_name} was created by DoubleYou.\n\nLicensing is CC by-NC-SA.',
+                               text=f'About {my_app_name} {version}\n\n{my_app_name} was created by DoubleYou.\n\nLicensing is CC BY-NC-SA.',
                                justify=tk.CENTER)
 
         about_frame.pack(fill=tk.BOTH, expand=True)
