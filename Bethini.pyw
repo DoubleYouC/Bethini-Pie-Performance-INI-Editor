@@ -236,7 +236,7 @@ class bethini_app(ttk.Window):
         self.theme_name = tk.StringVar(self)
         self.theme_dropdown = ttk.OptionMenu(self.preferences_frame,
                                              self.theme_name, app_config.get_value('General', 'sTheme', 'superhero'), *theme_names,
-                                             command=lambda t: set_theme(self.s, self, t))
+                                             command=lambda t: set_theme(self.s, t))
         self.theme_dropdown.var = self.theme_name
 
         self.choose_game_frame.pack(fill=tk.BOTH, expand=True)
@@ -511,7 +511,7 @@ class bethini_app(ttk.Window):
         theme_menu = tk.Menu(menubar, tearoff=False)
         theme_names = list(standThemes.STANDARD_THEMES.keys())
         for theme_name in theme_names:
-            theme_menu.add_command(label=theme_name, command = lambda t=theme_name: set_theme(style_object, self, t))
+            theme_menu.add_command(label=theme_name, command = lambda t=theme_name: set_theme(style_object, t))
 
         # Help
         helpmenu = tk.Menu(menubar, tearoff=False)
