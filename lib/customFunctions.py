@@ -73,11 +73,11 @@ def browse_to_location(choice: str, browse: tuple[str, ...], function: Callable,
         if manual:
             return manual
         return choice
-    else:
-        if function:
-            return_value_of_custom_function = getattr(CustomFunctions, function)(game_name,choice)
-            logger.debug(f"Return value of {function}: {return_value_of_custom_function}")
-        return choice
+
+    if function:
+        return_value_of_custom_function = getattr(CustomFunctions, function)(game_name,choice)
+        logger.debug(f"Return value of {function}: {return_value_of_custom_function}")
+    return choice
 
 class Info:
     def get_documents_directory():
@@ -148,29 +148,28 @@ class CustomFunctions:
 
         if choice in {"Choose...", "None found"}:
             return
-        else:
-            #An example of filesToReplace
-            #{
-            #    'Skyrim.ini':
-            #        {
-            #            'InitialFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Skyrim.ini',
-            #            'NewFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\Skyrim.ini'
-            #        },
-            #    'SkyrimPrefs.ini':
-            #        {
-            #            'InitialFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\SkyrimPrefs.ini',
-            #            'NewFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\SkyrimPrefs.ini'
-            #        }
-            #}
-            for file in files_to_replace:
-                initial_file = files_to_replace[file].get('InitialFile')
-                new_file = files_to_replace[file].get('NewFile')
-                try:
-                    shutil.copyfile(f"{new_file}", f"{initial_file}")
-                    logger.debug(f'{initial_file} was replaced with backup from {new_file}.')
-                except FileNotFoundError:
-                    logger.error(f'Restoring {new_file} to {initial_file} failed due to {new_file} not existing.')
-        return
+
+        #An example of filesToReplace
+        #{
+        #    'Skyrim.ini':
+        #        {
+        #            'InitialFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Skyrim.ini',
+        #            'NewFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\Skyrim.ini'
+        #        },
+        #    'SkyrimPrefs.ini':
+        #        {
+        #            'InitialFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\SkyrimPrefs.ini',
+        #            'NewFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\SkyrimPrefs.ini'
+        #        }
+        #}
+        for file in files_to_replace:
+            initial_file = files_to_replace[file].get('InitialFile')
+            new_file = files_to_replace[file].get('NewFile')
+            try:
+                shutil.copyfile(f"{new_file}", f"{initial_file}")
+                logger.debug(f'{initial_file} was replaced with backup from {new_file}.')
+            except FileNotFoundError:
+                logger.error(f'Restoring {new_file} to {initial_file} failed due to {new_file} not existing.')
 
     def getBackups(game_name: str) -> list[str]:
         gameDocumentsName = Info.game_documents_name(game_name)
