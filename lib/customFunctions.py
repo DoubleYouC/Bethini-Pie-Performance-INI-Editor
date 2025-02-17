@@ -191,7 +191,7 @@ class CustomFunctions:
         return ['Choose...', *backups]
 
     @staticmethod
-    def getCurrentResolution(gameName: str) -> str:
+    def getCurrentResolution() -> str:
         root = tk.Tk()
         root.withdraw()
         WIDTH, HEIGHT = root.winfo_screenwidth(), root.winfo_screenheight()

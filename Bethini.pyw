@@ -298,6 +298,7 @@ class bethini_app(ttk.Window):
         #This allows us to have our very convenient tkinter colorchooser dialog
         #window modify a button
         old_color = button_to_modify.var.get()
+        new_alpha: int | None = None
         #old_color is in format (255, 255, 255)
         if color_value_type == 'rgb':
             old_color = rgb_to_hex(ast.literal_eval(old_color))
@@ -334,7 +335,8 @@ class bethini_app(ttk.Window):
         elif color_value_type == 'rgba':
             new_color_tuple = hex_to_rgb(new_color)
             new_color_list = list(new_color_tuple)
-            new_color_list.append(new_alpha)
+            if new_alpha is not None:
+                new_color_list.append(new_alpha)
             new_color_tuple = tuple(new_color_list)
             button_to_modify.var.set(str(new_color_tuple).replace(' ',''))
         elif color_value_type == 'rgb 1':
@@ -1240,7 +1242,9 @@ class bethini_app(ttk.Window):
                                              self.setting_dictionary[each_setting].get('targetSections'),
                                              self.setting_dictionary[each_setting].get('settings'))
 
-        if setting_value != [] and 'Does Not Exist' not in setting_value:
+        this_value = None
+        new_color = None
+        if setting_value and 'Does Not Exist' not in setting_value:
             color_value_type = self.setting_dictionary[each_setting].get("colorValueType")
             if color_value_type == 'hex':
                 this_value = setting_value[0]
@@ -1281,16 +1285,17 @@ class bethini_app(ttk.Window):
                     this_value = tuple(round(float(i),4) for i in setting_value)
                     new_color = rgb_to_hex(tuple(int(float(i)*255) for i in setting_value))
                     this_value = str(this_value)
-            self.setting_dictionary[each_setting]['tk_var'].set(this_value)
-            tk_widget = self.setting_dictionary[each_setting].get("tk_widget")
-            rgb = hex_to_rgb(new_color)
-            luminance = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2]
-            the_text_color = '#FFFFFF' if luminance < 128 else '#000000'
-            tk_widget.configure(bg=new_color, activebackground=new_color, fg=the_text_color)
-            logger.debug(f"{each_setting} = {this_value}")
-            self.setting_dictionary[each_setting]['valueSet'] = True
-            return this_value
-        return None
+
+            if this_value is not None and new_color is not None:
+                self.setting_dictionary[each_setting]['tk_var'].set(this_value)
+                tk_widget = self.setting_dictionary[each_setting].get("tk_widget")
+                rgb = hex_to_rgb(new_color)
+                luminance = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2]
+                the_text_color = '#FFFFFF' if luminance < 128 else '#000000'
+                tk_widget.configure(bg=new_color, activebackground=new_color, fg=the_text_color)
+                logger.debug(f"{each_setting} = {this_value}")
+                self.setting_dictionary[each_setting]['valueSet'] = True
+        return this_value
 
     def check_dependents(self, each_setting) -> None:
         for each_dependent_setting in self.settings_that_settings_depend_on[each_setting]:
@@ -1692,8 +1697,8 @@ class bethini_app(ttk.Window):
                     'setToOff': set_to_off
                     }
 
-        badValue = f"\"{valueChangedTo}\" is an invalid value for this option."
     def validate(self, valueChangedTo, _valueWas, validate) -> bool:
+        badValue = f'"{valueChangedTo}" is an invalid value for this option.'
         if validate == 'integer':
             try:
                 if valueChangedTo == '':
