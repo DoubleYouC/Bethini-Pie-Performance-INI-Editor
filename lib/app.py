@@ -138,8 +138,7 @@ class AppName:
         containing the alwaysPrint attribute as specified in settings.json."""
         always_print = {}
         for ini_setting in self.data["iniValues"]:
-            always_print = ini_setting.get('alwaysPrint')
-            if always_print:
+            if ini_setting.get('alwaysPrint'):
                 ini = ini_setting.get('ini', self.default_ini)
                 the_value = str(ini_setting['value'].get('fixedDefault',
                                                          ini_setting['value'].get('default')))
@@ -155,8 +154,7 @@ class AppName:
         NOT containing the alwaysPrint attribute as specified in settings.json."""
         can_remove = {}
         for ini_setting in self.data["iniValues"]:
-            always_print = ini_setting.get('alwaysPrint')
-            if not always_print:
+            if not ini_setting.get('alwaysPrint'):
                 ini = ini_setting.get('ini', self.default_ini)
 
                 the_value = str(ini_setting['value'].get('default'))
