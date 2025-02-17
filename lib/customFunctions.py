@@ -15,7 +15,6 @@ from tkinter import simpledialog
 
 from lib.app import AppName
 from lib.ModifyINI import ModifyINI
-from collections.abc import Callable
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +49,7 @@ def decimal_to_rgb(decimal) -> tuple[int, int, int]:
     red = (decimal >> 16) & 255
     return (red, green, blue)
 
-def browse_to_location(choice: str, browse: tuple[str, ...], function: Callable, game_name) -> str:
+def browse_to_location(choice: str, browse: tuple[str, ...], function: str, game_name) -> str:
     if choice == 'Browse...':
         if browse[2] == 'directory':
             location = os.path.join(os.path.normpath(filedialog.askdirectory()), "")

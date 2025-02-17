@@ -14,7 +14,7 @@ import webbrowser
 from shutil import copyfile
 from datetime import datetime
 from operator import gt, ge, lt, le, ne, eq
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 #from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
 #This is for changing file read-only access via os.chmod(filename, S_IREAD,
 #S_IRGRP, #S_IROTH) Not currently used.
@@ -130,7 +130,7 @@ class bethini_app(ttk.Window):
 
         #variables
         self.setup_dictionary = {}
-        self.tab_dictionary = {}
+        self.tab_dictionary: dict[str, dict[str, Any]] = {}  # Temporary Any annotation to replace invalid type 'tab'
         self.setting_dictionary = {}
         self.dependent_settings_dictionary = {}
         self.settings_that_settings_depend_on = {}
@@ -395,7 +395,7 @@ class bethini_app(ttk.Window):
             tooltip_text = tooltip_description
 
         setting_name = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get('Name')
-        photo_for_setting = os.path.join('apps', GAME_NAME, 'images', f'{setting_name}.jpg')
+        photo_for_setting: str | None = os.path.join('apps', GAME_NAME, 'images', f'{setting_name}.jpg')
         if not os.path.isfile(photo_for_setting):
             photo_for_setting = None
 
@@ -471,7 +471,7 @@ class bethini_app(ttk.Window):
                 if tk_frame:
                     tk_frame.destroy()
 
-        self.tab_dictionary: dict[str, dict[str, tab]] = {}
+        self.tab_dictionary = {}
         for tab_number, tab in enumerate(APP.tabs()):
             self.tab_dictionary["Page" + str(tab_number)] = {"Name":tab}
 
