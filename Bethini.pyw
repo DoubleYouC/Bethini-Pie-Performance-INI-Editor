@@ -45,6 +45,7 @@ from ttkbootstrap.themes import standard as standThemes
 from ttkbootstrap.icons import Icon
 from tkinter import colorchooser
 from tkinter import messagebox
+from tkinter import simpledialog
 
 from simpleeval import simple_eval
 
@@ -310,7 +311,7 @@ class bethini_app(ttk.Window):
             alpha = old_color_original[3]
             #170
             try:
-                new_alpha = tk.simpledialog.askinteger("Alpha", "Alpha transparency (0 - 255):", initialvalue=alpha, minvalue = 0, maxvalue = 255)
+                new_alpha = simpledialog.askinteger("Alpha", "Alpha transparency (0 - 255):", initialvalue=alpha, minvalue = 0, maxvalue = 255)
                 logger.debug(f"New alpha: {new_alpha}")
             except:
                 new_alpha = alpha
