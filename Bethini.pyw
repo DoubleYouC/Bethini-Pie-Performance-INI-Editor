@@ -99,7 +99,7 @@ current_working_directory = os.getcwd()
 my_app_name = "Bethini Pie"
 my_app_short_name = "Bethini"
 
-def set_theme(style_object: ttk.Style, root: ttk.Window, theme_name: str) -> None:
+def set_theme(style_object: ttk.Style, theme_name: str) -> None:
     """ Sets the theme. """
     style_object.theme_use(theme_name)
     style_object.configure('choose_game_button.TButton', font=('Segoe UI', 14))
@@ -110,7 +110,7 @@ class Scalar(ttk.Scale):
 
     def __init__(self, *args, **kwargs) -> None:
         self.decimal_places = kwargs.pop('decimal_places')
-        self.chain = kwargs.pop('command', lambda *a: None)
+        self.chain = kwargs.pop('command', lambda *_a: None)
         super().__init__(*args, command=self._value_changed, **kwargs)
 
     def _value_changed(self, new_value) -> None:
@@ -245,7 +245,7 @@ class bethini_app(ttk.Window):
         self.label_Bethini.pack(padx=5, pady=5)
         self.label_Pie.pack(padx=5, pady=15)
         self.label_link.pack(padx=25, pady=5)
-        self.label_link.bind("<Button-1>", lambda e: webbrowser.open_new_tab('https://www.nexusmods.com/site/mods/631'))
+        self.label_link.bind("<Button-1>", lambda _event: webbrowser.open_new_tab('https://www.nexusmods.com/site/mods/631'))
 
         self.preferences_frame.pack()
         self.theme_label.pack(side=tk.LEFT)
@@ -260,7 +260,7 @@ class bethini_app(ttk.Window):
         self.preset_var = tk.StringVar(self)
         self.preset_var.set('Bethini')
 
-    def on_frame_configure(self, event: 'tk.Event[ttk.Frame]') -> None:
+    def on_frame_configure(self, _event: 'tk.Event[ttk.Frame]') -> None:
         self.the_canvas.configure(scrollregion=self.the_canvas.bbox('all'))
 
     def sub_container_configure(self, event: 'tk.Event[ttk.Notebook]') -> None:
@@ -350,7 +350,7 @@ class bethini_app(ttk.Window):
 
         return new_color
 
-    def tooltip(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_) -> None:
+    def tooltip(self, each_tab, the_label_frame, on_frame, the_setting, id_) -> None:
         """Sets the tooltips."""
 
         #Fectches the tooltip description.
@@ -551,7 +551,7 @@ class bethini_app(ttk.Window):
         self.deiconify()
         self.updateValues()
 
-    def save_ini_files(self, event: 'tk.Event[tk.Misc] | None' = None) -> None:
+    def save_ini_files(self, _event: 'tk.Event[tk.Misc] | None' = None) -> None:
         #self.openINIs = {
         #    my_app_config : {
         #        'located': {
@@ -817,7 +817,7 @@ class bethini_app(ttk.Window):
                                                                                                                               onvalue=on_value, offvalue=off_value)
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].var = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"]
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor='w', padx=5, pady=7)
-        self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
+        self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
             'tk_var': self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
@@ -834,7 +834,7 @@ class bethini_app(ttk.Window):
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Button(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
                                                                                                                          text=each_setting, command=lambda: self.set_preset(preset_id))
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0)
-        self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
+        self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
 
     def radio_preset(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
@@ -845,7 +845,7 @@ class bethini_app(ttk.Window):
                                                                                                                               text=each_setting,
                                                                                                                               variable=self.preset_var, value=value)
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=7)
-        self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
+        self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
             'tk_var': self.preset_var
@@ -887,7 +887,7 @@ class bethini_app(ttk.Window):
                                                                                                                              var.set(browse_to_location(c, browse, function, GAME_NAME)))
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].var = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"]
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
+        self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
@@ -921,7 +921,7 @@ class bethini_app(ttk.Window):
                                                                                                                            width=width, values=options)
 
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
+        self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
             'tk_var': self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
@@ -949,7 +949,7 @@ class bethini_app(ttk.Window):
                                                                                                                         width=entry_width,
                                                                                                                         textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
+        self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
@@ -998,8 +998,8 @@ class bethini_app(ttk.Window):
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["second_tk_widget"].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
 
-        self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, "second_tk_widget")
-        self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
+        self.tooltip(each_tab, the_label_frame, on_frame, the_setting, "second_tk_widget")
+        self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
@@ -1030,7 +1030,7 @@ class bethini_app(ttk.Window):
                                                                                                                         from_=from_value, to=to_value, increment=increment, width=width,
                                                                                                                         textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
+        self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
@@ -1061,7 +1061,7 @@ class bethini_app(ttk.Window):
                                                                                                                                                          color_value_type))
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].var = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"]
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tooltip(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
+        self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
@@ -1071,7 +1071,7 @@ class bethini_app(ttk.Window):
             }
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
-    def radio_preset_value(self, each_setting) -> str:
+    def radio_preset_value(self, _each_setting) -> str:
         return self.preset_var.get()
 
     def checkbox_value(self, each_setting):
@@ -1317,7 +1317,7 @@ class bethini_app(ttk.Window):
                 if second_tk_widget:
                     second_tk_widget.configure(state='disabled')
 
-    def assign_value(self, var, indx, mode, each_setting) -> None:
+    def assign_value(self, each_setting) -> None:
         id_ = self.setting_dictionary[each_setting].get('id')
         func = self.widget_type_assign_value.get(id_, "Invalid")
         if func != "Invalid":
@@ -1362,7 +1362,7 @@ class bethini_app(ttk.Window):
                         if setting_value[n] in this_value[n]:
                             theValue = setting_value[n]
                         elif this_value[n][0] in self.setting_dictionary:
-                            self.assign_value(1,2,3, this_value[n][0])
+                            self.assign_value(this_value[n][0])
                             continue
                         else:
                             theValue = this_value[n][0]
@@ -1638,10 +1638,10 @@ class bethini_app(ttk.Window):
         for each_setting in self.setting_dictionary:
             tk_var = self.setting_dictionary[each_setting].get('tk_var')
             if tk_var:
-                self.setting_dictionary[each_setting]["tk_var"].trace_add('write', lambda var, indx, mode, each_setting=each_setting:self.assign_value(var, indx, mode, each_setting))
+                self.setting_dictionary[each_setting]["tk_var"].trace_add('write', lambda _var, _index, _mode, each_setting=each_setting:self.assign_value(each_setting))
             forceSelect = self.setting_dictionary[each_setting].get('forceSelect')
             if forceSelect:
-                self.assign_value(1, 2, 3, each_setting)
+                self.assign_value(each_setting)
 
     def updateValues(self) -> None:
         self.start_progress()
@@ -1692,8 +1692,8 @@ class bethini_app(ttk.Window):
                     'setToOff': set_to_off
                     }
 
-    def validate(self, valueChangedTo, valueWas, validate) -> bool:
         badValue = f"\"{valueChangedTo}\" is an invalid value for this option."
+    def validate(self, valueChangedTo, _valueWas, validate) -> bool:
         if validate == 'integer':
             try:
                 if valueChangedTo == '':
