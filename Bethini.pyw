@@ -703,11 +703,10 @@ class bethini_app(ttk.Window):
             current_value = the_target_ini.get_value(target_section, target_setting, this_value)
 
             if current_value == this_value:
-                remove_setting = the_target_ini.remove_setting(target_section, target_setting)
-                if remove_setting == f"No section: {target_section}":
-                    self.sme(f"No section {target_section} exists for {target_setting} in {the_target_ini}.")
-                else:
+                if the_target_ini.remove_setting(target_section, target_setting):
                     self.sme(f"{target_ini} [{target_section}] {target_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed")
+                else:
+                    self.sme(f"No section {target_section} exists for {target_setting} in {the_target_ini}.")
 
     def create_tab_image(self, each_tab) -> None:
         try:

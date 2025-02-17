@@ -97,8 +97,11 @@ class ModifyINI:
             return True
         return False
 
-    def remove_setting(self, section, setting) -> str | None:
-        """Removes the specified setting."""
+    def remove_setting(self, section, setting) -> bool:
+        """Remove the specified setting.
+
+        Returns True if the section exists, False otherwise.
+        """
         existing_section = self.get_existing_section(section)
         existing_setting = self.get_existing_setting(existing_section, setting)
         try:
@@ -106,7 +109,8 @@ class ModifyINI:
             self.case_insensitive_config.remove_option(existing_section, existing_setting)
             self.has_been_modified = True
         except configparser.NoSectionError:
-            return f"No section: {section}"
+            return False
+        return True
 
     def remove_section(self, section) -> None:
         """Removes the specified section."""
