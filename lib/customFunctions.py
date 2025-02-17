@@ -80,6 +80,7 @@ def browse_to_location(choice: str, browse: tuple[str, ...], function: Callable,
     return choice
 
 class Info:
+    @staticmethod
     def get_documents_directory():
         CSIDL_PERSONAL = 5       # My Documents
         SHGFP_TYPE_CURRENT = 0   # Get current, not default value
@@ -92,6 +93,7 @@ class Info:
 
         return documents_directory
 
+    @staticmethod
     def game_documents_name(game_name: str) -> str:
         game_name_documents_location_dict = {"Skyrim Special Edition": "Skyrim Special Edition",
                                          "Skyrim": "Skyrim",
@@ -109,6 +111,7 @@ class Info:
             game_documents_name = ''
         return game_documents_name
 
+    @staticmethod
     def game_reg(game_name: str) -> str:
         game_name_registry_dict = {"Skyrim Special Edition": "Skyrim Special Edition",
                                 "Skyrim": "skyrim",
@@ -126,6 +129,7 @@ class Info:
 
 class CustomFunctions:
 
+    @staticmethod
     def restore_backup(game_name: str, choice: str) -> None:
         logger.info(f'Restoring backup from {choice}.')
         app = AppName(game_name)
@@ -171,6 +175,7 @@ class CustomFunctions:
             except FileNotFoundError:
                 logger.error(f'Restoring {new_file} to {initial_file} failed due to {new_file} not existing.')
 
+    @staticmethod
     def getBackups(game_name: str) -> list[str]:
         gameDocumentsName = Info.game_documents_name(game_name)
         if gameDocumentsName != '':
@@ -185,12 +190,14 @@ class CustomFunctions:
             backups = ["None found"]
         return ['Choose...', *backups]
 
+    @staticmethod
     def getCurrentResolution(gameName: str) -> str:
         root = tk.Tk()
         root.withdraw()
         WIDTH, HEIGHT = root.winfo_screenwidth(), root.winfo_screenheight()
         return str(WIDTH) + "x" + str(HEIGHT)
 
+    @staticmethod
     def getBethesdaGameFolder(game_name: str):
         game_folder = ModifyINI("Bethini.ini").get_value("Directories", "s" + game_name + "Path", default='Not Detected')
         if game_folder != 'Not Detected':
@@ -209,9 +216,11 @@ class CustomFunctions:
 
         return game_folder
 
+    @staticmethod
     def getGamePath(game_name: str):
         return ModifyINI("Bethini.ini").get_value("Directories", "s" + game_name + "Path", default='Not Detected')
 
+    @staticmethod
     def getINILocations(gameName: str) -> list[str]:
         gameDocumentsLocation = Info.game_documents_name(gameName)
         documents_directory = Info.get_documents_directory()
