@@ -201,8 +201,7 @@ class bethini_app(ttk.Window):
         self.start_progress()
         self.show_status_bar()
 
-        self.choose_game_window = ttk.Toplevel(self)
-        self.choose_game_window.title(f'Bethini Pie {version}')
+        self.choose_game_window = ttk.Toplevel(f'Bethini Pie {version}')
 
         self.choose_game_frame = ttk.Frame(self.choose_game_window)
 
