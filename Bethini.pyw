@@ -209,8 +209,8 @@ class bethini_app(ttk.Window):
         self.choose_game_frame_2 = ttk.Frame(self.choose_game_frame)
 
         self.label_Bethini = ttk.Label(self.choose_game_frame_2, text="Bethini Pie", font=('Segoe UI', 20))
-        self.label_Pie = ttk.Label(self.choose_game_frame_2, text="Performance INI Editor\nby DoubleYou", font=('Segoe UI', 15), justify='center', bootstyle="warning")
-        self.label_link = ttk.Label(self.choose_game_frame_2, text="www.nexusmods.com/site/mods/631", font=('Segoe UI', 10), cursor='hand2', bootstyle="info")
+        self.label_Pie = ttk.Label(self.choose_game_frame_2, text="Performance INI Editor\nby DoubleYou", font=('Segoe UI', 15), justify='center', style="warning")
+        self.label_link = ttk.Label(self.choose_game_frame_2, text="www.nexusmods.com/site/mods/631", font=('Segoe UI', 10), cursor='hand2', style="info")
 
         self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=('Segoe UI', 15))
 
@@ -222,7 +222,7 @@ class bethini_app(ttk.Window):
         self.choose_game_button = ttk.Button(self.choose_game_frame_2, text='Select Game', style='choose_game_button.TButton',
                                              command=lambda: self.choose_game_done(self.choose_game_tree.focus()))
 
-        self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=('Segoe UI', 12), justify='center', bootstyle="success")
+        self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=('Segoe UI', 12), justify='center', style="success")
         options = os.listdir('apps/')
         for option in options:
             self.choose_game_tree.insert('', 'end', id=option, text=option, values=[option])
