@@ -1502,7 +1502,7 @@ class bethini_app(ttk.Window):
                     try:
                         this_value = str(round(simple_eval(formulaValue),8))
                     except:
-                        self.sme('Failed to evaluate formula value for {this_value}.')
+                        self.sme(f'Failed to evaluate formula value for {this_value}.')
                 #if decimal_places:
                 #    this_value = round(this_value,int(decimal_places))
 
