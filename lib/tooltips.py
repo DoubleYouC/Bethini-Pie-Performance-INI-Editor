@@ -25,6 +25,7 @@ class Hovertip(OnHoverTooltipBase):
         self.preview_window = preview_list[0]
         self.preview_frame = preview_list[1]
         self.photo_for_setting = preview_list[2]
+        self.preview_image: ImageTk.PhotoImage | None = None
 
         self.anchor_widget.bind("<Button-3>", self.show_preview)
 
@@ -39,6 +40,7 @@ class Hovertip(OnHoverTooltipBase):
         print(event)
         for widget in self.preview_frame.winfo_children():
             widget.destroy()
+        self.preview_image = None
 
         if self.photo_for_setting:
             self.show_photo()
@@ -49,8 +51,6 @@ class Hovertip(OnHoverTooltipBase):
 
     def show_photo(self) -> None:
         """Packs the image in the preview window."""
-        preview_image = Image.open(self.photo_for_setting)
-        tk_image = ImageTk.PhotoImage(preview_image)
-        preview_label = ttk.Label(self.preview_frame, image=tk_image)
-        preview_label.image = tk_image
+        self.preview_image = ImageTk.PhotoImage(Image.open(self.photo_for_setting))
+        preview_label = ttk.Label(self.preview_frame, image=self.preview_image)
         preview_label.pack(anchor=tk.NW)
