@@ -14,6 +14,7 @@ import webbrowser
 from shutil import copyfile
 from datetime import datetime
 from operator import gt, ge, lt, le, ne, eq
+from typing import TYPE_CHECKING
 #from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
 #This is for changing file read-only access via os.chmod(filename, S_IREAD,
 #S_IRGRP, #S_IROTH) Not currently used.
@@ -411,10 +412,9 @@ class bethini_app(ttk.Window):
                 raise NameError
             if app_config.get_value('General', 'bAlwaysSelectGame', '1') != '0':
                 self.sme('Force choose game/application at startup.')
-                GAME_NAME #By calling the global variable GAME_NAME before it has been created,
-                         #we raise
-                         #an exception to force the app/game to be chosen only
-                         #at startup.
+                # By calling the global variable GAME_NAME before it has been created,
+                # we raise an exception to force the app/game to be chosen only at startup.
+                GAME_NAME  # type: ignore[reportUnusedExpression] # noqa: B018
             #raise Exception("Forcing you to choose")
             self.choose_game_done(choose_game_var)
         except NameError:
@@ -450,7 +450,9 @@ class bethini_app(ttk.Window):
         global APP
         APP = AppName(game)
         global GAME_NAME
-        GAME_NAME = APP.data["gameName"]
+        GAME_NAME = APP.data["gameName"]  # type: ignore[reportUnknownVariableType]
+        if TYPE_CHECKING:
+            assert isinstance(GAME_NAME, str)
         self.sme(f'Application/game is {GAME_NAME}')
 
         #The self.tab_dictionary lists all the tabs, which
