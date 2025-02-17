@@ -531,8 +531,7 @@ class bethini_app(ttk.Window):
         ttk.Window.config(self, menu=menubar)
 
     def about(self) -> None:
-        about_window = ttk.Toplevel(self)
-        about_window.title('About')
+        about_window = ttk.Toplevel('About')
 
         about_frame = ttk.Frame(about_window)
         about_frame_real = ttk.Frame(about_frame)
@@ -1577,8 +1576,7 @@ class bethini_app(ttk.Window):
 
         # Preview Window
         global PREVIEW_WINDOW
-        PREVIEW_WINDOW = ttk.Toplevel(self)
-        PREVIEW_WINDOW.title('Preview')
+        PREVIEW_WINDOW = ttk.Toplevel('Preview')
         global PREVIEW_FRAME
         PREVIEW_FRAME = ttk.Frame(PREVIEW_WINDOW)
         PREVIEW_FRAME.pack(padx=5, pady=5)
@@ -1594,9 +1592,8 @@ class bethini_app(ttk.Window):
             self.create_tab_image(each_tab)
             if self.tab_dictionary[each_tab]['Name'] == 'Setup':
                 global SETUP_WINDOW
-                self.tab_dictionary[each_tab]['SetupWindow'] = ttk.Toplevel(self)
+                self.tab_dictionary[each_tab]['SetupWindow'] = ttk.Toplevel('Setup')
                 SETUP_WINDOW = self.tab_dictionary[each_tab]['SetupWindow']
-                SETUP_WINDOW.title('Setup')
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(SETUP_WINDOW)
                 self.tab_dictionary[each_tab]["TkFrameForTab"].pack()
 
@@ -1608,9 +1605,8 @@ class bethini_app(ttk.Window):
                     SETUP_WINDOW.withdraw()
             elif self.tab_dictionary[each_tab]['Name'] == 'Preferences':
                 global preferencesWindow
-                self.tab_dictionary[each_tab]['PreferencesWindow'] = ttk.Toplevel(self)
+                self.tab_dictionary[each_tab]['PreferencesWindow'] = ttk.Toplevel('Preferences')
                 preferencesWindow = self.tab_dictionary[each_tab]['PreferencesWindow']
-                preferencesWindow.title('Preferences')
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(preferencesWindow)
                 self.tab_dictionary[each_tab]["TkFrameForTab"].pack()
 
