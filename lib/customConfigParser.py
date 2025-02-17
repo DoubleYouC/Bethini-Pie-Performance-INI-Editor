@@ -7,9 +7,8 @@ class customConfigParser(configparser.RawConfigParser):
     """Our custom configparser will not remove comments when the file is written.
     Also, it does not raise errors if duplicate options are detected."""
     def __init__(self) -> None:
-        configparser.RawConfigParser.__init__(self, comment_prefixes=None, delimiters='=',
-                                              allow_no_value=True, strict=False)
-        #comment_prefixes=None is necessary to preserve comments.
+        super().__init__(allow_no_value=True, delimiters=('=',), comment_prefixes=(), strict=False)
+        # comment_prefixes=() is necessary to preserve comments.
 
     def _read(self, fp, fpname) -> None:
         """Parse a sectioned configuration file.
