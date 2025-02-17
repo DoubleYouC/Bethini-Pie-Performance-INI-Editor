@@ -322,11 +322,8 @@ class bethini_app(ttk.Window):
         elif color_value_type == 'decimal':
             old_color = rgb_to_hex(decimal_to_rgb(old_color))
 
-        try:
-            new_color = colorchooser.askcolor(color = old_color)[1].upper()
-        except:
-            #self.sme('Cancelled change of color.', exception=1)
-            new_color = old_color
+        response = colorchooser.askcolor(color=old_color)
+        new_color = response[1].upper() if response[1] else old_color
 
         rgb = hex_to_rgb(new_color)
         luminance = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2]
