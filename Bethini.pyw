@@ -100,7 +100,7 @@ my_app_short_name = "Bethini"
 def set_theme(style_object: ttk.Style, root: ttk.Window, theme_name: str) -> None:
     """ Sets the theme. """
     style_object.theme_use(theme_name)
-    style_object.configure('choose_game_button.TButton', font=('Segoe UI', '14'))
+    style_object.configure('choose_game_button.TButton', font=('Segoe UI', 14))
     app_config.assign_setting_value('General', 'sTheme', theme_name)
 
 class Scalar(ttk.Scale):
@@ -207,21 +207,21 @@ class bethini_app(ttk.Window):
 
         self.choose_game_frame_2 = ttk.Frame(self.choose_game_frame)
 
-        self.label_Bethini = ttk.Label(self.choose_game_frame_2, text="Bethini Pie", font=('Segoe UI', '20'))
-        self.label_Pie = ttk.Label(self.choose_game_frame_2, text="Performance INI Editor\nby DoubleYou", font=('Segoe UI', '15'), justify='center', bootstyle="warning")
-        self.label_link = ttk.Label(self.choose_game_frame_2, text="www.nexusmods.com/site/mods/631", font=('Segoe UI', '10'), cursor='hand2', bootstyle="info")
+        self.label_Bethini = ttk.Label(self.choose_game_frame_2, text="Bethini Pie", font=('Segoe UI', 20))
+        self.label_Pie = ttk.Label(self.choose_game_frame_2, text="Performance INI Editor\nby DoubleYou", font=('Segoe UI', 15), justify='center', bootstyle="warning")
+        self.label_link = ttk.Label(self.choose_game_frame_2, text="www.nexusmods.com/site/mods/631", font=('Segoe UI', 10), cursor='hand2', bootstyle="info")
 
-        self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=('Segoe UI', '15'))
+        self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=('Segoe UI', 15))
 
         self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode='browse', show='tree', columns=('Name'))
         self.choose_game_tree.column('#0', width=0, stretch=tk.NO)
         self.choose_game_tree.column('Name', anchor=tk.W, width=300)
 
-        self.s.configure('choose_game_button.TButton', font=('Segoe UI', '14'))
+        self.s.configure('choose_game_button.TButton', font=('Segoe UI', 14))
         self.choose_game_button = ttk.Button(self.choose_game_frame_2, text='Select Game', style='choose_game_button.TButton',
                                              command=lambda: self.choose_game_done(self.choose_game_tree.focus()))
 
-        self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=('Segoe UI', '12'), justify='center', bootstyle="success")
+        self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=('Segoe UI', 12), justify='center', bootstyle="success")
         options = os.listdir('apps/')
         for option in options:
             self.choose_game_tree.insert('', 'end', id=option, text=option, values=[option])
