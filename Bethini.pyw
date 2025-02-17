@@ -683,7 +683,7 @@ class bethini_app(ttk.Window):
             the_target_ini = open_ini(str(ini_location), str(target_ini))
 
             # Check if we are only supposed to add the value if the value is missing
-            if only_if_missing and (the_target_ini.get_value(target_section, target_setting, "Not Present") != "Not Present"):
+            if only_if_missing and (the_target_ini.get_value(target_section, target_setting) is not None):
                 continue
             the_target_ini.assign_setting_value(target_section, target_setting, this_value)
             self.sme(target_ini + " [" + target_section + "] " + target_setting + "=" + this_value)
@@ -774,14 +774,14 @@ class bethini_app(ttk.Window):
         self.setting_type_switcher(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, setting_type)
 
     def setting_type_switcher(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, setting_type) -> None:
-        func = self.widget_type_function.get(setting_type, "Invalid")
-        if func != "Invalid":
+        func = self.widget_type_function.get(setting_type)
+        if func is not None:
             func(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting)
 
     def widget_type_switcher(self, each_setting):
         id_ = self.setting_dictionary[each_setting].get('id')
-        func = self.widget_type_value.get(id_, "Invalid")
-        if func != "Invalid":
+        func = self.widget_type_value.get(id_)
+        if func is not None:
             return func(each_setting)
         return None
 
@@ -1080,7 +1080,7 @@ class bethini_app(ttk.Window):
                                              self.setting_dictionary[each_setting].get('targetSections'),
                                              self.setting_dictionary[each_setting].get('settings'))
 
-        if setting_value != [] and 'Does Not Exist' not in setting_value:
+        if setting_value and None not in setting_value:
             on_value = self.setting_dictionary[each_setting].get('onvalue')
             off_value = self.setting_dictionary[each_setting].get('offvalue')
             if setting_value == on_value:
@@ -1114,7 +1114,7 @@ class bethini_app(ttk.Window):
                                              self.setting_dictionary[each_setting].get('settingChoices'),
                                              self.setting_dictionary[each_setting].get('delimiter'))
 
-        if setting_value != [] and 'Does Not Exist' not in setting_value:
+        if setting_value and None not in setting_value:
             decimal_places = self.setting_dictionary[each_setting].get("decimal places")
             if decimal_places:
                 decimal_places = int(decimal_places)
@@ -1153,7 +1153,7 @@ class bethini_app(ttk.Window):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
                                              self.setting_dictionary[each_setting].get('targetSections'),
                                              self.setting_dictionary[each_setting].get('settings'))
-        if setting_value != [] and 'Does Not Exist' not in setting_value:
+        if setting_value and None not in setting_value:
             this_value = setting_value[0]
 
             decimal_places = self.setting_dictionary[each_setting].get("decimal places")
@@ -1173,7 +1173,7 @@ class bethini_app(ttk.Window):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
                                              self.setting_dictionary[each_setting].get('targetSections'),
                                              self.setting_dictionary[each_setting].get('settings'))
-        if setting_value != [] and 'Does Not Exist' not in setting_value:
+        if setting_value and None not in setting_value:
             formula = self.setting_dictionary[each_setting].get("formula")
             file_format = self.setting_dictionary[each_setting].get("fileFormat")
             if formula:
@@ -1202,7 +1202,7 @@ class bethini_app(ttk.Window):
                                              self.setting_dictionary[each_setting].get('targetSections'),
                                              self.setting_dictionary[each_setting].get('settings'))
 
-        if setting_value != [] and 'Does Not Exist' not in setting_value:
+        if setting_value and None not in setting_value:
             this_value = setting_value[0]
 
             decimal_places = self.setting_dictionary[each_setting].get("decimal places")
@@ -1225,7 +1225,7 @@ class bethini_app(ttk.Window):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
                                              self.setting_dictionary[each_setting].get('targetSections'),
                                              self.setting_dictionary[each_setting].get('settings'))
-        if setting_value != [] and 'Does Not Exist' not in setting_value:
+        if setting_value and None not in setting_value:
             this_value = setting_value[0]
             try:
                 self.setting_dictionary[each_setting]['tk_var'].set(this_value)
@@ -1243,7 +1243,7 @@ class bethini_app(ttk.Window):
 
         this_value = None
         new_color = None
-        if setting_value and 'Does Not Exist' not in setting_value:
+        if setting_value and None not in setting_value:
             color_value_type = self.setting_dictionary[each_setting].get("colorValueType")
             if color_value_type == 'hex':
                 this_value = setting_value[0]
@@ -1323,8 +1323,8 @@ class bethini_app(ttk.Window):
 
     def assign_value(self, each_setting) -> None:
         id_ = self.setting_dictionary[each_setting].get('id')
-        func = self.widget_type_assign_value.get(id_, "Invalid")
-        if func != "Invalid":
+        func = self.widget_type_assign_value.get(id_)
+        if func is not None:
             func(each_setting)
 
         if each_setting in list(self.settings_that_settings_depend_on.keys()):
@@ -1760,14 +1760,14 @@ class bethini_app(ttk.Window):
                 ININumber += 1
                 #Get the Bethini.ini key for the location of the target INI
                 ini_location = self.getINILocation(INI)
-                if ini_location != "Does Not Exist":
+                if ini_location is not None:
                     #If the INI location is known.
 
                     currentSetting = theSettings[ININumber]
                     currentSection = targetSections[ININumber]
 
                     # This looks for a default value in the settings.json
-                    defaultValue = "Does Not Exist" if my_app_config == INI else APP.get_value(currentSetting, "default")
+                    defaultValue = None if my_app_config == INI else APP.get_value(currentSetting, "default")
 
                     #target_ini = ModifyINI(str(ini_location) + str(INI))
 

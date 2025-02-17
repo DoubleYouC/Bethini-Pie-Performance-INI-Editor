@@ -57,7 +57,7 @@ class ModifyINI:
                 break
         return setting
 
-    def get_value(self, section, setting, default='Does Not Exist'):
+    def get_value(self, section, setting, default: str | None = None):
         """Retrieves the value of a given setting, if it exists."""
         section = self.get_existing_section(section)
         #Even though we are checking the case_insensitive_config, sections ARE case sensitive.
