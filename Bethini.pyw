@@ -314,14 +314,11 @@ class bethini_app(ttk.Window):
             except:
                 new_alpha = alpha
         elif color_value_type == 'rgb 1':
-            print("===RGB1===")
             #"(1.0000, 1.0000, 1.0000)"
             #(255, 255, 255)
             old_color = tuple(int(float(i)*255) for i in ast.literal_eval(old_color))
-            print('=============================================1' + repr(old_color))
         elif color_value_type == 'decimal':
             old_color = rgb_to_hex(decimal_to_rgb(old_color))
-            print('=============================================2' + repr(old_color))
 
         try:
             new_color = colorchooser.askcolor(color = old_color)[1].upper()
@@ -352,7 +349,6 @@ class bethini_app(ttk.Window):
             button_to_modify.var.set(new_color)
         preferencesWindow.lift()
 
-        print(f"COLOR TYPE: {type(new_color)}")
         return new_color
 
     def tooltip(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_) -> None:
