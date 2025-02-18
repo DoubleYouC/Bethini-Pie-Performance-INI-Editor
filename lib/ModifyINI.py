@@ -3,18 +3,19 @@ Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
 To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
 or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA."""
 
-from collections import OrderedDict
-import configparser #This is allowing us to sort the INI files
+import configparser
 import logging
-logger = logging.getLogger(__name__)
+import operator
+import sys
+from collections import OrderedDict
+from pathlib import Path
 
 from lib.customConfigParser import customConfigParser
-import operator
-from pathlib import Path
-import sys
 
 if __name__ == '__main__':
     sys.exit(1)
+
+logger = logging.getLogger(__name__)
 
 
 class ModifyINI:

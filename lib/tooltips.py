@@ -2,11 +2,10 @@
 
 import sys
 import tkinter as tk
+from idlelib.tooltip import OnHoverTooltipBase
 from tkinter import ttk
 
 from PIL import Image, ImageTk
-
-from idlelib.tooltip import OnHoverTooltipBase
 
 if __name__ == '__main__':
     sys.exit(1)

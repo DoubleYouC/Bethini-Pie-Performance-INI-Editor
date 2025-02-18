@@ -7,20 +7,20 @@
 
 import ast
 import configparser
+import logging
+import math
 import os
 import sys
-import math
 import webbrowser
+from datetime import datetime
+from operator import eq, ge, gt, le, lt, ne
 from pathlib import Path
 from shutil import copyfile
-from datetime import datetime
-from operator import gt, ge, lt, le, ne, eq
 from typing import TYPE_CHECKING, Any
+
 #from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
 #This is for changing file read-only access via os.chmod(filename, S_IREAD,
 #S_IRGRP, #S_IROTH) Not currently used.
-import logging
-
 
 # Configure Logging
 # TODO refactor usage of 'the_backup_directory'

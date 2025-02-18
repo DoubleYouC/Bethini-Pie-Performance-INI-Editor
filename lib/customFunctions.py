@@ -5,15 +5,15 @@
 #or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 #
 
-import os
-import logging
 import ctypes.wintypes
-import tkinter as tk
+import logging
+import os
 import shutil
 import sys
+import tkinter as tk
 from pathlib import Path
-from tkinter import filedialog
-from tkinter import simpledialog
+from tkinter import filedialog, simpledialog
+
 from lib.app import AppName
 from lib.ModifyINI import ModifyINI
 
