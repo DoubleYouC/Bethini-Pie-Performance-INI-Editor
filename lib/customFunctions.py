@@ -17,7 +17,7 @@ from tkinter import filedialog, simpledialog
 from lib.app import AppName
 from lib.ModifyINI import ModifyINI
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(1)
 
 logger = logging.getLogger(__name__)
@@ -25,16 +25,16 @@ logger = logging.getLogger(__name__)
 try:
     from winreg import HKEY_LOCAL_MACHINE, ConnectRegistry, OpenKey, QueryValueEx
 except ModuleNotFoundError:
-    logger.error('winreg module not found')
+    logger.error("winreg module not found")
 
 def rgb_to_hex(rgb: tuple[int, int, int]) -> str:
-    return '#{:02x}{:02x}{:02x}'.format(*rgb)
+    return "#{:02x}{:02x}{:02x}".format(*rgb)
 
 def rgba_to_hex(rgba: tuple[int, int, int, int]) -> str:
-    return '#{:02x}{:02x}{:02x}{:02x}'.format(*rgba)
+    return "#{:02x}{:02x}{:02x}{:02x}".format(*rgba)
 
 def hex_to_rgb(value: str) -> tuple[int, int, int] | tuple[int, ...]:
-    value = value.lstrip('#')
+    value = value.lstrip("#")
     lv = len(value)
     if lv == 1:
         v = int(value, 16)*17
@@ -44,7 +44,7 @@ def hex_to_rgb(value: str) -> tuple[int, int, int] | tuple[int, ...]:
     return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 def hex_to_decimal(hex_) -> str:
-    return str(int(str(hex_).lstrip('#'),16))
+    return str(int(str(hex_).lstrip("#"),16))
 
 def decimal_to_rgb(decimal) -> tuple[int, int, int]:
     decimal = int(decimal)
@@ -54,13 +54,13 @@ def decimal_to_rgb(decimal) -> tuple[int, int, int]:
     return (red, green, blue)
 
 def browse_to_location(choice: str, browse: tuple[str, ...], function: str, game_name) -> str:
-    if choice == 'Browse...':
-        if browse[2] == 'directory':
+    if choice == "Browse...":
+        if browse[2] == "directory":
             location = Path(filedialog.askdirectory()).resolve()
         else:
             openfilename = Path(filedialog.askopenfilename(filetypes=[(browse[1], browse[1])]))
             if not openfilename.exists():
-                logger.error(f'file not found: {openfilename}')
+                logger.error(f"file not found: {openfilename}")
                 return choice
             try:
                 with openfilename.open() as _fp:
@@ -74,7 +74,7 @@ def browse_to_location(choice: str, browse: tuple[str, ...], function: str, game
         logger.debug(f"location set to '{location}'")
         return str(location)
 
-    if choice == 'Manual...':
+    if choice == "Manual...":
         manual = simpledialog.askstring("Manual entry", "Custom Value:")
         logger.debug(f"Manually entered a value of {manual}")
         if manual:
@@ -96,7 +96,7 @@ class Info:
         ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
 
         documents_directory = Path(buf.value)
-        logger.debug(f'User documents location: {documents_directory}')
+        logger.debug(f"User documents location: {documents_directory}")
 
         return documents_directory
 
@@ -113,9 +113,9 @@ class Info:
 
         game_documents_name = game_name_documents_location_dict.get(game_name, "")
         if game_documents_name:
-            logger.debug(f'{game_name} Documents/My Games/ folder is {game_documents_name}.')
+            logger.debug(f"{game_name} Documents/My Games/ folder is {game_documents_name}.")
         else:
-            logger.error(f'{game_name} not in the list of known Documents/My Games/ folders.')
+            logger.error(f"{game_name} not in the list of known Documents/My Games/ folders.")
         return game_documents_name
 
     @staticmethod
@@ -130,7 +130,7 @@ class Info:
 
         game_reg = game_name_registry_dict.get(game_name, "")
         if not game_reg:
-            logger.error(f'{game_name} not in the list of known registry locations.')
+            logger.error(f"{game_name} not in the list of known registry locations.")
 
         return game_reg
 
@@ -138,7 +138,7 @@ class CustomFunctions:
 
     @staticmethod
     def restore_backup(game_name: str, choice: str) -> None:
-        logger.info(f'Restoring backup from {choice}.')
+        logger.info(f"Restoring backup from {choice}.")
         app = AppName(game_name)
         ini_files = app.what_ini_files_are_used()
 
@@ -152,7 +152,7 @@ class CustomFunctions:
         files_to_replace = {}
         for ini, file_paths in ini_files_with_location.items():
             ini_location = str(Bethini_key.get_value("Directories", file_paths))
-            file_to_replace = f'{ini_location}{ini}'
+            file_to_replace = f"{ini_location}{ini}"
             backup_file = Path(ini_location) / "Bethini Pie backups" / choice / ini
             files_to_replace[ini] = {"InitialFile": file_to_replace,
                                  "NewFile": backup_file}
@@ -162,37 +162,37 @@ class CustomFunctions:
 
         #An example of filesToReplace
         #{
-        #    'Skyrim.ini':
+        #    "Skyrim.ini":
         #        {
-        #            'InitialFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Skyrim.ini',
-        #            'NewFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\Skyrim.ini'
+        #            "InitialFile": "S:\\Documents\\My Games\\Skyrim Special Edition\\Skyrim.ini",
+        #            "NewFile": "S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\Skyrim.ini"
         #        },
-        #    'SkyrimPrefs.ini':
+        #    "SkyrimPrefs.ini":
         #        {
-        #            'InitialFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\SkyrimPrefs.ini',
-        #            'NewFile': 'S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\SkyrimPrefs.ini'
+        #            "InitialFile": "S:\\Documents\\My Games\\Skyrim Special Edition\\SkyrimPrefs.ini",
+        #            "NewFile": "S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\SkyrimPrefs.ini"
         #        }
         #}
         for file_paths in files_to_replace.values():
-            initial_file = file_paths.get('InitialFile')
-            new_file = file_paths.get('NewFile')
+            initial_file = file_paths.get("InitialFile")
+            new_file = file_paths.get("NewFile")
             try:
                 shutil.copyfile(f"{new_file}", f"{initial_file}")
-                logger.debug(f'{initial_file} was replaced with backup from {new_file}.')
+                logger.debug(f"{initial_file} was replaced with backup from {new_file}.")
             except FileNotFoundError:
-                logger.error(f'Restoring {new_file} to {initial_file} failed due to {new_file} not existing.')
+                logger.error(f"Restoring {new_file} to {initial_file} failed due to {new_file} not existing.")
 
     @staticmethod
     def getBackups(game_name: str) -> list[str]:
         gameDocumentsName = Info.game_documents_name(game_name)
-        defaultINILocation = str(Info.get_documents_path() / 'My Games' / gameDocumentsName) if gameDocumentsName else ''
+        defaultINILocation = str(Info.get_documents_path() / "My Games" / gameDocumentsName) if gameDocumentsName else ""
         INIPath = str(ModifyINI("Bethini.ini").get_value("Directories", f"s{game_name}INIPath", default=defaultINILocation))
-        backup_directory = Path(INIPath) / 'Bethini Pie backups'
+        backup_directory = Path(INIPath) / "Bethini Pie backups"
         try:
             backups = [b.name for b in backup_directory.iterdir()]
         except OSError:
             backups = ["None found"]
-        return ['Choose...', *backups]
+        return ["Choose...", *backups]
 
     @staticmethod
     def getCurrentResolution(_game_name: str) -> str:
@@ -204,22 +204,22 @@ class CustomFunctions:
 
     @staticmethod
     def getBethesdaGameFolder(game_name: str):
-        game_folder = ModifyINI('Bethini.ini').get_value('Directories', f's{game_name}Path')
+        game_folder = ModifyINI("Bethini.ini").get_value("Directories", f"s{game_name}Path")
         if game_folder is not None:
             return game_folder
 
         gameReg = Info.game_reg(game_name)
 
         try:
-            game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\Bethesda Softworks\\{gameReg}'), "installed path")[0]
+            game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f"SOFTWARE\\Bethesda Softworks\\{gameReg}"), "installed path")[0]
         except:
-            logger.error('Did not find game folder in the registry (no WOW6432Node location).')
+            logger.error("Did not find game folder in the registry (no WOW6432Node location).")
 
         if game_folder is None:
             try:
-                game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f'SOFTWARE\\WOW6432Node\\Bethesda Softworks\\{gameReg}'), "installed path")[0]
+                game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f"SOFTWARE\\WOW6432Node\\Bethesda Softworks\\{gameReg}"), "installed path")[0]
             except:
-                logger.error('Did not find game folder in the registry.')
+                logger.error("Did not find game folder in the registry.")
 
         return game_folder
 
@@ -230,15 +230,15 @@ class CustomFunctions:
     @staticmethod
     def getINILocations(gameName: str) -> list[str]:
         documents_path = Info.get_documents_path()
-        game_documents_path = documents_path / 'My Games' / Info.game_documents_name(gameName)
+        game_documents_path = documents_path / "My Games" / Info.game_documents_name(gameName)
         game_documents_path.mkdir(parents=True, exist_ok=True)
         app = AppName(gameName)
         ini_files = app.what_ini_files_are_used()
         for file in ini_files:
-            if file == 'Ultra.ini':
+            if file == "Ultra.ini":
                 continue
             file_path = game_documents_path / file
             with file_path.open() as _fp:  # TODO this line needs refactoring, unused filehandle
                 pass
 
-        return [str(game_documents_path), 'Browse...']
+        return [str(game_documents_path), "Browse..."]

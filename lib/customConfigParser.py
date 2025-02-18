@@ -3,7 +3,7 @@
 import configparser
 import sys
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(1)
 
 
@@ -11,15 +11,15 @@ class customConfigParser(configparser.RawConfigParser):
     """Our custom configparser will not remove comments when the file is written.
     Also, it does not raise errors if duplicate options are detected."""
     def __init__(self) -> None:
-        super().__init__(allow_no_value=True, delimiters=('=',), comment_prefixes=(), strict=False)
+        super().__init__(allow_no_value=True, delimiters=("=",), comment_prefixes=(), strict=False)
         # comment_prefixes=() is necessary to preserve comments.
 
     def _read(self, fp, fpname) -> None:
         """Parse a sectioned configuration file.
 
         Each section in a configuration file contains a header, indicated by
-        a name in square brackets (`[]'), plus key/value options, indicated by
-        `name' and `value' delimited with a specific substring (`=' or `:' by
+        a name in square brackets (`[]`), plus key/value options, indicated by
+        `name` and `value` delimited with a specific substring (`=` or `:` by
         default).
 
         Values can span multiple lines, as long as they are indented deeper
@@ -27,7 +27,7 @@ class customConfigParser(configparser.RawConfigParser):
         lines may be treated as parts of multiline values or ignored.
 
         Configuration files may include comments, prefixed by specific
-        characters (`#' and `;' by default). Comments may appear on their own
+        characters (`#` and `;` by default). Comments may appear on their own
         in an otherwise empty line or may be entered in lines holding values or
         section names.
         """
@@ -71,7 +71,7 @@ class customConfigParser(configparser.RawConfigParser):
                         cursect is not None and
                         optname and
                         cursect[optname] is not None):
-                        cursect[optname].append('') # newlines added at join
+                        cursect[optname].append("") # newlines added at join
                 else:
                     # empty line marks end of value
                     indent_level = sys.maxsize
@@ -88,7 +88,7 @@ class customConfigParser(configparser.RawConfigParser):
                 # is it a section header?
                 mo = self.SECTCRE.match(value)
                 if mo:
-                    sectname = mo.group('header')
+                    sectname = mo.group("header")
                     if sectname in self._sections:
                         if self._strict and sectname in elements_added:
                             raise configparser.DuplicateSectionError(sectname, fpname,
@@ -110,7 +110,7 @@ class customConfigParser(configparser.RawConfigParser):
                     # But given the fact that users could have corrupt one with invalid settings, add a dummy TotallyFakeSectionHeader
                     # will fix the problem, and our code later in the pipeline removes invalid sections.
                     cursect = self._dict()
-                    sectname = 'TotallyFakeSectionHeader'
+                    sectname = "TotallyFakeSectionHeader"
                     self._sections[sectname] = cursect
                     self._proxies[sectname] = configparser.SectionProxy(self, sectname)
                     elements_added.add(sectname)
@@ -120,7 +120,7 @@ class customConfigParser(configparser.RawConfigParser):
                 else:
                     mo = self._optcre.match(value)
                     if mo:
-                        optname, _vi, optval = mo.group('option', 'vi', 'value')
+                        optname, _vi, optval = mo.group("option", "vi", "value")
                         if not optname:
                             e = self._handle_error(e, fpname, lineno, line)
                         optname = self.optionxform(optname.rstrip())
