@@ -11,6 +11,7 @@ import os
 import sys
 import math
 import webbrowser
+from pathlib import Path
 from shutil import copyfile
 from datetime import datetime
 from operator import gt, ge, lt, le, ne, eq
@@ -18,21 +19,21 @@ from typing import TYPE_CHECKING, Any
 #from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
 #This is for changing file read-only access via os.chmod(filename, S_IREAD,
 #S_IRGRP, #S_IROTH) Not currently used.
-
 import logging
 
-# configure logging
-LOG_DIR_DATE: str = f'{datetime.now().strftime("%Y %m-%b %d %a - %H.%M.%S")}' # TODO refactor usage of 'the_backup_directory'
-APP_LOG_DIR = os.path.join("logs",LOG_DIR_DATE)
-APP_LOG_FILE: str = os.path.join("logs", LOG_DIR_DATE, "log.log")
+
+# Configure Logging
+# TODO refactor usage of 'the_backup_directory'
+LOG_DIR_DATE: str = f'{datetime.now().strftime("%Y %m-%b %d %a - %H.%M.%S")}'
+APP_LOG_DIR = Path.cwd() / "logs" / LOG_DIR_DATE
+APP_LOG_DIR.mkdir(parents=True, exist_ok=True)
+APP_LOG_FILE = APP_LOG_DIR / "log.log"
 
 fmt: str = '%(asctime)s  [%(levelname)s]  %(filename)s  %(funcName)s:%(lineno)s:  %(message)s'
 datefmt: str  = '%Y-%m-%d %H:%M:%S'
-if not os.path.exists(APP_LOG_DIR):
-    os.makedirs(APP_LOG_DIR)
 
 logging.basicConfig(filename=APP_LOG_FILE, filemode='w', format=fmt, datefmt=datefmt, encoding='utf-8', level=logging.DEBUG)
-logger = logging.getLogger() # this is the root logger
+logger = logging.getLogger()
 _log_stdout = logging.StreamHandler(sys.stdout) # to console
 _log_stdout.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
 logger.addHandler(_log_stdout)
@@ -92,8 +93,6 @@ tkinter_switch_dict = {
 
 types_without_label = ['Checkbutton', 'preset', 'radioPreset', 'description']
 types_packed_left = ['Dropdown', 'Combobox', 'Entry', 'Spinbox', 'Slider', 'Color']
-
-current_working_directory = os.getcwd()
 
 #Specify the name of the application.
 my_app_name = "Bethini Pie"
@@ -224,9 +223,8 @@ class bethini_app(ttk.Window):
                                              command=lambda: self.choose_game_done(self.choose_game_tree.focus()))
 
         self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=('Segoe UI', 12), justify='center', style="success")
-        options = os.listdir('apps/')
-        for option in options:
-            self.choose_game_tree.insert('', 'end', id=option, text=option, values=[option])
+        for option in Path('apps').iterdir():
+            self.choose_game_tree.insert('', 'end', id=option.name, text=option.name, values=[option.name])
 
 
         self.preferences_frame = ttk.Frame(self.choose_game_frame_2)
@@ -395,8 +393,10 @@ class bethini_app(ttk.Window):
             tooltip_text = tooltip_description
 
         setting_name = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get('Name')
-        photo_for_setting: str | None = os.path.join('apps', GAME_NAME, 'images', f'{setting_name}.jpg')
-        if not os.path.isfile(photo_for_setting):
+        if TYPE_CHECKING:
+            assert isinstance(GAME_NAME, str)
+        photo_for_setting: Path | None = Path.cwd() / 'apps' / GAME_NAME / 'images' / f'{setting_name}.jpg'
+        if not (photo_for_setting and photo_for_setting.is_file()):
             photo_for_setting = None
 
         Hovertip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text, [PREVIEW_WINDOW, PREVIEW_FRAME, photo_for_setting], tooltip_wrap_length)
@@ -578,46 +578,44 @@ class bethini_app(ttk.Window):
         for each_ini in open_inis:
             location_list = list(open_inis[each_ini]['located'].keys())
             for n in range(len(location_list)):
-                this_location = open_inis[each_ini]['located'][str(n+1)].get('at')
+                this_location = Path(str(open_inis[each_ini]['located'][str(n+1)].get('at')))
                 this_ini_object = open_inis[each_ini]['located'][str(n+1)].get('object')
                 if each_ini == my_app_config:
                     continue
                 if not this_ini_object.has_been_modified:
                     self.sme(f'{each_ini} has not been modified, so there is no reason to resave it.')
                     continue
-                if messagebox.askyesno(f"Save {each_ini}", f"Do you want to save {this_location}{each_ini}?"):
+                if messagebox.askyesno(f"Save {each_ini}", f"Do you want to save {this_location / each_ini}?"):
                     #we need to make a backup of each save before actually saving.
-                    first_time_backup_trigger = remove_excess_directory_files(f'{this_location}{my_app_name} backups',
+                    first_time_backup_trigger = remove_excess_directory_files(this_location / f"{my_app_name} backups",
                                                                     int(app_config.get_value('General', 'iMaxBackups', '-1')),
                                                                     files_to_remove)
                     if first_time_backup_trigger:
                         first_time_backup = True
                     if first_time_backup:
-                        the_backup_directory = os.path.join(this_location, f'{my_app_name} backups', 'First-Time-Backup')
-                        if not os.path.isdir(the_backup_directory):
-                            os.makedirs(the_backup_directory)
-                        if os.path.exists(f"{the_backup_directory}{each_ini}"):
-                            self.sme(f'{the_backup_directory}{each_ini} exists, so it will not be overwritten.')
+                        the_backup_directory = this_location / f'{my_app_name} backups' / 'First-Time-Backup'
+                        the_backup_directory.mkdir(parents=True, exist_ok=True)
+                        if (the_backup_directory / each_ini).exists():
+                            self.sme(f'{the_backup_directory / each_ini} exists, so it will not be overwritten.')
                         else:
                             try:
-                                copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
+                                copyfile(this_location / each_ini, the_backup_directory / each_ini)
                             except FileNotFoundError:
-                                self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", exception=True)
-                        copyfile(APP_LOG_FILE, f"{the_backup_directory}log.log")
-                    the_backup_directory = os.path.join(this_location, f'{my_app_name} backups', LOG_DIR_DATE)
-                    if not os.path.isdir(the_backup_directory):
-                        os.makedirs(the_backup_directory)
-                    if os.path.exists(f"{the_backup_directory}{each_ini}"):
-                        self.sme(f'{the_backup_directory}{each_ini} exists, so it will not be overwritten.')
+                                self.sme(f"{this_location / each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", exception=True)
+                        copyfile(APP_LOG_FILE, the_backup_directory / "log.log")
+                    the_backup_directory = this_location / f'{my_app_name} backups' / LOG_DIR_DATE
+                    the_backup_directory.mkdir(parents=True, exist_ok=True)
+                    if (the_backup_directory / each_ini).exists():
+                        self.sme(f'{the_backup_directory / each_ini} exists, so it will not be overwritten.')
                     else:
                         try:
-                            copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
+                            copyfile(this_location / each_ini, the_backup_directory / each_ini)
                         except FileNotFoundError:
-                            self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", exception=True)
-                    copyfile(APP_LOG_FILE, f"{the_backup_directory}log.log")
+                            self.sme(f"{this_location / each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", exception=True)
+                    copyfile(APP_LOG_FILE, the_backup_directory / "log.log")
                     this_ini_object.save_ini_file(sort=True)
                     files_saved = True
-                    self.sme(f"{this_location}{each_ini} saved.")
+                    self.sme(f"{this_location / each_ini} saved.")
         if not files_saved:
             self.sme('No files were modified.')
 
@@ -710,13 +708,15 @@ class bethini_app(ttk.Window):
 
     def create_tab_image(self, each_tab) -> None:
         try:
-            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = os.path.join("icons", f"{self.tab_dictionary[each_tab]['Name']}.png"), height=16, width=16)
+            icon_path = Path.cwd() / 'icons' / f'{self.tab_dictionary[each_tab]["Name"]}.png'
+            self.tab_dictionary[each_tab]['TkPhotoImageForTab'] = tk.PhotoImage(file=icon_path, height=16, width=16)
         except tk.TclError as e:
             self.sme(f'No image for tab "{each_tab}": {e}', exception=True)
+            icon_path = icon_path.with_name('Blank.png')
             try:
-                self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = os.path.join("icons", "Blank.png"))
+                self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file=icon_path)
             except tk.TclError as e:
-                self.sme(f'Failed to load blank icon at {os.path.join(current_working_directory, "icons", "Blank.png")}\n\n{e}', exception=True)
+                self.sme(f'Failed to load blank icon at {icon_path}\n\n{e}', exception=True)
                 self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(data=Icon.warning)
 
     def label_frames_for_tab(self, each_tab) -> None:
@@ -1128,13 +1128,10 @@ class bethini_app(ttk.Window):
                 if file_format:
                     this_value = os.path.split(setting_value[0])
                     if file_format == "directory":
-                        if this_value[0] != '':
-                            this_value = this_value[0]
-                            if this_value[-1] != '\\':
-                                this_value += '\\'
-                        else:
-                            this_value = this_value[0]
-                    if file_format == "file":
+                        this_value = this_value[0]
+                        if this_value and this_value[-1] != '\\':
+                            this_value += '\\'
+                    elif file_format == "file":
                         this_value = this_value[1]
                     self.setting_dictionary[each_setting]["tk_var"].set(this_value)
                 else:
@@ -1808,34 +1805,34 @@ def on_closing(root) -> None:
         root.save_ini_files()
         root.quit()
 
-def remove_excess_directory_files(directory, max_to_keep, files_to_remove) -> bool:
+def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_remove: list[str]) -> bool:
     """Removes excess logs/backups.
     directory: the directory to remove files from
     max_to_keep: the maximum amount of directories that will be excluded from removal
     files_to_remove: list of files that will be removed
     """
     try:
-        subdirectories = os.listdir(directory)
+        subdirectories = [d for d in directory.iterdir() if d.name.lower() != 'first-time-backup']
     except OSError as e:
         logger.debug(f"Info: {directory} : {e.strerror}")
         return True
     subdirectories.sort()
-    if 'First-Time-Backup' in subdirectories:
-        subdirectories.remove('First-Time-Backup')
+
     if max_to_keep > -1:
         for n in range(len(subdirectories)):
             if n < max_to_keep:
-                logger.debug(subdirectories[n] + ' will be kept.')
+                logger.debug(f"{subdirectories[n].name} will be kept.")
             else:
-                dir_path = os.path.join(directory, subdirectories[n])
+                dir_path = subdirectories[n]
                 try:
                     for file in files_to_remove:
+                        file_path = dir_path / file
                         try:
-                            os.remove(os.path.join(dir_path, file))
+                            file_path.unlink(missing_ok=True)
                         except OSError as e:
-                            logger.error(f"{os.path.join(dir_path, file)}: {e.strerror}")
-                    os.rmdir(dir_path)
-                    logger.debug(subdirectories[n] + ' was removed.')
+                            logger.error(f'{file_path}: {e.strerror}')
+                    dir_path.unlink(missing_ok=True)
+                    logger.debug(f"{subdirectories[n].name} was removed.")
                 except OSError as e:
                     logger.error(f"{dir_path} : {e.strerror}")
     return False
@@ -1856,7 +1853,7 @@ def open_ini(location, ini):
         open_inis[ini]['located'][open_ini_id] = {
             'at':location
             }
-        open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(os.path.join(location, ini))
+        open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(Path(location) / ini)
         return open_inis[ini]['located'][open_ini_id]['object']
     #if the ini has not been opened before
     open_ini_id = "1"
@@ -1868,7 +1865,7 @@ def open_ini(location, ini):
             }
         }
     try:
-        open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(os.path.join(location, ini))
+        open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(Path(location) / ini)
         #open_inis[ini]['located'][open_ini_id]['original'] = ModifyINI(location + ini)
     except configparser.MissingSectionHeaderError as e:
         logger.error(f"{e.strerror}")
@@ -1890,7 +1887,7 @@ if __name__ == '__main__':
     app_config.assign_setting_value('General', 'sTheme', theme)
 
     #Remove excess log files.
-    remove_excess_directory_files(os.path.join(current_working_directory, 'logs'), int(iMaxLogs), ['log.log'])
+    remove_excess_directory_files(Path.cwd() / 'logs', int(iMaxLogs), ['log.log'])
 
     #Initialize open_inis dictionary to store list of opened INI files in.
     open_inis = {
@@ -1906,14 +1903,14 @@ if __name__ == '__main__':
 
     #Get version
     try:
-        with open('changelog.txt') as changelog:
+        with Path('changelog.txt').open(encoding="utf-8") as changelog:
             version = changelog.readline().replace('\n','')
     except FileNotFoundError:
         version = ''
 
     #Start the app class
 
-    window = bethini_app(themename=theme, iconphoto=os.path.join('Icons', 'Icon.png'))
+    window = bethini_app(themename=theme, iconphoto=(Path('Icons') / 'Icon.png'))
     window.choose_game()
     window.minsize(400,200)
 

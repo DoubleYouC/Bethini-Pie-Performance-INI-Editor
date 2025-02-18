@@ -4,7 +4,7 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
 or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA."""
 
 import json
-import os
+from pathlib import Path
 from typing import Any, Literal
 
 
@@ -13,9 +13,9 @@ class AppName:
     the apps folder."""
 
     def __init__(self, appname: str) -> None:
-        with open(os.path.join('apps', appname, 'settings.json'), encoding='utf-8') as app_json:
+        with (Path.cwd() / 'apps' / appname / 'settings.json').open(encoding='utf-8') as app_json:
             self.data: dict = json.load(app_json)
-        with open(os.path.join('apps', appname, 'Bethini.json'), encoding='utf-8') as bethini:
+        with (Path.cwd() /'apps' / appname / 'Bethini.json').open(encoding='utf-8') as bethini:
             self.bethini: dict = json.load(bethini)
 
         self.default_ini = list(self.bethini['INIs'])[1] if len(self.bethini['INIs']) > 1 else None
@@ -26,8 +26,7 @@ class AppName:
 
     def what_ini_files_are_used(self) -> list[Any]:
         """Returns a list of INI files used, with Bethini.ini removed from the list."""
-        ini_files = [ini for ini in self.bethini["INIs"] if ini != "Bethini.ini"]
-        return ini_files
+        return [ini for ini in self.bethini["INIs"] if ini != "Bethini.ini"]
 
     def inis(self, ini) -> Literal['', False] | Any:
         """Returns the INI settings name used in Bethini.ini to store the location
@@ -80,7 +79,7 @@ class AppName:
             return False
         return setting in the_section_list
 
-    def preset_values(self, preset) -> dict[Any, Any]:
+    def preset_values(self, preset: str) -> dict[Any, Any]:
         """Returns a dictionary listing all the settings and values
         for a given preset specified in settings.json."""
         preset_dict = {}

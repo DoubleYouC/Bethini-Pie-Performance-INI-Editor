@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 from lib.customConfigParser import customConfigParser
 import operator
+from pathlib import Path
 
 class ModifyINI:
     """This class gives us an easy way to modify the various INI files in a more
@@ -132,7 +133,7 @@ class ModifyINI:
         """Writes the file."""
         if sort:
             self.sort()
-        with open(self.ini_to_manage, 'w', encoding='utf-8') as config_file:
+        with Path(self.ini_to_manage).open('w', encoding='utf-8') as config_file:
             self.config.write(config_file, space_around_delimiters = False)
         self.has_been_modified = False
 
