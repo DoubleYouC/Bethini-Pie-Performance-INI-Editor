@@ -443,7 +443,8 @@ class bethini_app(ttk.Window):
             self.choose_game_var = app_config.get_value("General","sAppName")
             if self.choose_game_var != game:
                 self.sme(f"Change of game from {self.choose_game_var} to {game}")
-                raise Exception(f"App/Game specified in {my_app_config} differs from the game chosen, so it will be changed to the one you chose.")
+                msg = f"App/Game specified in {my_app_config} differs from the game chosen, so it will be changed to the one you chose."
+                raise Exception(msg)
         except Exception as e:
             self.sme("Change of game/application", exception=e)
             app_config.assign_setting_value("General","sAppName", game)
