@@ -278,9 +278,9 @@ class bethini_app(ttk.Window):
         self.pw = ttk.Label(self.hsbframeholder, text='Loading... Please Wait... ')
         self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode='indeterminate')
 
-    def sme(self, message: str, *, exception: bool=False) -> None:
-        if exception:
-            logger.error(message)
+    def sme(self, message: str, *, exception: Exception | None = None) -> None:
+        if exception is not None:
+            logger.error(exception, exc_info=True)  # noqa: LOG014
         else:
             logger.debug(message)
         self.statusbar_text.set(message)
@@ -418,12 +418,13 @@ class bethini_app(ttk.Window):
             #raise Exception("Forcing you to choose")
             self.choose_game_done(choose_game_var)
         except NameError:
-            self.sme('Choose game/application.', exception=True)
+            self.sme('Choose game/application.')
             self.choose_game_window.deiconify()
         except Exception as e:
-            self.sme('An unhandled exception occurred.', exception=True)
-            messagebox.showerror(title='Unhandled exception', message=f'An unhandled exception occurred.\n{e}\nThis program will now close. No files will be modified.')
+            self.sme('An unhandled exception occurred.', exception=e)
+            messagebox.showerror(title='Unhandled exception', message=f'An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified.')
             self.quit()
+            sys.exit(1)
 
     def choose_game_done(self, game: str, *, from_choose_game_window: bool=False) -> None:
         if not game:
@@ -436,8 +437,8 @@ class bethini_app(ttk.Window):
             if self.choose_game_var != game:
                 self.sme(f'Change of game from {self.choose_game_var} to {game}')
                 raise Exception("App/Game specified in " + my_app_config + " differs from the game chosen, so it will be changed to the one you chose.")
-        except:
-            self.sme('Change of game/application', exception=True)
+        except Exception as e:
+            self.sme('Change of game/application', exception=e)
             app_config.assign_setting_value('General','sAppName', game)
             from_choose_game_window = True
 
@@ -487,7 +488,7 @@ class bethini_app(ttk.Window):
         try:
             self.createTabs(from_choose_game_window=from_choose_game_window)
         except Exception as e:
-            self.sme('An unhandled exception occurred.', exception=True)
+            self.sme('An unhandled exception occurred.', exception=e)
             messagebox.showerror(title='Unhandled exception', message=f'An unhandled exception occurred.\n{e}\nThis program will now close. No files will be modified.')
             self.quit()
         self.menu(self.s)
@@ -570,7 +571,7 @@ class bethini_app(ttk.Window):
         try:
             self.apply_ini_dict(APP.preset_values('fixedDefault'), only_if_missing=True)
         except NameError as e:
-            self.sme(f'NameError: {e}', exception=True)
+            self.sme(f'NameError: {e}', exception=e)
             return
         ini_list = list(open_inis.keys())
         files_to_remove = ini_list[1:]
@@ -600,8 +601,8 @@ class bethini_app(ttk.Window):
                         else:
                             try:
                                 copyfile(this_location / each_ini, the_backup_directory / each_ini)
-                            except FileNotFoundError:
-                                self.sme(f"{this_location / each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", exception=True)
+                            except FileNotFoundError as e:
+                                self.sme(f"{this_location / each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", exception=e)
                         copyfile(APP_LOG_FILE, the_backup_directory / "log.log")
                     the_backup_directory = this_location / f'{my_app_name} backups' / LOG_DIR_DATE
                     the_backup_directory.mkdir(parents=True, exist_ok=True)
@@ -610,8 +611,8 @@ class bethini_app(ttk.Window):
                     else:
                         try:
                             copyfile(this_location / each_ini, the_backup_directory / each_ini)
-                        except FileNotFoundError:
-                            self.sme(f"{this_location / each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", exception=True)
+                        except FileNotFoundError as e:
+                            self.sme(f"{this_location / each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", exception=e)
                     copyfile(APP_LOG_FILE, the_backup_directory / "log.log")
                     this_ini_object.save_ini_file(sort=True)
                     files_saved = True
@@ -711,12 +712,12 @@ class bethini_app(ttk.Window):
             icon_path = Path.cwd() / 'icons' / f'{self.tab_dictionary[each_tab]["Name"]}.png'
             self.tab_dictionary[each_tab]['TkPhotoImageForTab'] = tk.PhotoImage(file=icon_path, height=16, width=16)
         except tk.TclError as e:
-            self.sme(f'No image for tab "{each_tab}": {e}', exception=True)
+            self.sme(f'No image for tab "{each_tab}": {e}', exception=e)
             icon_path = icon_path.with_name('Blank.png')
             try:
                 self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file=icon_path)
             except tk.TclError as e:
-                self.sme(f'Failed to load blank icon at {icon_path}\n\n{e}', exception=True)
+                self.sme(f'Failed to load blank icon at {icon_path}\n\n{e}', exception=e)
                 self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(data=Icon.warning)
 
     def label_frames_for_tab(self, each_tab) -> None:
@@ -1347,8 +1348,8 @@ class bethini_app(ttk.Window):
             for n in range(len(this_value)):
                 if type(this_value[n]) is tuple:
                     this_value[n] = list(this_value[n])
-        except:
-            self.sme(f'{this_value} .... Make sure that the {each_setting} checkbutton Onvalue and Offvalue are lists within lists in the json.', exception=True)
+        except Exception as e:
+            self.sme(f'{this_value} .... Make sure that the {each_setting} checkbutton Onvalue and Offvalue are lists within lists in the json.', exception=e)
 
         if targetINIs:
             for n in range(len(targetINIs)):
@@ -1367,8 +1368,8 @@ class bethini_app(ttk.Window):
                             try:
                                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
                                 self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
-                            except AttributeError:
-                                self.sme(f"Failed to assign {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue} because the {targetINIs[n]} has an issue.", exception=True)
+                            except AttributeError as e:
+                                self.sme(f"Failed to assign {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue} because the {targetINIs[n]} has an issue.", exception=e)
 
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + theValue)
@@ -1400,8 +1401,8 @@ class bethini_app(ttk.Window):
                         else:
                             self.sme(f'{each_partial_setting} is not set yet.')
                             return
-                    except:
-                        self.sme(f'{each_partial_setting} is not set yet.', exception=True)
+                    except Exception as e:
+                        self.sme(f'{each_partial_setting} is not set yet.', exception=e)
                         return
 
 
@@ -1519,8 +1520,8 @@ class bethini_app(ttk.Window):
                 try:
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                     self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
-                except AttributeError:
-                    self.sme(f"Failed to set {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value} because the {targetINIs[n]} has an issue.", exception=True)
+                except AttributeError as e:
+                    self.sme(f"Failed to set {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value} because the {targetINIs[n]} has an issue.", exception=e)
 
     def spinbox_assign_value(self, each_setting) -> None:
         targetINIs = self.setting_dictionary[each_setting].get('targetINIs')
@@ -1767,8 +1768,8 @@ class bethini_app(ttk.Window):
                     target_ini = open_ini(str(ini_location), str(INI))
                     try:
                         value = str(target_ini.get_value(currentSection, currentSetting, default=defaultValue))
-                    except AttributeError:
-                        self.sme(f"There was a problem with the existing {target_ini} [{currentSection}] {currentSetting}, so {defaultValue} will be used.", exception=True)
+                    except AttributeError as e:
+                        self.sme(f"There was a problem with the existing {target_ini} [{currentSection}] {currentSetting}, so {defaultValue} will be used.", exception=e)
                         value = defaultValue
                     settingValues.append(value)
             if settingValues != []:

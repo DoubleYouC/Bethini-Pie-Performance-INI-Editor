@@ -35,14 +35,14 @@ class customConfigParser(configparser.RawConfigParser):
         #This read function was modified to pick the first option value if there is a
         #duplicate option. Any subsequent duplicate option values are discarded.
         elements_added = set()
-        cursect = None                        # None, or a dictionary
+        cursect: dict | None = None
         sectname = None
         optname = None
         lineno = 0
         indent_level = 0
-        e = None                              # None, or an exception
+        e: Exception | None = None
         for lineno, line in enumerate(fp, start=1):
-            comment_start = sys.maxsize
+            comment_start: int | None = sys.maxsize
             # strip inline comments
             inline_prefixes = dict.fromkeys(self._inline_comment_prefixes, -1)
             while comment_start == sys.maxsize and inline_prefixes:
