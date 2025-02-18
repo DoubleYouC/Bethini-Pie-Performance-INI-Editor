@@ -280,7 +280,7 @@ class bethini_app(ttk.Window):
         self.pw = ttk.Label(self.hsbframeholder, text='Loading... Please Wait... ')
         self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode='indeterminate')
 
-    def sme(self, message: str, exception: bool=False) -> None:
+    def sme(self, message: str, *, exception: bool=False) -> None:
         if exception:
             logger.error(message)
         else:
@@ -401,7 +401,7 @@ class bethini_app(ttk.Window):
 
         Hovertip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text, [PREVIEW_WINDOW, PREVIEW_FRAME, photo_for_setting], tooltip_wrap_length)
 
-    def choose_game(self, forced: bool=False) -> None:
+    def choose_game(self, *, forced: bool=False) -> None:
         self.withdraw()
         # The Choose App/Game dialog window.  The window is skipped here if
         # sAppName is already set in the Bethini.ini file.
@@ -425,7 +425,7 @@ class bethini_app(ttk.Window):
             messagebox.showerror(title='Unhandled exception', message=f'An unhandled exception occurred.\n{e}\nThis program will now close. No files will be modified.')
             self.quit()
 
-    def choose_game_done(self, game: str, from_choose_game_window: bool=False) -> None:
+    def choose_game_done(self, game: str, *, from_choose_game_window: bool=False) -> None:
         if not game:
             return
         self.choose_game_window.withdraw()
@@ -485,7 +485,7 @@ class bethini_app(ttk.Window):
         if not from_choose_game_window:
             self.deiconify()
         try:
-            self.createTabs(from_choose_game_window)
+            self.createTabs(from_choose_game_window=from_choose_game_window)
         except Exception as e:
             self.sme('An unhandled exception occurred.', exception=True)
             messagebox.showerror(title='Unhandled exception', message=f'An unhandled exception occurred.\n{e}\nThis program will now close. No files will be modified.')
@@ -570,7 +570,7 @@ class bethini_app(ttk.Window):
         try:
             self.apply_ini_dict(APP.preset_values('fixedDefault'), only_if_missing=True)
         except NameError as e:
-            self.sme(f'NameError: {e}', True)
+            self.sme(f'NameError: {e}', exception=True)
             return
         ini_list = list(open_inis.keys())
         files_to_remove = ini_list[1:]
@@ -602,7 +602,7 @@ class bethini_app(ttk.Window):
                             try:
                                 copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
                             except FileNotFoundError:
-                                self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
+                                self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", exception=True)
                         copyfile(APP_LOG_FILE, f"{the_backup_directory}log.log")
                     the_backup_directory = os.path.join(this_location, f'{my_app_name} backups', LOG_DIR_DATE)
                     if not os.path.isdir(the_backup_directory):
@@ -613,7 +613,7 @@ class bethini_app(ttk.Window):
                         try:
                             copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
                         except FileNotFoundError:
-                            self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
+                            self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", exception=True)
                     copyfile(APP_LOG_FILE, f"{the_backup_directory}log.log")
                     this_ini_object.save_ini_file(sort=True)
                     files_saved = True
@@ -668,7 +668,7 @@ class bethini_app(ttk.Window):
                                         this_ini_object.remove_section(section)
                                         self.sme(f'{section} was removed because it was empty.')
 
-    def apply_ini_dict(self, ini_dict, only_if_missing=False) -> None:
+    def apply_ini_dict(self, ini_dict, *, only_if_missing: bool=False) -> None:
         for each_setting in ini_dict:
             target_setting = each_setting.split(':')[0]
             if target_setting in APP.bethini['presetsIgnoreTheseSettings'] and not only_if_missing:
@@ -1375,7 +1375,7 @@ class bethini_app(ttk.Window):
                                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
                                 self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
                             except AttributeError:
-                                self.sme(f"Failed to assign {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue} because the {targetINIs[n]} has an issue.", True)
+                                self.sme(f"Failed to assign {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue} because the {targetINIs[n]} has an issue.", exception=True)
 
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + theValue)
@@ -1528,7 +1528,7 @@ class bethini_app(ttk.Window):
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                     self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
                 except AttributeError:
-                    self.sme(f"Failed to set {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value} because the {targetINIs[n]} has an issue.", True)
+                    self.sme(f"Failed to set {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value} because the {targetINIs[n]} has an issue.", exception=True)
 
     def spinbox_assign_value(self, each_setting) -> None:
         targetINIs = self.setting_dictionary[each_setting].get('targetINIs')
@@ -1575,7 +1575,7 @@ class bethini_app(ttk.Window):
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                         self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
 
-    def createTabs(self, fromChooseGameWindow=False) -> None:
+    def createTabs(self, *, from_choose_game_window: bool=False) -> None:
 
         # Preview Window
         global PREVIEW_WINDOW
@@ -1604,7 +1604,7 @@ class bethini_app(ttk.Window):
                 setup_ok_button.pack(anchor=tk.SE, padx=5, pady=5)
 
                 SETUP_WINDOW.protocol("WM_DELETE_WINDOW", self.withdraw_setup)
-                if not fromChooseGameWindow:
+                if not from_choose_game_window:
                     SETUP_WINDOW.withdraw()
             elif self.tab_dictionary[each_tab]['Name'] == 'Preferences':
                 global preferencesWindow
@@ -1628,7 +1628,7 @@ class bethini_app(ttk.Window):
             self.label_frames_for_tab(each_tab)
 
         self.stop_progress()
-        if not fromChooseGameWindow:
+        if not from_choose_game_window:
             self.updateValues()
         self.start_progress()
         self.bindTkVars()
@@ -1776,7 +1776,7 @@ class bethini_app(ttk.Window):
                     try:
                         value = str(target_ini.get_value(currentSection, currentSetting, default=defaultValue))
                     except AttributeError:
-                        self.sme(f"There was a problem with the existing {target_ini} [{currentSection}] {currentSetting}, so {defaultValue} will be used.", True)
+                        self.sme(f"There was a problem with the existing {target_ini} [{currentSection}] {currentSetting}, so {defaultValue} will be used.", exception=True)
                         value = defaultValue
                     settingValues.append(value)
             if settingValues != []:

@@ -17,7 +17,7 @@ class ModifyINI:
     It also modifies the configparser to work in the way that we desire.
     This by nature allows us to make the changes in how we use the confiparser
     apply to every instance of modifying the INI files."""
-    def __init__(self, ini_to_manage: str, preserve_case: bool =True) -> None:
+    def __init__(self, ini_to_manage: str, *, preserve_case: bool = True) -> None:
         self.ini_to_manage = ini_to_manage
         self.config = customConfigParser()
         if preserve_case:
@@ -50,7 +50,7 @@ class ModifyINI:
 
         lowercase_setting = setting.lower()
 
-        for existing_setting in self.get_settings(section, True):
+        for existing_setting in self.get_settings(section, original_case=True):
             lowercase_existing_setting = existing_setting.lower()
             if lowercase_existing_setting == lowercase_setting:
                 setting = existing_setting
@@ -69,7 +69,7 @@ class ModifyINI:
         """Retrieves all sections."""
         return self.case_insensitive_config.sections()
 
-    def get_settings(self, section, original_case=False):
+    def get_settings(self, section, *, original_case: bool=False):
         """Retrieves all settings within the given section."""
         section = self.get_existing_section(section)
         try:
@@ -128,7 +128,7 @@ class ModifyINI:
                                                    key=operator.itemgetter(0)))
         self.has_been_modified = True
 
-    def save_ini_file(self, sort=False) -> None:
+    def save_ini_file(self, *, sort: bool = False) -> None:
         """Writes the file."""
         if sort:
             self.sort()
