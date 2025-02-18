@@ -23,7 +23,7 @@ if __name__ == '__main__':
 logger = logging.getLogger(__name__)
 
 try:
-    from winreg import QueryValueEx, OpenKey, ConnectRegistry, HKEY_LOCAL_MACHINE
+    from winreg import HKEY_LOCAL_MACHINE, ConnectRegistry, OpenKey, QueryValueEx
 except ModuleNotFoundError:
     logger.error('winreg module not found')
 

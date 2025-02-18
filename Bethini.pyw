@@ -11,12 +11,34 @@ import logging
 import math
 import os
 import sys
+import tkinter as tk
 import webbrowser
 from datetime import datetime
 from operator import eq, ge, gt, le, lt, ne
 from pathlib import Path
 from shutil import copyfile
+from tkinter import colorchooser, messagebox, simpledialog
 from typing import TYPE_CHECKING, Any
+
+import ttkbootstrap as ttk
+from simpleeval import simple_eval
+from ttkbootstrap.constants import *
+from ttkbootstrap.icons import Icon
+from ttkbootstrap.themes import standard as standThemes
+
+from lib.app import AppName
+from lib.AutoScrollbar import AutoScrollbar
+from lib.customFunctions import (
+    CustomFunctions,
+    browse_to_location,
+    decimal_to_rgb,
+    hex_to_decimal,
+    hex_to_rgb,
+    rgb_to_hex,
+    rgba_to_hex,
+)
+from lib.ModifyINI import ModifyINI
+from lib.tooltips import Hovertip
 
 #from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
 #This is for changing file read-only access via os.chmod(filename, S_IREAD,
@@ -39,22 +61,6 @@ _log_stdout.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
 logger.addHandler(_log_stdout)
 logger.info(f"Logging to '{APP_LOG_FILE}'")
 
-import tkinter as tk
-import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
-from ttkbootstrap.themes import standard as standThemes
-from ttkbootstrap.icons import Icon
-from tkinter import colorchooser
-from tkinter import messagebox
-from tkinter import simpledialog
-
-from simpleeval import simple_eval
-
-from lib.app import AppName
-from lib.AutoScrollbar import AutoScrollbar
-from lib.tooltips import Hovertip
-from lib.ModifyINI import ModifyINI
-from lib.customFunctions import CustomFunctions, browse_to_location, rgb_to_hex, rgba_to_hex,hex_to_rgb, hex_to_decimal, decimal_to_rgb
 
 #This dictionary maps the operator modules to specific text.
 operator_dictionary = {
