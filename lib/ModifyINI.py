@@ -10,10 +10,10 @@ import sys
 from collections import OrderedDict
 from pathlib import Path
 
-from lib.customConfigParser import customConfigParser
-
 if __name__ == "__main__":
     sys.exit(1)
+
+from lib.customConfigParser import customConfigParser
 
 logger = logging.getLogger(__name__)
 

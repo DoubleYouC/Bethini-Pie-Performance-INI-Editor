@@ -14,11 +14,11 @@ import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, simpledialog
 
-from lib.app import AppName
-from lib.ModifyINI import ModifyINI
-
 if __name__ == "__main__":
     sys.exit(1)
+
+from lib.app import AppName
+from lib.ModifyINI import ModifyINI
 
 logger = logging.getLogger(__name__)
 
