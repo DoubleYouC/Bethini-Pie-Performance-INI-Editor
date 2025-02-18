@@ -7,12 +7,6 @@ import json
 import os
 from typing import Any, Literal
 
-def iter_items_list(items) -> list[Any]:
-    """Given a dictionary, returns a list of all items."""
-    item_list = []
-    for item in items:
-        item_list.append(item)
-    return item_list
 
 class AppName:
     """This class handles the different apps/games supported, which are placed in
@@ -34,14 +28,6 @@ class AppName:
 
         self.ini_section_setting_dict = self.get_ini_section_setting_dict()
 
-    def tabs(self) -> list[Any]:
-        """Returns a list of tabs to be displayed."""
-        return iter_items_list(self.bethini["displayTabs"])
-
-    def custom(self, custom_variable) -> Any:
-        """Given a custom_variable, returns the corresponding customFunction."""
-        return self.bethini["customFunctions"][custom_variable]
-
     def what_ini_files_are_used(self) -> list[Any]:
         """Returns a list of INI files used, with Bethini.ini removed from the list."""
         ini_files = []
@@ -50,26 +36,13 @@ class AppName:
                 ini_files.append(ini)
         return ini_files
 
-    def inis(self, ini) -> Any | Literal[''] | Literal[False]:
+    def inis(self, ini) -> Literal['', False] | Any:
         """Returns the INI settings name used in Bethini.ini to store the location
         of the given ini file."""
         try:
             return '' if not ini else self.bethini["INIs"][ini]
         except KeyError:
             return False
-
-    def settings(self) -> list[Any]:
-        """Returns a list of settings in settings.json."""
-        return iter_items_list(self.data["iniValues"])
-
-    def sections(self) -> list[Any]:
-        """Returns a sorted list of sections in settings.json"""
-        ini_sections = []
-        for ini_setting in self.data["iniValues"]:
-            if ini_setting['section'] not in ini_sections:
-                ini_sections.append(ini_setting['section'])
-        ini_sections.sort()
-        return ini_sections
 
     def get_setting_values(self) -> dict[Any, Any]:
         """Returns a dictionary listing all the different value types for every setting."""
@@ -103,10 +76,6 @@ class AppName:
 
         return ini_section_setting_dict
 
-    def get_value(self, setting, value_type) -> Any:
-        """Returns the value for the given setting and value type."""
-        return self.setting_values[setting][value_type]
-
     def does_setting_exist(self, ini, section, setting) -> bool:
         """Checks if the given setting for the given
         section and ini file exists in settings.json."""
@@ -134,22 +103,6 @@ class AppName:
                     }
         return preset_dict
 
-    def always_print(self) -> dict[Any, Any]:
-        """Returns a dictionary listing all the settings and default values
-        containing the alwaysPrint attribute as specified in settings.json."""
-        always_print = {}
-        for ini_setting in self.data["iniValues"]:
-            if ini_setting.get('alwaysPrint'):
-                ini = ini_setting.get('ini', self.default_ini)
-                the_value = str(ini_setting['value'].get('fixedDefault',
-                                                         ini_setting['value'].get('default')))
-                always_print[ini_setting['name']+':'+ini_setting['section']]={
-                    'ini': ini,
-                    'section': ini_setting['section'],
-                    'value': the_value
-                    }
-        return always_print
-
     def can_remove(self) -> dict[Any, Any]:
         """Returns a dictionary listing all the settings and default values
         NOT containing the alwaysPrint attribute as specified in settings.json."""
@@ -167,14 +120,6 @@ class AppName:
                     }
         return can_remove
 
-    def label_frames_in_tab(self, tab) -> list[Any]:
-        """Returns a list of label frames in the given tab."""
-        return iter_items_list(self.bethini['displayTabs'][tab])
-
-    def settings_in_label_frame(self, tab, label_frame) -> list[Any]:
-        """Returns a list of settings in the given lable frame."""
-        return iter_items_list(self.bethini['displayTabs'][tab][label_frame]['Settings'])
-
     def pack_settings(self, tab, label_frame) -> Any:
         """Returns the pack settings for the label frame."""
         default_pack_settings = {
@@ -188,10 +133,6 @@ class AppName:
     def number_of_vertically_stacked_settings(self, tab, label_frame) -> Any:
         """Returns the maximum number of vertically stacked settings desired for the label frame."""
         return self.bethini['displayTabs'][tab][label_frame]['NumberOfVerticallyStackedSettings']
-
-    def get_all_fields_for_setting(self, tab, label_frame, setting) -> Any:
-        """Returns all fields for the given setting."""
-        return self.bethini['displayTabs'][tab][label_frame]['Settings'][setting]
 
 if __name__ == '__main__':
     print('This is the app.appName class module.')

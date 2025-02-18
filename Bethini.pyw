@@ -472,7 +472,7 @@ class bethini_app(ttk.Window):
                     tk_frame.destroy()
 
         self.tab_dictionary = {}
-        for tab_number, tab in enumerate(APP.tabs()):
+        for tab_number, tab in enumerate(APP.bethini['displayTabs']):
             self.tab_dictionary["Page" + str(tab_number)] = {"Name":tab}
 
         self.setup_dictionary = {}
@@ -722,7 +722,7 @@ class bethini_app(ttk.Window):
     def label_frames_for_tab(self, each_tab) -> None:
         the_dict = self.tab_dictionary[each_tab]
         the_dict["LabelFrames"] = {}
-        for label_frame_number, label_frame in enumerate(APP.label_frames_in_tab(the_dict['Name'])):
+        for label_frame_number, label_frame in enumerate(APP.bethini['displayTabs'][the_dict['Name']]):
             the_label_frame=f"LabelFrame{label_frame_number}"
             the_dict["LabelFrames"][the_label_frame] = {"Name":label_frame}
             if "NoLabelFrame" not in label_frame:
@@ -741,7 +741,8 @@ class bethini_app(ttk.Window):
     def settings_frames_for_label_frame(self, each_tab, label_frame, the_label_frame) -> None:
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"] = {}
         number_of_vertically_stacked_settings = int(APP.number_of_vertically_stacked_settings(self.tab_dictionary[each_tab]["Name"], label_frame))
-        for setting_number, each_setting in enumerate(APP.settings_in_label_frame(self.tab_dictionary[each_tab]['Name'], label_frame)):
+
+        for setting_number, each_setting in enumerate(APP.bethini['displayTabs'][self.tab_dictionary[each_tab]['Name']][label_frame]['Settings']):
             on_frame = "SettingFrame" + str(math.ceil(setting_number / number_of_vertically_stacked_settings) - 1)
             if on_frame not in self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"]:
                 self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame] = {}
@@ -752,7 +753,7 @@ class bethini_app(ttk.Window):
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"] = ttk.Frame(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame]["TkSettingFrame"])
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"].pack(anchor='w', padx='5', pady='2')
             if 'Placeholder' not in each_setting:
-                self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].update(APP.get_all_fields_for_setting(self.tab_dictionary[each_tab]["Name"], label_frame, each_setting))
+                self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].update(APP.bethini['displayTabs'][self.tab_dictionary[each_tab]["Name"]][label_frame]['Settings'][each_setting])
                 self.setting_label(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting)
 
     def setting_label(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
@@ -864,17 +865,17 @@ class bethini_app(ttk.Window):
 
         if isinstance(options, str):
             if 'FUNC' in options:
-                option_string = APP.custom(options)
+                option_string = APP.bethini['customFunctions'][options]
                 if '{}' in option_string:
-                    custom_function = APP.custom(f'{options}Format')
+                    custom_function = APP.bethini["customFunctions"][f'{options}Format']
                     value_to_insert = getattr(CustomFunctions, custom_function)(GAME_NAME)
                     options = value_to_insert
         else:
             for n in range(len(options)):
                 if 'FUNC' in options[n]:
-                    option_string = APP.custom(options[n])
+                    option_string = APP.bethini["customFunctions"][options[n]]
                     if '{}' in option_string:
-                        custom_function = APP.custom(str(options[n]) + 'Format')
+                        custom_function = APP.bethini["customFunctions"][f"{options[n]}Format"]
                         value_to_insert = getattr(CustomFunctions, custom_function)(GAME_NAME)
                         options[n] = option_string.format(value_to_insert)
 
@@ -1767,7 +1768,7 @@ class bethini_app(ttk.Window):
                     currentSection = targetSections[ININumber]
 
                     # This looks for a default value in the settings.json
-                    defaultValue = None if my_app_config == INI else APP.get_value(currentSetting, "default")
+                    defaultValue = None if my_app_config == INI else APP.setting_values[currentSetting]["default"]
 
                     #target_ini = ModifyINI(str(ini_location) + str(INI))
 
