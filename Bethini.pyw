@@ -495,8 +495,10 @@ class bethini_app(ttk.Window):
             self.createTabs(from_choose_game_window=from_choose_game_window)
         except Exception as e:
             self.sme("An unhandled exception occurred.", exception=e)
-            messagebox.showerror(title="Unhandled exception", message=f"An unhandled exception occurred.\n{e}\nThis program will now close. No files will be modified.")
+            messagebox.showerror(title="Unhandled exception", message=f"An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified.")
             self.quit()
+            sys.exit(1)
+
         self.menu(self.s)
 
 
