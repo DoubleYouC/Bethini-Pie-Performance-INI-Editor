@@ -93,10 +93,10 @@ class AppName:
             if preset_value or preset_value in {0, ""}:
                 #if a preset value was specified
                 ini = ini_setting.get("ini", self.default_ini)
-                preset_dict[ini_setting["name"]+":"+ini_setting["section"]]={
+                preset_dict[f"{ini_setting['name']}:{ini_setting['section']}"] = {
                     "ini": ini,
                     "section": ini_setting["section"],
-                    "value": str(preset_value)
+                    "value": str(preset_value),
                     }
         return preset_dict
 
@@ -110,7 +110,7 @@ class AppName:
 
                 the_value = str(ini_setting["value"].get("default"))
 
-                can_remove[ini_setting["name"]+":"+ini_setting["section"]] = {
+                can_remove[f"{ini_setting['name']}:{ini_setting['section']}"] = {
                     "ini": ini,
                     "section": ini_setting["section"],
                     "value": the_value

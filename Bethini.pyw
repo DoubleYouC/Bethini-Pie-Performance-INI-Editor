@@ -387,14 +387,14 @@ class bethini_app(ttk.Window):
                 tooltip_INI_targets += str(target_ini)
 
                 for target_section in settings_location_dict[target_ini]:
-                    tooltip_INI_targets += "\n[" + str(target_section) + "]"
+                    tooltip_INI_targets += f"\n[{target_section}]"
                     for target_setting in settings_location_dict[target_ini][target_section]:
-                        tooltip_INI_targets += "\n" + str(target_setting)
+                        tooltip_INI_targets += f"\n{target_setting}"
                 if iterator != len(settings_location_dict):
                     tooltip_INI_targets += "\n"
 
             #Appends our formatted string of INI settings to the bottom of the tooltip description.
-            tooltip_text = tooltip_description + "\n\n" + tooltip_INI_targets
+            tooltip_text = f"{tooltip_description}\n\n{tooltip_INI_targets}"
         else: #If there are no INI settings specified, only the tooltip description will be used.
             tooltip_text = tooltip_description
 
@@ -442,7 +442,7 @@ class bethini_app(ttk.Window):
             self.choose_game_var = app_config.get_value("General","sAppName")
             if self.choose_game_var != game:
                 self.sme(f"Change of game from {self.choose_game_var} to {game}")
-                raise Exception("App/Game specified in " + my_app_config + " differs from the game chosen, so it will be changed to the one you chose.")
+                raise Exception(f"App/Game specified in {my_app_config} differs from the game chosen, so it will be changed to the one you chose.")
         except Exception as e:
             self.sme("Change of game/application", exception=e)
             app_config.assign_setting_value("General","sAppName", game)
@@ -480,7 +480,7 @@ class bethini_app(ttk.Window):
 
         self.tab_dictionary = {}
         for tab_number, tab in enumerate(APP.bethini["displayTabs"]):
-            self.tab_dictionary["Page" + str(tab_number)] = {"Name":tab}
+            self.tab_dictionary[f"Page{tab_number}"] = {"Name":tab}
 
         self.setup_dictionary = {}
         self.setting_dictionary = {}
@@ -693,7 +693,7 @@ class bethini_app(ttk.Window):
             if only_if_missing and (the_target_ini.get_value(target_section, target_setting) is not None):
                 continue
             the_target_ini.assign_setting_value(target_section, target_setting, this_value)
-            self.sme(target_ini + " [" + target_section + "] " + target_setting + "=" + this_value)
+            self.sme(f"{target_ini} [{target_section}] {target_setting}={this_value}")
 
     def remove_ini_dict(self, ini_dict) -> None:
         for each_setting in ini_dict:
@@ -752,12 +752,12 @@ class bethini_app(ttk.Window):
         number_of_vertically_stacked_settings = int(APP.number_of_vertically_stacked_settings(self.tab_dictionary[each_tab]["Name"], label_frame))
 
         for setting_number, each_setting in enumerate(APP.bethini["displayTabs"][self.tab_dictionary[each_tab]["Name"]][label_frame]["Settings"]):
-            on_frame = "SettingFrame" + str(math.ceil(setting_number / number_of_vertically_stacked_settings) - 1)
+            on_frame = f"SettingFrame{math.ceil(setting_number / number_of_vertically_stacked_settings) - 1}"
             if on_frame not in self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"]:
                 self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame] = {}
                 self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame]["TkSettingFrame"] = ttk.Frame(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["TkLabelFrame"])
                 self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame]["TkSettingFrame"].pack(side=tk.LEFT, anchor=tk.NW)
-            the_setting = "Setting" + str(setting_number)
+            the_setting = f"Setting{setting_number}"
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting] = {"Name":each_setting}
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"] = ttk.Frame(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame]["TkSettingFrame"])
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"].pack(anchor=tk.W, padx=5, pady=2)
@@ -1380,10 +1380,10 @@ class bethini_app(ttk.Window):
                                 self.sme(f"Failed to assign {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue} because the {targetINIs[n]} has an issue.", exception=e)
 
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
-                        self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + theValue)
+                        self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
                     else:
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value[n])
-                        self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value[n])
+                        self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value[n]}")
 
     def dropdown_assign_value(self, each_setting) -> None:
         tk_var = self.setting_dictionary[each_setting].get("tk_var")
@@ -1466,7 +1466,7 @@ class bethini_app(ttk.Window):
                     this_value = str(this_value)
 
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
+                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def entry_assign_value(self, each_setting) -> None:
         targetINIs = self.setting_dictionary[each_setting].get("targetINIs")
@@ -1509,7 +1509,7 @@ class bethini_app(ttk.Window):
                 if partial:
                     this_value = theValueStr.format(this_value)
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
+                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def slider_assign_value(self, each_setting) -> None:
         targetINIs = self.setting_dictionary[each_setting].get("targetINIs")
@@ -1546,7 +1546,7 @@ class bethini_app(ttk.Window):
                 the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
 
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
+                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def color_assign_value(self, each_setting) -> None:
         targetINIs = self.setting_dictionary[each_setting].get("targetINIs")
@@ -1565,16 +1565,16 @@ class bethini_app(ttk.Window):
 
                 if color_value_type in {"hex", "decimal"}:
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                    self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
+                    self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
                 elif color_value_type in {"rgb", "rgb 1", "rgba"}:
                     if len(theSettings) > 1:
                         theValue = str(ast.literal_eval(this_value)[n])
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
-                        self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + theValue)
+                        self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
                     else:
                         this_value = this_value.lstrip("(").rstrip(")")
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                        self.sme(targetINIs[n] + " [" + targetSections[n] + "] " + theSettings[n] + "=" + this_value)
+                        self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def createTabs(self, *, from_choose_game_window: bool=False) -> None:
 
