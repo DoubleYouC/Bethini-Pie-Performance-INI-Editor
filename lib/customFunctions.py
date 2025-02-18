@@ -195,7 +195,7 @@ class CustomFunctions:
         root = tk.Tk()
         root.withdraw()
         WIDTH, HEIGHT = root.winfo_screenwidth(), root.winfo_screenheight()
-        return str(WIDTH) + "x" + str(HEIGHT)
+        return f"{WIDTH}x{HEIGHT}"
 
     @staticmethod
     def getBethesdaGameFolder(game_name: str):

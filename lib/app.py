@@ -18,11 +18,7 @@ class AppName:
         with open(os.path.join('apps', appname, 'Bethini.json'), encoding='utf-8') as bethini:
             self.bethini: dict = json.load(bethini)
 
-        ini_files = list(self.bethini["INIs"].keys())
-        try:
-            self.default_ini = ini_files[1]
-        except IndexError:
-            self.default_ini = None
+        self.default_ini = self.bethini['INIs'].keys()[1] if len(self.bethini['INIs']) > 1 else None
 
         self.setting_values = self.get_setting_values()
 
@@ -83,9 +79,9 @@ class AppName:
         try:
             the_section_list = [x.lower() for x in self.ini_section_setting_dict[ini][section]]
             setting = setting.lower()
-            return setting in the_section_list
         except KeyError:
             return False
+        return setting in the_section_list
 
     def preset_values(self, preset) -> dict[Any, Any]:
         """Returns a dictionary listing all the settings and values
