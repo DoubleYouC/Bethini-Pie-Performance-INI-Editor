@@ -18,7 +18,7 @@ class AppName:
         with open(os.path.join('apps', appname, 'Bethini.json'), encoding='utf-8') as bethini:
             self.bethini: dict = json.load(bethini)
 
-        self.default_ini = self.bethini['INIs'].keys()[1] if len(self.bethini['INIs']) > 1 else None
+        self.default_ini = list(self.bethini['INIs'])[1] if len(self.bethini['INIs']) > 1 else None
 
         self.setting_values = self.get_setting_values()
 
