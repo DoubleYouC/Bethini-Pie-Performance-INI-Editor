@@ -73,28 +73,28 @@ operator_dictionary = {
     }
 
 tkinter_switch_dict = {
-    "Left": tk.LEFT,
-    "Right": tk.RIGHT,
-    "Top": tk.TOP,
-    "Bottom": tk.BOTTOM,
-    "X": tk.X,
-    "Y": tk.Y,
-    "Center": tk.CENTER,
-    "Both": tk.BOTH,
-    "Horizontal": tk.HORIZONTAL,
-    "Flat": tk.FLAT,
-    "N": tk.N,
-    "NE": tk.NE,
-    "NW": tk.NW,
-    "NS": tk.NS,
-    "NSEW": tk.NSEW,
-    "S": tk.S,
-    "SE": tk.SE,
-    "SW": tk.SW,
-    "E": tk.E,
-    "EW": tk.EW,
-    "W": tk.W,
-    "None": None
+    "left": tk.LEFT,
+    "right": tk.RIGHT,
+    "top": tk.TOP,
+    "bottom": tk.BOTTOM,
+    "x": tk.X,
+    "y": tk.Y,
+    "center": tk.CENTER,
+    "both": tk.BOTH,
+    "horizontal": tk.HORIZONTAL,
+    "flat": tk.FLAT,
+    "n": tk.N,
+    "ne": tk.NE,
+    "nw": tk.NW,
+    "ns": tk.NS,
+    "nsew": tk.NSEW,
+    "s": tk.S,
+    "se": tk.SE,
+    "sw": tk.SW,
+    "e": tk.E,
+    "ew": tk.EW,
+    "w": tk.W,
+    "none": tk.NONE,
 }
 
 types_without_label = ["Checkbutton", "preset", "radioPreset", "description"]
@@ -180,9 +180,9 @@ class bethini_app(ttk.Window):
         self.the_canvas = ttk.Canvas(self)
         self.hsbframeholder = ttk.Frame(self)
 
-        self.vsb = AutoScrollbar(self, orient="vertical",
+        self.vsb = AutoScrollbar(self, orient=tk.VERTICAL,
                                  command=self.the_canvas.yview)
-        self.hsb = AutoScrollbar(self.hsbframeholder, orient="horizontal",
+        self.hsb = AutoScrollbar(self.hsbframeholder, orient=tk.HORIZONTAL,
                                  command=self.the_canvas.xview)
         self.the_canvas.configure(yscrollcommand=self.vsb.set, xscrollcommand=self.hsb.set)
 
@@ -215,8 +215,8 @@ class bethini_app(ttk.Window):
         self.choose_game_frame_2 = ttk.Frame(self.choose_game_frame)
 
         self.label_Bethini = ttk.Label(self.choose_game_frame_2, text="Bethini Pie", font=("Segoe UI", 20))
-        self.label_Pie = ttk.Label(self.choose_game_frame_2, text="Performance INI Editor\nby DoubleYou", font=("Segoe UI", 15), justify="center", style="warning")
-        self.label_link = ttk.Label(self.choose_game_frame_2, text="www.nexusmods.com/site/mods/631", font=("Segoe UI", 10), cursor="hand2", style="info")
+        self.label_Pie = ttk.Label(self.choose_game_frame_2, text="Performance INI Editor\nby DoubleYou", font=("Segoe UI", 15), justify=tk.CENTER, style=ttk.WARNING)
+        self.label_link = ttk.Label(self.choose_game_frame_2, text="www.nexusmods.com/site/mods/631", font=("Segoe UI", 10), cursor="hand2", style=ttk.INFO)
 
         self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=("Segoe UI", 15))
 
@@ -228,7 +228,7 @@ class bethini_app(ttk.Window):
         self.choose_game_button = ttk.Button(self.choose_game_frame_2, text="Select Game", style="choose_game_button.TButton",
                                              command=lambda: self.choose_game_done(self.choose_game_tree.focus()))
 
-        self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=("Segoe UI", 12), justify="center", style="success")
+        self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=("Segoe UI", 12), justify=tk.CENTER, style="success")
         for option in Path("apps").iterdir():
             self.choose_game_tree.insert("", "end", id=option.name, text=option.name, values=[option.name])
 
@@ -296,7 +296,7 @@ class bethini_app(ttk.Window):
         self.sub_container.pack(fill=tk.BOTH, expand=True)
 
     def show_status_bar(self) -> None:
-        self.statusbar.pack(anchor="w", side=tk.BOTTOM, fill=tk.X)
+        self.statusbar.pack(anchor=tk.W, side=tk.BOTTOM, fill=tk.X)
 
     def choose_color(self, button_to_modify: tk.Button, color_value_type: str="hex"):
         #This allows us to have our very convenient tkinter colorchooser dialog
@@ -551,7 +551,7 @@ class bethini_app(ttk.Window):
 
         about_frame.pack(fill=tk.BOTH, expand=True)
         about_frame_real.pack(anchor=tk.CENTER, expand=True)
-        about_label.pack(anchor=tk.CENTER, padx="10", pady="10")
+        about_label.pack(anchor=tk.CENTER, padx=10, pady=10)
 
     def show_setup(self) -> None:
         self.withdraw()
@@ -740,9 +740,9 @@ class bethini_app(ttk.Window):
                 the_dict["LabelFrames"][the_label_frame]["TkLabelFrame"] = ttk.Frame(the_dict["TkFrameForTab"])
 
             pack_settings = APP.pack_settings(self.tab_dictionary[each_tab]["Name"], label_frame)
-            the_dict["LabelFrames"][the_label_frame]["TkLabelFrame"].pack(anchor=tkinter_switch_dict[pack_settings.get("Anchor","NW")],
-                                                                          side=tkinter_switch_dict[pack_settings.get("Side","Top")],
-                                                                          fill=tkinter_switch_dict[pack_settings.get("Fill","Both")],
+            the_dict["LabelFrames"][the_label_frame]["TkLabelFrame"].pack(anchor=tkinter_switch_dict[pack_settings.get("Anchor", tk.NW).lower()],
+                                                                          side=tkinter_switch_dict[pack_settings.get("Side", tk.TOP).lower()],
+                                                                          fill=tkinter_switch_dict[pack_settings.get("Fill", tk.BOTH).lower()],
                                                                           expand=pack_settings.get("Expand", 1),
                                                                           padx=10, pady=10)
             self.settings_frames_for_label_frame(each_tab, label_frame, the_label_frame)
@@ -756,11 +756,11 @@ class bethini_app(ttk.Window):
             if on_frame not in self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"]:
                 self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame] = {}
                 self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame]["TkSettingFrame"] = ttk.Frame(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["TkLabelFrame"])
-                self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame]["TkSettingFrame"].pack(side=tk.LEFT, anchor="nw")
+                self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame]["TkSettingFrame"].pack(side=tk.LEFT, anchor=tk.NW)
             the_setting = "Setting" + str(setting_number)
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting] = {"Name":each_setting}
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"] = ttk.Frame(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame]["TkSettingFrame"])
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"].pack(anchor="w", padx="5", pady="2")
+            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"].pack(anchor=tk.W, padx=5, pady=2)
             if "Placeholder" not in each_setting:
                 self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].update(APP.bethini["displayTabs"][self.tab_dictionary[each_tab]["Name"]][label_frame]["Settings"][each_setting])
                 self.setting_label(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting)
@@ -779,7 +779,7 @@ class bethini_app(ttk.Window):
         setting_description = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("Description")
         if setting_description:
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkDescriptionLabel"] = ttk.Label(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                                              text=setting_description, justify="left", wraplength=900)
+                                                                                                                                              text=setting_description, justify=tk.LEFT, wraplength=900)
             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkDescriptionLabel"].pack(anchor=tk.N)
         self.setting_type_switcher(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, setting_type)
 
@@ -827,7 +827,7 @@ class bethini_app(ttk.Window):
                                                                                                                               text=each_setting, variable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
                                                                                                                               onvalue=on_value, offvalue=off_value)
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].var = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"]
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor="w", padx=5, pady=7)
+        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.W, padx=5, pady=7)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {

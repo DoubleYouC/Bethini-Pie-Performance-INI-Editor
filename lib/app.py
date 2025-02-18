@@ -5,6 +5,7 @@ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 import json
 import sys
+import tkinter as tk
 from pathlib import Path
 from typing import Any, Literal
 
@@ -119,9 +120,9 @@ class AppName:
     def pack_settings(self, tab, label_frame) -> Any:
         """Returns the pack settings for the label frame."""
         default_pack_settings = {
-            "Side": "Top",
-            "Anchor": "NW",
-            "Fill": "Both",
+            "Side": tk.TOP,
+            "Anchor": tk.NW,
+            "Fill": tk.BOTH,
             "Expand": 1
             }
         return self.bethini["displayTabs"][tab][label_frame].get("Pack", default_pack_settings)

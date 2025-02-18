@@ -39,7 +39,7 @@ class Hovertip(OnHoverTooltipBase):
                          font=("Segoe UI", 10), wraplength=self.wrap_length)
         label.pack()
 
-    def show_preview(self, event=None) -> None:
+    def show_preview(self, _event=None) -> None:
         """Displays the preview window"""
         for widget in self.preview_frame.winfo_children():
             widget.destroy()
