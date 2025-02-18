@@ -26,10 +26,7 @@ class AppName:
 
     def what_ini_files_are_used(self) -> list[Any]:
         """Returns a list of INI files used, with Bethini.ini removed from the list."""
-        ini_files = []
-        for ini in self.bethini["INIs"]:
-            if ini != "Bethini.ini":
-                ini_files.append(ini)
+        ini_files = [ini for ini in self.bethini["INIs"] if ini != "Bethini.ini"]
         return ini_files
 
     def inis(self, ini) -> Literal['', False] | Any:
