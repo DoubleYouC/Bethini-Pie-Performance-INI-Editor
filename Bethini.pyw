@@ -204,7 +204,7 @@ class bethini_app(ttk.Window):
         self.statusbar = ttk.Entry(self.hsbframeholder, textvariable=self.statusbar_text)
 
         self.pw = ttk.Label(self.hsbframeholder, text="Loading... Please Wait... ")
-        self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode="indeterminate")
+        self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode=ttk.INDETERMINATE)
         self.start_progress()
         self.show_status_bar()
 
@@ -220,7 +220,7 @@ class bethini_app(ttk.Window):
 
         self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=("Segoe UI", 15))
 
-        self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode="browse", show="tree", columns=("Name"))
+        self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode=tk.BROWSE, show="tree", columns=("Name"))
         self.choose_game_tree.column("#0", width=0, stretch=tk.NO)
         self.choose_game_tree.column("Name", anchor=tk.W, width=300)
 
@@ -230,7 +230,7 @@ class bethini_app(ttk.Window):
 
         self.choose_game_tip = ttk.Label(self.choose_game_frame_2, text="Tip: You can change the game at any time\nby going to File > Choose Game.", font=("Segoe UI", 12), justify=tk.CENTER, style="success")
         for option in Path("apps").iterdir():
-            self.choose_game_tree.insert("", "end", id=option.name, text=option.name, values=[option.name])
+            self.choose_game_tree.insert("", tk.END, id=option.name, text=option.name, values=[option.name])
 
 
         self.preferences_frame = ttk.Frame(self.choose_game_frame_2)
@@ -282,7 +282,7 @@ class bethini_app(ttk.Window):
         self.p.stop()
         self.p.destroy()
         self.pw = ttk.Label(self.hsbframeholder, text="Loading... Please Wait... ")
-        self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode="indeterminate")
+        self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode=ttk.INDETERMINATE)
 
     def sme(self, message: str, *, exception: Exception | None = None) -> None:
         if exception is not None:
@@ -1313,18 +1313,18 @@ class bethini_app(ttk.Window):
                 value = float(value)
                 current_value = float(current_value)
             if the_operator(current_value, value):
-                self.setting_dictionary[each_dependent_setting]["tk_widget"].configure(state="normal")
+                self.setting_dictionary[each_dependent_setting]["tk_widget"].configure(state=tk.NORMAL)
                 if second_tk_widget:
-                    second_tk_widget.configure(state="normal")
+                    second_tk_widget.configure(state=tk.NORMAL)
             else:
                 set_to_off = self.settings_that_settings_depend_on[each_setting][each_dependent_setting].get("setToOff")
                 if set_to_off:
                     off_value = self.setting_dictionary[each_dependent_setting].get("offvalue")
 
                     self.setting_dictionary[each_dependent_setting]["tk_var"].set(off_value)
-                self.setting_dictionary[each_dependent_setting]["tk_widget"].configure(state="disabled")
+                self.setting_dictionary[each_dependent_setting]["tk_widget"].configure(state=tk.DISABLED)
                 if second_tk_widget:
-                    second_tk_widget.configure(state="disabled")
+                    second_tk_widget.configure(state=tk.DISABLED)
 
     def assign_value(self, each_setting) -> None:
         id_ = self.setting_dictionary[each_setting].get("id")
@@ -1677,16 +1677,16 @@ class bethini_app(ttk.Window):
                 the_operator = operator_dictionary[the_operator]
                 second_tk_widget = self.setting_dictionary[each_setting].get("second_tk_widget")
                 if the_operator(current_value, value):
-                    self.setting_dictionary[each_setting]["tk_widget"].configure(state="normal")
+                    self.setting_dictionary[each_setting]["tk_widget"].configure(state=tk.NORMAL)
                     if second_tk_widget:
-                        second_tk_widget.configure(state="normal")
+                        second_tk_widget.configure(state=tk.NORMAL)
                 else:
                     if set_to_off:
                         off_value = self.dependent_settings_dictionary[each_setting][masterSetting].get("offvalue")
                         self.setting_dictionary[each_setting]["tk_var"].set(off_value)
-                    self.setting_dictionary[each_setting]["tk_widget"].configure(state="disabled")
+                    self.setting_dictionary[each_setting]["tk_widget"].configure(state=tk.DISABLED)
                     if second_tk_widget:
-                        second_tk_widget.configure(state="disabled")
+                        second_tk_widget.configure(state=tk.DISABLED)
 
                 if not self.settings_that_settings_depend_on.get(masterSetting):
                     self.settings_that_settings_depend_on[masterSetting] = {}
