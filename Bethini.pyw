@@ -541,7 +541,8 @@ class bethini_app(ttk.Window):
 
         ttk.Window.config(self, menu=menubar)
 
-    def about(self) -> None:
+    @staticmethod
+    def about() -> None:
         about_window = ttk.Toplevel("About")
 
         about_frame = ttk.Frame(about_window)
@@ -1736,7 +1737,8 @@ class bethini_app(ttk.Window):
                 return False
         return True
 
-    def getINILocation(self, ini):
+    @staticmethod
+    def getINILocation(ini):
         ini_location = APP.inis(ini)
         return "" if not ini_location else app_config.get_value("Directories", ini_location)
 
