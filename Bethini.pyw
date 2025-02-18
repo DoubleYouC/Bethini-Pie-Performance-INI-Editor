@@ -298,7 +298,8 @@ class bethini_app(ttk.Window):
     def show_status_bar(self) -> None:
         self.statusbar.pack(anchor=tk.W, side=tk.BOTTOM, fill=tk.X)
 
-    def choose_color(self, button_to_modify: tk.Button, color_value_type: str="hex"):
+    @staticmethod
+    def choose_color(button_to_modify: tk.Button, color_value_type: str = "hex"):
         #This allows us to have our very convenient tkinter colorchooser dialog
         #window modify a button
         old_color = button_to_modify.var.get()
@@ -685,7 +686,7 @@ class bethini_app(ttk.Window):
             this_value = str(ini_dict[each_setting]["value"])
 
             ini_location = APP.inis(target_ini)
-            if ini_location != "":
+            if not ini_location:
                 ini_location = app_config.get_value("Directories", ini_location)
             the_target_ini = open_ini(str(ini_location), str(target_ini))
 
@@ -703,7 +704,7 @@ class bethini_app(ttk.Window):
             this_value = str(ini_dict[each_setting]["value"])
 
             ini_location = APP.inis(target_ini)
-            if ini_location != "":
+            if not ini_location:
                 ini_location = app_config.get_value("Directories", ini_location)
             the_target_ini = open_ini(str(ini_location), str(target_ini))
 
@@ -1459,7 +1460,7 @@ class bethini_app(ttk.Window):
                 ini_location = self.getINILocation(targetINIs[n])
                 the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
 
-                if decimal_places and this_value != "":
+                if decimal_places and not this_value:
                     this_value = round(float(this_value),int(decimal_places))
                     if decimal_places == "0":
                         this_value = int(this_value)
@@ -1702,43 +1703,37 @@ class bethini_app(ttk.Window):
         badValue = f"'{valueChangedTo}' is an invalid value for this option."
         if validate == "integer":
             try:
-                if valueChangedTo == "":
+                if not valueChangedTo or str(abs(int(valueChangedTo))).isdigit():
                     return True
-                if str(abs(int(valueChangedTo))).isdigit():
-                    return True
-                self.sme(badValue)
-                return False
             except:
-                self.sme(badValue)
-                return False
-        elif validate == "whole":
-            if valueChangedTo == "":
-                return True
-            if valueChangedTo.isdigit():
+                pass
+            self.sme(badValue)
+            return False
+
+        if validate == "whole":
+            if not valueChangedTo or valueChangedTo.isdigit():
                 return True
             self.sme(badValue)
             return False
-        elif validate == "counting":
-            if valueChangedTo == "":
-                return True
+
+        if validate == "counting":
             if valueChangedTo == "0":
                 self.sme(badValue)
                 return False
-            if valueChangedTo.isdigit():
+            if not valueChangedTo or valueChangedTo.isdigit():
                 return True
             self.sme(badValue)
             return False
-        elif validate == "float":
-            if valueChangedTo == "":
+
+        if validate == "float":
+            if not valueChangedTo:
                 return True
             try:
                 float(valueChangedTo)
-                return True
             except:
                 self.sme(badValue)
                 return False
-        else:
-            return True
+        return True
 
     def getINILocation(self, ini):
         ini_location = APP.inis(ini)
@@ -1917,7 +1912,6 @@ if __name__ == "__main__":
     window = bethini_app(themename=theme, iconphoto=(Path("Icons") / "Icon.png"))
     window.choose_game()
     window.minsize(400,200)
-
 
     window.protocol("WM_DELETE_WINDOW", lambda: on_closing(window))
     window.mainloop()
