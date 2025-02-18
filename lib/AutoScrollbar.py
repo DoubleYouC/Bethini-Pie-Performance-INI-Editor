@@ -1,6 +1,11 @@
 """This is the AutoScrollbar module."""
 
+import sys
 import tkinter as tk
+
+if __name__ == '__main__':
+    sys.exit(1)
+
 
 class AutoScrollbar(tk.Scrollbar):
     """This creates a scrollbar if necessary."""
@@ -12,6 +17,3 @@ class AutoScrollbar(tk.Scrollbar):
         else:
             self.pack(side=tk.RIGHT, fill=tk.Y)
         tk.Scrollbar.set(self, first, last)
-
-if __name__ == '__main__':
-    print('This is the AutoScrollbar module.')

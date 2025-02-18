@@ -1,11 +1,16 @@
 """Modification of Hovertip"""
 
+import sys
 import tkinter as tk
 from tkinter import ttk
 
 from PIL import Image, ImageTk
 
 from idlelib.tooltip import OnHoverTooltipBase
+
+if __name__ == '__main__':
+    sys.exit(1)
+
 
 class Hovertip(OnHoverTooltipBase):
     """A tooltip that pops up when a mouse hovers over an anchor widget."""
@@ -37,7 +42,6 @@ class Hovertip(OnHoverTooltipBase):
 
     def show_preview(self, event=None) -> None:
         """Displays the preview window"""
-        print(event)
         for widget in self.preview_frame.winfo_children():
             widget.destroy()
         self.preview_image = None

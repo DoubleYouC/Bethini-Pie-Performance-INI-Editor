@@ -4,8 +4,12 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
 or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA."""
 
 import json
+import sys
 from pathlib import Path
 from typing import Any, Literal
+
+if __name__ == '__main__':
+    sys.exit(1)
 
 
 class AppName:
@@ -125,6 +129,3 @@ class AppName:
     def number_of_vertically_stacked_settings(self, tab, label_frame) -> Any:
         """Returns the maximum number of vertically stacked settings desired for the label frame."""
         return self.bethini['displayTabs'][tab][label_frame]['NumberOfVerticallyStackedSettings']
-
-if __name__ == '__main__':
-    print('This is the app.appName class module.')

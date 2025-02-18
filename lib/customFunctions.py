@@ -10,11 +10,15 @@ import logging
 import ctypes.wintypes
 import tkinter as tk
 import shutil
+import sys
 from pathlib import Path
 from tkinter import filedialog
 from tkinter import simpledialog
 from lib.app import AppName
 from lib.ModifyINI import ModifyINI
+
+if __name__ == '__main__':
+    sys.exit(1)
 
 logger = logging.getLogger(__name__)
 
@@ -238,6 +242,3 @@ class CustomFunctions:
                 pass
 
         return [str(game_documents_path), 'Browse...']
-
-if __name__ == '__main__':
-    print('This is the customFunctions module.')

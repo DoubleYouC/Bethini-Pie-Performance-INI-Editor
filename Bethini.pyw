@@ -1261,7 +1261,6 @@ class bethini_app(ttk.Window):
                     for n in range(len(setting_value)):
                         this_value += setting_value[n]
                     this_value += ')'
-                    print(this_value)
                     new_color = rgb_to_hex(ast.literal_eval(this_value))
             elif color_value_type == 'rgba':
                 rgb_type = self.setting_dictionary[each_setting].get("rgbType")
@@ -1274,7 +1273,6 @@ class bethini_app(ttk.Window):
                     for n in range(len(setting_value)):
                         this_value += setting_value[n]
                     this_value += ')'
-                    print(this_value)
                     new_color = rgb_to_hex(ast.literal_eval(this_value)[0:3])
             elif color_value_type == 'rgb 1':
                 rgb_type = self.setting_dictionary[each_setting].get("rgbType")
@@ -1352,8 +1350,6 @@ class bethini_app(ttk.Window):
         except:
             self.sme(f'{this_value} .... Make sure that the {each_setting} checkbutton Onvalue and Offvalue are lists within lists in the json.', exception=True)
 
-        #print(this_value, onvalue, off_value)
-
         if targetINIs:
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
@@ -1383,7 +1379,6 @@ class bethini_app(ttk.Window):
     def dropdown_assign_value(self, each_setting) -> None:
         tk_var = self.setting_dictionary[each_setting].get('tk_var')
         this_value = tk_var.get()
-        #print(this_value)
         targetINIs = self.setting_dictionary[each_setting].get('targetINIs')
         targetSections = self.setting_dictionary[each_setting].get('targetSections')
         theSettings = self.setting_dictionary[each_setting].get('settings')

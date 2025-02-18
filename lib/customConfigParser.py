@@ -3,6 +3,10 @@
 import configparser
 import sys
 
+if __name__ == '__main__':
+    sys.exit(1)
+
+
 class customConfigParser(configparser.RawConfigParser):
     """Our custom configparser will not remove comments when the file is written.
     Also, it does not raise errors if duplicate options are detected."""
@@ -145,6 +149,3 @@ class customConfigParser(configparser.RawConfigParser):
         # if any parsing errors occurred, raise an exception
         if e:
             raise e
-
-if __name__ == '__main__':
-    print('This is the customConfigParser module.')
