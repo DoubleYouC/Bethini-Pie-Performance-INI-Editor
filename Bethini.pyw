@@ -1811,11 +1811,11 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
     files_to_remove: list of files that will be removed
     """
     try:
-        subdirectories = [d for d in directory.iterdir() if d.name.lower() != "first-time-backup"]
+        subdirectories = [d for d in directory.iterdir() if d.name.lower() != "first-time-backup" and d.is_dir()]
     except OSError as e:
         logger.debug(f"Info: {directory} : {e.strerror}")
         return True
-    subdirectories.sort()
+    subdirectories.sort(key=lambda d: d.name)
 
     if max_to_keep > -1:
         for n in range(len(subdirectories)):
