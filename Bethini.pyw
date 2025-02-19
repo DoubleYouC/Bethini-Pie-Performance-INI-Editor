@@ -589,7 +589,8 @@ class bethini_app(ttk.Window):
         for each_ini in open_inis:
             location_list = list(open_inis[each_ini]["located"].keys())
             for n in range(len(location_list)):
-                this_location = Path(str(open_inis[each_ini]["located"][str(n+1)].get("at")))
+                located_at = open_inis[each_ini]["located"][str(n+1)].get("at")
+                this_location = Path(located_at) if located_at else Path.cwd()
                 this_ini_object = open_inis[each_ini]["located"][str(n+1)].get("object")
                 if each_ini == my_app_config:
                     continue
@@ -1819,21 +1820,26 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
 
     if max_to_keep > -1:
         for n in range(len(subdirectories)):
+            dir_path = subdirectories[n]
             if n < max_to_keep:
-                logger.debug(f"{subdirectories[n].name} will be kept.")
+                logger.debug(f"{subdirectories[n]} will be kept.")
             else:
-                dir_path = subdirectories[n]
-                try:
-                    for file in files_to_remove:
-                        file_path = dir_path / file
-                        try:
-                            file_path.unlink(missing_ok=True)
-                        except OSError as e:
-                            logger.error(f"{file_path}: {e.strerror}")
-                    dir_path.unlink(missing_ok=True)
-                    logger.debug(f"{subdirectories[n].name} was removed.")
-                except OSError as e:
-                    logger.error(f"{dir_path} : {e.strerror}")
+                file_delete_failed = False
+                for file in files_to_remove:
+                    file_path = dir_path / file
+                    try:
+                        file_path.unlink(missing_ok=True)
+                    except OSError as e:
+                        logger.error(f"{file_path}: {e.strerror}")
+                        file_delete_failed = True
+
+                if not file_delete_failed:
+                    try:
+                        dir_path.rmdir()
+                    except OSError as e:
+                        logger.error(f"{dir_path} : {e.strerror}")
+                    else:
+                        logger.debug(f"{dir_path} was removed.")
     return False
 
 def open_ini(location, ini):
