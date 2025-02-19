@@ -1869,9 +1869,9 @@ def open_ini(location: str, ini: str):
             }
         }
     try:
-        #open_inis[ini]["located"][open_ini_id]["original"] = ModifyINI(location + ini)
-    except configparser.MissingSectionHeaderError as e:
-        logger.error(f"{e.strerror}")
+        open_inis[ini]["located"][open_ini_id_str]["object"] = ModifyINI(Path(location) / ini)
+    except configparser.MissingSectionHeaderError:
+        logger.error(f"Failed to open ini: {ini}", exc_info=True)
     return open_inis[ini]["located"][open_ini_id_str]["object"]
 
 if __name__ == "__main__":
