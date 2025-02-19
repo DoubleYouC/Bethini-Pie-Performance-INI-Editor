@@ -576,7 +576,6 @@ class bethini_app(ttk.Window):
         #            }
         #        }
         #    }
-        first_time_backup = False
         files_saved = False
         self.remove_invalid_settings()
         try:
@@ -599,12 +598,10 @@ class bethini_app(ttk.Window):
                     continue
                 if messagebox.askyesno(f"Save {each_ini}", f"Do you want to save {this_location / each_ini}?"):
                     #we need to make a backup of each save before actually saving.
-                    first_time_backup_trigger = remove_excess_directory_files(this_location / f"{my_app_name} backups",
+                    do_first_time_backup = remove_excess_directory_files(this_location / f"{my_app_name} backups",
                                                                     int(app_config.get_value("General", "iMaxBackups", "-1")),
                                                                     files_to_remove)
-                    if first_time_backup_trigger:
-                        first_time_backup = True
-                    if first_time_backup:
+                    if do_first_time_backup:
                         the_backup_directory = this_location / f"{my_app_name} backups" / "First-Time-Backup"
                         the_backup_directory.mkdir(parents=True, exist_ok=True)
                         if (the_backup_directory / each_ini).exists():
