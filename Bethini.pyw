@@ -687,7 +687,7 @@ class bethini_app(ttk.Window):
             ini_location = APP.inis(target_ini)
             if ini_location:
                 ini_location = app_config.get_value("Directories", ini_location)
-            the_target_ini = open_ini(str(ini_location), str(target_ini))
+            the_target_ini = open_ini(ini_location, target_ini)
 
             # Check if we are only supposed to add the value if the value is missing
             if only_if_missing and (the_target_ini.get_value(target_section, target_setting) is not None):
@@ -705,7 +705,7 @@ class bethini_app(ttk.Window):
             ini_location = APP.inis(target_ini)
             if ini_location:
                 ini_location = app_config.get_value("Directories", ini_location)
-            the_target_ini = open_ini(str(ini_location), str(target_ini))
+            the_target_ini = open_ini(ini_location, target_ini)
 
             current_value = the_target_ini.get_value(target_section, target_setting, this_value)
 
@@ -1362,7 +1362,7 @@ class bethini_app(ttk.Window):
         if targetINIs:
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(ini_location, targetINIs[n])
                 #1
                 if this_value in (on_value, off_value):
                     if type(this_value[n]) is list:
@@ -1418,7 +1418,7 @@ class bethini_app(ttk.Window):
             for n in range(len(targetINIs)):
                 theValue = ""
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(ini_location, targetINIs[n])
                 #1280x720
                 if this_value in {"Manual...", "Browse..."}:
                     theValue = ""
@@ -1457,7 +1457,7 @@ class bethini_app(ttk.Window):
             decimal_places = self.setting_dictionary[each_setting].get("decimal places")
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(ini_location, targetINIs[n])
 
                 if decimal_places and this_value:
                     this_value = round(float(this_value),int(decimal_places))
@@ -1495,7 +1495,7 @@ class bethini_app(ttk.Window):
 
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(ini_location, targetINIs[n])
 
                 if formula:
                     formulaValue = formula.format(this_value)
@@ -1523,7 +1523,7 @@ class bethini_app(ttk.Window):
 
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(ini_location, targetINIs[n])
 
                 try:
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
@@ -1543,7 +1543,7 @@ class bethini_app(ttk.Window):
 
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(ini_location, targetINIs[n])
 
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
@@ -1561,7 +1561,7 @@ class bethini_app(ttk.Window):
             color_value_type = self.setting_dictionary[each_setting].get("colorValueType")
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
+                the_target_ini = open_ini(ini_location, targetINIs[n])
 
                 if color_value_type in {"hex", "decimal"}:
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
@@ -1735,9 +1735,9 @@ class bethini_app(ttk.Window):
         return True
 
     @staticmethod
-    def getINILocation(ini):
-        ini_location = APP.inis(ini)
         return "" if not ini_location else app_config.get_value("Directories", ini_location)
+    def getINILocation(ini_name: str):
+        ini_location = APP.inis(ini_name)
 
     def get_setting_values(self, targetINIs, targetSections, theSettings, setting_choices=None, delimiter=None):
         #This function returns the current value of the each_setting.
@@ -1841,7 +1841,7 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
                         logger.debug(f"{dir_path} was removed.")
     return False
 
-def open_ini(location, ini):
+def open_ini(location: str, ini: str):
     """Given the location and name of an INI file, opens the INI object and stores it in open_inis."""
     open_ini = open_inis.get(ini)
     if open_ini:
@@ -1853,27 +1853,26 @@ def open_ini(location, ini):
                 return open_ini_location[each_location].get("object")
         #if the location is not found, add it
         open_ini_id += 1
-        open_ini_id = str(open_ini_id)
-        open_inis[ini]["located"][open_ini_id] = {
+        open_ini_id_str = str(open_ini_id)
+        open_inis[ini]["located"][open_ini_id_str] = {
             "at":location
             }
-        open_inis[ini]["located"][open_ini_id]["object"] = ModifyINI(Path(location) / ini)
-        return open_inis[ini]["located"][open_ini_id]["object"]
+        open_inis[ini]["located"][open_ini_id_str]["object"] = ModifyINI(Path(location) / ini)
+        return open_inis[ini]["located"][open_ini_id_str]["object"]
     #if the ini has not been opened before
-    open_ini_id = "1"
+    open_ini_id_str = "1"
     open_inis[ini] = {
         "located": {
-            open_ini_id: {
+            open_ini_id_str: {
                 "at": location
                 }
             }
         }
     try:
-        open_inis[ini]["located"][open_ini_id]["object"] = ModifyINI(Path(location) / ini)
         #open_inis[ini]["located"][open_ini_id]["original"] = ModifyINI(location + ini)
     except configparser.MissingSectionHeaderError as e:
         logger.error(f"{e.strerror}")
-    return open_inis[ini]["located"][open_ini_id]["object"]
+    return open_inis[ini]["located"][open_ini_id_str]["object"]
 
 if __name__ == "__main__":
 

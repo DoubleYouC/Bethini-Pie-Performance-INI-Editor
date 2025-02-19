@@ -29,17 +29,21 @@ class AppName:
 
         self.ini_section_setting_dict = self.get_ini_section_setting_dict()
 
-    def what_ini_files_are_used(self) -> list[Any]:
+    def what_ini_files_are_used(self) -> list[str]:
         """Returns a list of INI files used, with Bethini.ini removed from the list."""
         return [ini for ini in self.bethini["INIs"] if ini != "Bethini.ini"]
 
-    def inis(self, ini) -> Literal["", False] | Any:
+    def inis(self, ini: str) -> str | Literal[""]:
         """Returns the INI settings name used in Bethini.ini to store the location
         of the given ini file."""
-        try:
-            return "" if not ini else self.bethini["INIs"][ini]
-        except KeyError:
-            return False
+        if not ini:
+            return ""
+        ini_setting = self.bethini["INIs"].get(ini)
+        if ini_setting is None:
+            msg = f"Unknown INI: {ini}"
+            raise KeyError(msg)
+        return ini_setting
+
 
     def get_setting_values(self) -> dict[Any, Any]:
         """Returns a dictionary listing all the different value types for every setting."""

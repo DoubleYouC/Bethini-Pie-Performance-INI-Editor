@@ -186,7 +186,7 @@ class CustomFunctions:
     def getBackups(game_name: str) -> list[str]:
         gameDocumentsName = Info.game_documents_name(game_name)
         defaultINILocation = str(Info.get_documents_path() / "My Games" / gameDocumentsName) if gameDocumentsName else ""
-        INIPath = str(ModifyINI("Bethini.ini").get_value("Directories", f"s{game_name}INIPath", default=defaultINILocation))
+        INIPath = ModifyINI("Bethini.ini").get_value("Directories", f"s{game_name}INIPath", default=defaultINILocation)
         backup_directory = Path(INIPath) / "Bethini Pie backups"
         try:
             backups = [b.name for b in backup_directory.iterdir()]
@@ -238,7 +238,7 @@ class CustomFunctions:
             if file == "Ultra.ini":
                 continue
             file_path = game_documents_path / file
-            with file_path.open() as _fp:  # TODO this line needs refactoring, unused filehandle
+            with file_path.open() as _fp:
                 pass
 
         return [str(game_documents_path), "Browse..."]
