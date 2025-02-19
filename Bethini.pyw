@@ -583,9 +583,8 @@ class bethini_app(ttk.Window):
         except NameError as e:
             self.sme(f"NameError: {e}", exception=e)
             return
-        ini_list = list(open_inis.keys())
-        files_to_remove = ini_list[1:]
-        files_to_remove.append("log.log")
+
+        files_to_remove = [*list(open_inis)[1:], "log.log"]
         for each_ini in open_inis:
             location_list = list(open_inis[each_ini]["located"].keys())
             for n in range(len(location_list)):
