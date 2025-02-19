@@ -1462,7 +1462,7 @@ class bethini_app(ttk.Window):
                 ini_location = self.getINILocation(targetINIs[n])
                 the_target_ini = open_ini(str(ini_location), str(targetINIs[n]))
 
-                if decimal_places and not this_value:
+                if decimal_places and this_value:
                     this_value = round(float(this_value),int(decimal_places))
                     if decimal_places == "0":
                         this_value = int(this_value)
