@@ -688,7 +688,7 @@ class bethini_app(ttk.Window):
             this_value = str(ini_dict[each_setting]["value"])
 
             ini_location = APP.inis(target_ini)
-            if not ini_location:
+            if ini_location:
                 ini_location = app_config.get_value("Directories", ini_location)
             the_target_ini = open_ini(str(ini_location), str(target_ini))
 
@@ -706,7 +706,7 @@ class bethini_app(ttk.Window):
             this_value = str(ini_dict[each_setting]["value"])
 
             ini_location = APP.inis(target_ini)
-            if not ini_location:
+            if ini_location:
                 ini_location = app_config.get_value("Directories", ini_location)
             the_target_ini = open_ini(str(ini_location), str(target_ini))
 
