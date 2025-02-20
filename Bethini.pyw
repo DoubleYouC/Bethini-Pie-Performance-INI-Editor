@@ -896,15 +896,24 @@ class bethini_app(ttk.Window):
                         options[n] = option_string.format(value_to_insert)
 
         setting["tk_var"] = tk.StringVar(self)
+
+        browse: list[str] = setting.get("browse")
+        func = setting.get("custom_function")
+        def browse_to_loc(c, var: tk.StringVar = setting["tk_var"], browse: list[str] = browse, function: str = func) -> None:
+            location = browse_to_location(c, browse, function, GAME_NAME)
+            if location:
+                var.set(location)
+            elif options[0] not in {"Browse...", "Manual..."}:
+                var.set(options[0])
+            else:
+                var.set("")
+
         setting[id_] = ttk.OptionMenu(
             setting["TkFinalSettingFrame"],
             setting["tk_var"],
             options[0],
             *options,
-            command=lambda c,
-            var=setting["tk_var"],
-            browse=setting.get("browse"),
-            function=setting.get("custom_function"): var.set(browse_to_location(c, browse, function, GAME_NAME)),
+            command=browse_to_loc,
         )
         setting[id_].var = setting["tk_var"]
         setting[id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)

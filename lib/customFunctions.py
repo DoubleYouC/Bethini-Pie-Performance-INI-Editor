@@ -7,10 +7,8 @@
 
 import ctypes.wintypes
 import logging
-import os
 import shutil
 import sys
-import tkinter as tk
 from pathlib import Path
 from tkinter import filedialog, simpledialog
 
@@ -53,37 +51,45 @@ def decimal_to_rgb(decimal) -> tuple[int, int, int]:
     red = (decimal >> 16) & 255
     return (red, green, blue)
 
-def browse_to_location(choice: str, browse: tuple[str, ...], function: str, game_name) -> str:
+def browse_to_location(choice: str, browse: list[str], function: str, game_name: str) -> str | None:
     if choice == "Browse...":
         if browse[2] == "directory":
-            location = Path(filedialog.askdirectory()).resolve()
+            response = filedialog.askdirectory()
+            if not response:
+                return None
+
+            location = Path(response).resolve()
+
         else:
-            openfilename = Path(filedialog.askopenfilename(filetypes=[(browse[1], browse[1])]))
-            if not openfilename.exists():
-                logger.error(f"file not found: {openfilename}")
-                return choice
+            response = filedialog.askopenfilename(filetypes=[(browse[1], browse[1])])
+            if not response:
+                return None
+
+            location = Path(response).resolve()
             try:
-                with openfilename.open() as _fp:
+                with location.open() as _fp:
                     pass
+
             except OSError:
-                logger.error(f"failed to open file: {openfilename}")
-                return choice
-            location = openfilename.resolve()
-            if browse[0] == "directory":
-                location = Path(os.path.join(os.path.split(str(location))[0], ""))
-        logger.debug(f"location set to '{location}'")
+                logger.error(f"Failed to open file: {location}")
+                return None
+
+            if browse[0] == "directory" and location.is_file():
+                location = location.parent
+
+        logger.debug(f"Location set to '{location}'")
         return str(location)
 
     if choice == "Manual...":
-        manual = simpledialog.askstring("Manual entry", "Custom Value:")
-        logger.debug(f"Manually entered a value of {manual}")
-        if manual:
-            return manual
-        return choice
+        response = simpledialog.askstring("Manual Entry", "Custom Value:") or ""
+        if response:
+            logger.debug(f"Manually entered a value of '{response}'")
+        return response or None
 
     if function:
-        return_value_of_custom_function = getattr(CustomFunctions, function)(game_name,choice)
+        return_value_of_custom_function = getattr(CustomFunctions, function)(game_name, choice)
         logger.debug(f"Return value of {function}: {return_value_of_custom_function}")
+
     return choice
 
 class Info:
