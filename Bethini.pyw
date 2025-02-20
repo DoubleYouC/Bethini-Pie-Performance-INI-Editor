@@ -360,16 +360,18 @@ class bethini_app(ttk.Window):
     def tooltip(self, each_tab, the_label_frame, on_frame, the_setting, id_) -> None:
         """Sets the tooltips."""
 
-        # Fectches the tooltip description.
-        tooltip_description: str = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("tooltip", "No description available.")
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
 
-        tooltip_wrap_length: int = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("tooltip_wrap_length", 200)
+        # Fectches the tooltip description.
+        tooltip_description: str = setting.get("tooltip", "No description available.")
+
+        tooltip_wrap_length: int = setting.get("tooltip_wrap_length", 200)
 
         # Checks for INI settings specified, and adds them to the bottom of the tooltip if found.
-        target_ini_files: list[str] = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("targetINIs")
+        target_ini_files: list[str] = setting.get("targetINIs")
         if target_ini_files: #If there are INI settings specified
-            target_sections: list[str] = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("targetSections")
-            target_settings: list[str] = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("settings")
+            target_sections: list[str] = setting.get("targetSections")
+            target_settings: list[str] = setting.get("settings")
 
             # Place INI settings into a dictionary to filter out duplicate target INI files and sections.
             settings_location_dict = {}
@@ -399,14 +401,14 @@ class bethini_app(ttk.Window):
         else: #If there are no INI settings specified, only the tooltip description will be used.
             tooltip_text = tooltip_description
 
-        setting_name = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("Name")
+        setting_name = setting.get("Name")
         if TYPE_CHECKING:
             assert isinstance(GAME_NAME, str)
         photo_for_setting: Path | None = Path.cwd() / "apps" / GAME_NAME / "images" / f"{setting_name}.jpg"
         if not (photo_for_setting and photo_for_setting.is_file()):
             photo_for_setting = None
 
-        Hovertip(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_], tooltip_text, [PREVIEW_WINDOW, PREVIEW_FRAME, photo_for_setting], tooltip_wrap_length)
+        Hovertip(setting[id_], tooltip_text, [PREVIEW_WINDOW, PREVIEW_FRAME, photo_for_setting], tooltip_wrap_length)
 
     def choose_game(self, *, forced: bool=False) -> None:
         self.withdraw()
@@ -748,39 +750,39 @@ class bethini_app(ttk.Window):
             self.settings_frames_for_label_frame(each_tab, label_frame, the_label_frame)
 
     def settings_frames_for_label_frame(self, each_tab, label_frame, the_label_frame) -> None:
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"] = {}
+        setting_frames = {}
+        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"] = setting_frames
         number_of_vertically_stacked_settings = int(APP.number_of_vertically_stacked_settings(self.tab_dictionary[each_tab]["Name"], label_frame))
 
         for setting_number, each_setting in enumerate(APP.bethini["displayTabs"][self.tab_dictionary[each_tab]["Name"]][label_frame]["Settings"], start=1):
             on_frame = f"SettingFrame{math.ceil(setting_number / number_of_vertically_stacked_settings) - 1}"
-            if on_frame not in self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"]:
-                self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame] = {}
-                self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame]["TkSettingFrame"] = ttk.Frame(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["TkLabelFrame"])
-                self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame]["TkSettingFrame"].pack(side=tk.LEFT, anchor=tk.NW)
+            if on_frame not in setting_frames:
+                setting_frames[on_frame] = {}
+                setting_frames[on_frame]["TkSettingFrame"] = ttk.Frame(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["TkLabelFrame"])
+                setting_frames[on_frame]["TkSettingFrame"].pack(side=tk.LEFT, anchor=tk.NW)
             the_setting = f"Setting{setting_number}"
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting] = {"Name":each_setting}
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"] = ttk.Frame(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame]["TkSettingFrame"])
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"].pack(anchor=tk.W, padx=5, pady=2)
+            setting_frames[on_frame][the_setting] = {"Name": each_setting}
+            setting_frames[on_frame][the_setting]["TkFinalSettingFrame"] = ttk.Frame(setting_frames[on_frame]["TkSettingFrame"])
+            setting_frames[on_frame][the_setting]["TkFinalSettingFrame"].pack(anchor=tk.W, padx=5, pady=2)
             if "Placeholder" not in each_setting:
-                self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].update(APP.bethini["displayTabs"][self.tab_dictionary[each_tab]["Name"]][label_frame]["Settings"][each_setting])
+                setting_frames[on_frame][the_setting].update(APP.bethini["displayTabs"][self.tab_dictionary[each_tab]["Name"]][label_frame]["Settings"][each_setting])
                 self.setting_label(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting)
 
     def setting_label(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
-        setting_type = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("type")
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
+        setting_type = setting.get("type")
         if setting_type not in types_without_label:
             setting_label = each_setting if setting_type else ""
-            setting_label_width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("customWidth")
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkLabel"] = ttk.Label(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                                   text=setting_label, width=setting_label_width, anchor=tk.E)
+            setting_label_width = setting.get("customWidth")
+            setting["TkLabel"] = ttk.Label(setting["TkFinalSettingFrame"], text=setting_label, width=setting_label_width, anchor=tk.E)
             if setting_type in types_packed_left:
-                self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkLabel"].pack(anchor=tk.CENTER, side=tk.LEFT, padx=5, pady=5)
+                setting["TkLabel"].pack(anchor=tk.CENTER, side=tk.LEFT, padx=5, pady=5)
             else:
-                self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkLabel"].pack(anchor=tk.CENTER, padx=5, pady=5)
-        setting_description = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("Description")
+                setting["TkLabel"].pack(anchor=tk.CENTER, padx=5, pady=5)
+        setting_description = setting.get("Description")
         if setting_description:
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkDescriptionLabel"] = ttk.Label(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                                              text=setting_description, justify=tk.LEFT, wraplength=900)
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkDescriptionLabel"].pack(anchor=tk.N)
+            setting["TkDescriptionLabel"] = ttk.Label(setting["TkFinalSettingFrame"], text=setting_description, justify=tk.LEFT, wraplength=900)
+            setting["TkDescriptionLabel"].pack(anchor=tk.N)
         self.setting_type_switcher(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, setting_type)
 
     def setting_type_switcher(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, setting_type) -> None:
@@ -796,24 +798,25 @@ class bethini_app(ttk.Window):
         return None
 
     def add_to_setting_dictionary(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_) -> None:
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
         stuff_to_add_to_setting_dictionary = {
-            each_setting : {
+            each_setting: {
                 "each_tab": each_tab,
                 "label_frame": label_frame,
                 "the_label_frame": the_label_frame,
                 "on_frame": on_frame,
                 "the_setting": the_setting,
                 "id": id_,
-                "tk_widget": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_],
-                "targetINIs": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("targetINIs"),
-                "settings": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("settings"),
-                "targetSections": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("targetSections")
-                }
+                "tk_widget": setting[id_],
+                "targetINIs": setting.get("targetINIs"),
+                "settings": setting.get("settings"),
+                "targetSections": setting.get("targetSections"),
             }
+        }
 
         self.setting_dictionary.update(stuff_to_add_to_setting_dictionary)
 
-        dependent_settings = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("dependentSettings")
+        dependent_settings = setting.get("dependentSettings")
         if dependent_settings:
             self.dependent_settings_dictionary[each_setting] = dependent_settings
 
@@ -821,20 +824,19 @@ class bethini_app(ttk.Window):
         """Create a ttk.Checkbutton."""
 
         id_ = "TkCheckbutton"
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"] = tk.StringVar(self)
-        on_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("Onvalue")
-        off_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("Offvalue")
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Checkbutton(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                              text=each_setting, variable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
-                                                                                                                              onvalue=on_value, offvalue=off_value)
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].var = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"]
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.W, padx=5, pady=7)
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
+        setting["tk_var"] = tk.StringVar(self)
+        on_value = setting.get("Onvalue")
+        off_value = setting.get("Offvalue")
+        setting[id_] = ttk.Checkbutton(setting["TkFinalSettingFrame"], text=each_setting, variable=setting["tk_var"], onvalue=on_value, offvalue=off_value)
+        setting[id_].var = setting["tk_var"]
+        setting[id_].pack(anchor=tk.W, padx=5, pady=7)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
-            "tk_var": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
+            "tk_var": setting["tk_var"],
             "onvalue": on_value,
-            "offvalue": off_value
+            "offvalue": off_value,
             }
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
@@ -842,11 +844,10 @@ class bethini_app(ttk.Window):
         """Create a Preset ttk.Button."""
 
         id_ = "TkPresetButton"
-
-        preset_id = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("preset id")
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Button(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                         text=each_setting, command=lambda: self.set_preset(preset_id))
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0)
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
+        preset_id = setting.get("preset id")
+        setting[id_] = ttk.Button(setting["TkFinalSettingFrame"], text=each_setting, command=lambda: self.set_preset(preset_id))
+        setting[id_].pack(anchor=tk.CENTER, padx=5, pady=0)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
 
@@ -854,11 +855,9 @@ class bethini_app(ttk.Window):
         """Create a Preset Radiobutton."""
 
         id_ = "TkRadioPreset"
-        value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("value")
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Radiobutton(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                              text=each_setting,
-                                                                                                                              variable=self.preset_var, value=value)
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=7)
+        value = setting.get("value")
+        setting[id_] = ttk.Radiobutton(setting["TkFinalSettingFrame"], text=each_setting, variable=self.preset_var, value=value)
+        setting[id_].pack(anchor=tk.CENTER, padx=5, pady=7)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
@@ -870,8 +869,8 @@ class bethini_app(ttk.Window):
         """Create a ttk.OptionMenu."""
 
         id_ = "TkOptionMenu"
-
-        options = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("choices")
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
+        options = setting.get("choices")
 
         # Custom functions allow us to auto-detect certain
         # predefined options that can then easily be selected.
@@ -892,28 +891,31 @@ class bethini_app(ttk.Window):
                         value_to_insert = getattr(CustomFunctions, custom_function)(GAME_NAME)
                         options[n] = option_string.format(value_to_insert)
 
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"] = tk.StringVar(self)
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.OptionMenu(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                             self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
-                                                                                                                             options[0], *options,
-                                                                                                                             command=lambda c,var=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
-                                                                                                                             browse=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("browse"),
-                                                                                                                             function=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("custom_function"):
-                                                                                                                             var.set(browse_to_location(c, browse, function, GAME_NAME)))
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].var = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"]
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        setting["tk_var"] = tk.StringVar(self)
+        setting[id_] = ttk.OptionMenu(
+            setting["TkFinalSettingFrame"],
+            setting["tk_var"],
+            options[0],
+            *options,
+            command=lambda c,
+            var=setting["tk_var"],
+            browse=setting.get("browse"),
+            function=setting.get("custom_function"): var.set(browse_to_location(c, browse, function, GAME_NAME)),
+        )
+        setting[id_].var = setting["tk_var"]
+        setting[id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
-            "tk_var": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
+            "tk_var": setting["tk_var"],
             "options": options,
-            "settingChoices": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("settingChoices"),
-            "delimiter": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("delimiter"),
-            "decimal places": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("decimal places"),
-            "fileFormat": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("fileFormat"),
-            "forceSelect": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("forceSelect"),
-            "partial": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("partial")
+            "settingChoices": setting.get("settingChoices"),
+            "delimiter": setting.get("delimiter"),
+            "decimal places": setting.get("decimal places"),
+            "fileFormat": setting.get("fileFormat"),
+            "forceSelect": setting.get("forceSelect"),
+            "partial": setting.get("partial"),
             }
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
@@ -921,29 +923,38 @@ class bethini_app(ttk.Window):
         """Create a ttk.Combobox."""
 
         id_ = "TkCombobox"
-        options = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("choices")
-        width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("width")
-        validate = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("validate")
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
+        options = setting.get("choices")
+        width = setting.get("width")
+        validate = setting.get("validate")
 
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"] = tk.StringVar(self)
+        setting["tk_var"] = tk.StringVar(self)
 
         if validate:
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"] = self.register(self.validate)
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Combobox(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                           textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
-                                                                                                                           width=width, values=options, validate="key", validatecommand=(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"],"%P","%s",validate))
+            setting["validate"] = self.register(self.validate)
+            setting[id_] = ttk.Combobox(
+                setting["TkFinalSettingFrame"],
+                textvariable=setting["tk_var"],
+                width=width,
+                values=options,
+                validate="key",
+                validatecommand=(setting["validate"], "%P", "%s", validate),
+            )
         else:
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Combobox(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                           textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
-                                                                                                                           width=width, values=options)
+            setting[id_] = ttk.Combobox(
+                setting["TkFinalSettingFrame"],
+                textvariable=setting["tk_var"],
+                width=width,
+                values=options,
+            )
 
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        setting[id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
-            "tk_var": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
+            "tk_var": setting["tk_var"],
             "options": options,
-            "decimal places": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("decimal places")
+            "decimal places": setting.get("decimal places")
             }
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
@@ -951,141 +962,177 @@ class bethini_app(ttk.Window):
         """Create a ttk.Entry."""
 
         id_ = "TkEntry"
-        entry_width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("entry_width")
-        validate = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("validate")
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
+        entry_width = setting.get("entry_width")
+        validate = setting.get("validate")
 
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"] = tk.StringVar(self)
+        setting["tk_var"] = tk.StringVar(self)
 
         if validate:
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"] = self.register(self.validate)
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Entry(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        width=entry_width, validate="key",
-                                                                                                                        validatecommand=(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"],"%P","%s",validate),
-                                                                                                                        textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
+            setting["validate"] = self.register(self.validate)
+            setting[id_] = ttk.Entry(
+                setting["TkFinalSettingFrame"],
+                width=entry_width,
+                validate="key",
+                validatecommand=(setting["validate"], "%P", "%s", validate),
+                textvariable=setting["tk_var"],
+            )
         else:
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Entry(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        width=entry_width,
-                                                                                                                        textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+            setting[id_] = ttk.Entry(setting["TkFinalSettingFrame"], width=entry_width, textvariable=setting["tk_var"])
+
+        setting[id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
-            "tk_var": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
-            "formula": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("formula"),
-            "decimal places": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("decimal places"),
-            "partial": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("partial"),
-            "fileFormat": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("fileFormat")
+            "tk_var": setting["tk_var"],
+            "formula": setting.get("formula"),
+            "decimal places": setting.get("decimal places"),
+            "partial": setting.get("partial"),
+            "fileFormat": setting.get("fileFormat"),
             }
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
     def slider(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
         id_ = "TkSlider"
-        from_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("from")
-        to_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("to")
-        decimal_places = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("decimal places")
-        length_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("length")
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
+        from_value = setting.get("from")
+        to_value = setting.get("to")
+        decimal_places = setting.get("decimal places")
+        length_value = setting.get("length")
 
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"] = tk.StringVar(self)
+        setting["tk_var"] = tk.StringVar(self)
 
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = Scalar(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        from_=from_value, to=to_value, orient=tk.HORIZONTAL,
-                                                                                                                        length=length_value, decimal_places=decimal_places,
-                                                                                                                        variable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
+        setting[id_] = Scalar(
+            setting["TkFinalSettingFrame"],
+            from_=from_value,
+            to=to_value,
+            orient=tk.HORIZONTAL,
+            length=length_value,
+            decimal_places=decimal_places,
+            variable=setting["tk_var"],
+        )
 
-        width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("width")
-        validate = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("validate")
-        increment_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("increment")
+        width = setting.get("width")
+        validate = setting.get("validate")
+        increment_value = setting.get("increment")
 
-        reversed_ = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("reversed")
+        reversed_ = setting.get("reversed")
         if reversed_:
-            from_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("to")
-            to_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("from")
+            from_value = setting.get("to")
+            to_value = setting.get("from")
 
         if validate:
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"] = self.register(self.validate)
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["second_tk_widget"] = ttk.Spinbox(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        width=width, validate="key", increment=increment_value, from_=from_value, to=to_value,
-                                                                                                                        validatecommand=(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"],"%P","%s",validate),
-                                                                                                                        textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
+            setting["validate"] = self.register(self.validate)
+            setting["second_tk_widget"] = ttk.Spinbox(
+                setting["TkFinalSettingFrame"],
+                width=width,
+                validate="key",
+                increment=increment_value,
+                from_=from_value,
+                to=to_value,
+                validatecommand=(setting["validate"], "%P", "%s", validate),
+                textvariable=setting["tk_var"],
+            )
         else:
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["second_tk_widget"] = ttk.Spinbox(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        width=width, increment=increment_value, from_=from_value, to=to_value,
-                                                                                                                        textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
+            setting["second_tk_widget"] = ttk.Spinbox(
+                setting["TkFinalSettingFrame"],
+                width=width,
+                increment=increment_value,
+                from_=from_value,
+                to=to_value,
+                textvariable=setting["tk_var"],
+            )
 
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["second_tk_widget"].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        setting["second_tk_widget"].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        setting[id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
 
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, "second_tk_widget")
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
-            "tk_var": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
-            "decimal places": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("decimal places"),
-            "second_tk_widget": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["second_tk_widget"]
+            "tk_var": setting["tk_var"],
+            "decimal places": setting.get("decimal places"),
+            "second_tk_widget": setting["second_tk_widget"]
             }
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
     def spinbox(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
         id_ = "TkSpinbox"
-        from_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("from")
-        to_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("to")
-        increment = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("increment")
-        width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("width")
-        validate = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("validate")
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
+        from_value = setting.get("from")
+        to_value = setting.get("to")
+        increment = setting.get("increment")
+        width = setting.get("width")
+        validate = setting.get("validate")
 
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"] = tk.StringVar(self)
+        setting["tk_var"] = tk.StringVar(self)
 
         if validate:
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"] = self.register(self.validate)
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Spinbox(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        from_=from_value, to=to_value, increment=increment, width=width, validate="key",
-                                                                                                                        validatecommand=(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["validate"],"%P","%s",validate),
-                                                                                                                        textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
+            setting["validate"] = self.register(self.validate)
+            setting[id_] = ttk.Spinbox(
+                setting["TkFinalSettingFrame"],
+                from_=from_value,
+                to=to_value,
+                increment=increment,
+                width=width,
+                validate="key",
+                validatecommand=(setting["validate"], "%P", "%s", validate),
+                textvariable=setting["tk_var"],
+            )
         else:
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Spinbox(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        from_=from_value, to=to_value, increment=increment, width=width,
-                                                                                                                        textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"])
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+            setting[id_] = ttk.Spinbox(
+                setting["TkFinalSettingFrame"],
+                from_=from_value,
+                to=to_value,
+                increment=increment,
+                width=width,
+                textvariable=setting["tk_var"],
+            )
+
+        setting[id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
-            "tk_var": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"]
-            }
+            "tk_var": setting["tk_var"],
+        }
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
     def color(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
         # chooseColor(colorToChange, buttonToModify)
         id_ = "TkColor"
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
 
-        color_value_type = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("colorValueType")
+        color_value_type = setting.get("colorValueType")
 
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"] = tk.StringVar(self)
+        setting["tk_var"] = tk.StringVar(self)
         if color_value_type == "hex":
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"].set("#FFFFFF")
+            setting["tk_var"].set("#FFFFFF")
         elif color_value_type == "rgb":
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"].set("(255, 255, 255)")
+            setting["tk_var"].set("(255, 255, 255)")
         elif color_value_type == "rgba":
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"].set("(255, 255, 255, 255)")
+            setting["tk_var"].set("(255, 255, 255, 255)")
         elif color_value_type == "rgb 1":
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"].set("(1.0000, 1.0000, 1.0000)")
+            setting["tk_var"].set("(1.0000, 1.0000, 1.0000)")
         elif color_value_type == "decimal":
-            self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"].set("16777215")
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = tk.Button(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
-                                                                                                                        textvariable=self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
-                                                                                                                        command=lambda: self.choose_color(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_],
-                                                                                                                                                         color_value_type))
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].var = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"]
-        self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+            setting["tk_var"].set("16777215")
+
+        setting[id_] = tk.Button(
+            setting["TkFinalSettingFrame"],
+            textvariable=setting["tk_var"],
+            command=lambda: self.choose_color(setting[id_], color_value_type),
+        )
+        setting[id_].var = setting["tk_var"]
+        setting[id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
         stuff_to_add_to_setting_dictionary = {
-            "tk_var": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"],
+            "tk_var": setting["tk_var"],
             "colorValueType": color_value_type,
-            "rgbType": self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("rgbType")
+            "rgbType": setting.get("rgbType")
             }
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
@@ -1093,9 +1140,11 @@ class bethini_app(ttk.Window):
         return self.preset_var.get()
 
     def checkbox_value(self, each_setting):
-        setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get("targetINIs"),
-                                             self.setting_dictionary[each_setting].get("targetSections"),
-                                             self.setting_dictionary[each_setting].get("settings"))
+        setting_value = self.get_setting_values(
+            self.setting_dictionary[each_setting].get("targetINIs"),
+            self.setting_dictionary[each_setting].get("targetSections"),
+            self.setting_dictionary[each_setting].get("settings"),
+        )
 
         if setting_value and None not in setting_value:
             on_value = self.setting_dictionary[each_setting].get("onvalue")
@@ -1125,11 +1174,13 @@ class bethini_app(ttk.Window):
         return None
 
     def dropdown_value(self, each_setting):
-        setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get("targetINIs"),
-                                             self.setting_dictionary[each_setting].get("targetSections"),
-                                             self.setting_dictionary[each_setting].get("settings"),
-                                             self.setting_dictionary[each_setting].get("settingChoices"),
-                                             self.setting_dictionary[each_setting].get("delimiter"))
+        setting_value = self.get_setting_values(
+            self.setting_dictionary[each_setting].get("targetINIs"),
+            self.setting_dictionary[each_setting].get("targetSections"),
+            self.setting_dictionary[each_setting].get("settings"),
+            self.setting_dictionary[each_setting].get("settingChoices"),
+            self.setting_dictionary[each_setting].get("delimiter"),
+        )
 
         if setting_value and None not in setting_value:
             decimal_places = self.setting_dictionary[each_setting].get("decimal places")
@@ -1164,9 +1215,11 @@ class bethini_app(ttk.Window):
         return None
 
     def combobox_value(self, each_setting):
-        setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get("targetINIs"),
-                                             self.setting_dictionary[each_setting].get("targetSections"),
-                                             self.setting_dictionary[each_setting].get("settings"))
+        setting_value = self.get_setting_values(
+            self.setting_dictionary[each_setting].get("targetINIs"),
+            self.setting_dictionary[each_setting].get("targetSections"),
+            self.setting_dictionary[each_setting].get("settings"),
+        )
         if setting_value and None not in setting_value:
             this_value = setting_value[0]
 
@@ -1184,9 +1237,11 @@ class bethini_app(ttk.Window):
         return None
 
     def entry_value(self, each_setting):
-        setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get("targetINIs"),
-                                             self.setting_dictionary[each_setting].get("targetSections"),
-                                             self.setting_dictionary[each_setting].get("settings"))
+        setting_value = self.get_setting_values(
+            self.setting_dictionary[each_setting].get("targetINIs"),
+            self.setting_dictionary[each_setting].get("targetSections"),
+            self.setting_dictionary[each_setting].get("settings"),
+        )
         if setting_value and None not in setting_value:
             formula = self.setting_dictionary[each_setting].get("formula")
             file_format = self.setting_dictionary[each_setting].get("fileFormat")
@@ -1212,9 +1267,11 @@ class bethini_app(ttk.Window):
         return None
 
     def slider_value(self, each_setting):
-        setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get("targetINIs"),
-                                             self.setting_dictionary[each_setting].get("targetSections"),
-                                             self.setting_dictionary[each_setting].get("settings"))
+        setting_value = self.get_setting_values(
+            self.setting_dictionary[each_setting].get("targetINIs"),
+            self.setting_dictionary[each_setting].get("targetSections"),
+            self.setting_dictionary[each_setting].get("settings"),
+        )
 
         if setting_value and None not in setting_value:
             this_value = setting_value[0]
@@ -1236,9 +1293,11 @@ class bethini_app(ttk.Window):
         return None
 
     def spinbox_value(self, each_setting):
-        setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get("targetINIs"),
-                                             self.setting_dictionary[each_setting].get("targetSections"),
-                                             self.setting_dictionary[each_setting].get("settings"))
+        setting_value = self.get_setting_values(
+            self.setting_dictionary[each_setting].get("targetINIs"),
+            self.setting_dictionary[each_setting].get("targetSections"),
+            self.setting_dictionary[each_setting].get("settings"),
+        )
         if setting_value and None not in setting_value:
             this_value = setting_value[0]
             try:
@@ -1251,9 +1310,11 @@ class bethini_app(ttk.Window):
         return None
 
     def color_value(self, each_setting):
-        setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get("targetINIs"),
-                                             self.setting_dictionary[each_setting].get("targetSections"),
-                                             self.setting_dictionary[each_setting].get("settings"))
+        setting_value = self.get_setting_values(
+            self.setting_dictionary[each_setting].get("targetINIs"),
+            self.setting_dictionary[each_setting].get("targetSections"),
+            self.setting_dictionary[each_setting].get("settings"),
+        )
 
         this_value = None
         new_color = None
