@@ -131,7 +131,7 @@ class bethini_app(ttk.Window):
     """This is the main app, the glue that creates the GUI."""
 
     def __init__(self, *args, **kwargs) -> None:
-        ttk.Window.__init__(self, *args, **kwargs)
+        super().__init__(self, *args, **kwargs)
 
         # Variables
         self.setup_dictionary = {}
