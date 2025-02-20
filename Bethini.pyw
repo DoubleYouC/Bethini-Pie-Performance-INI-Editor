@@ -208,7 +208,7 @@ class bethini_app(ttk.Window):
         self.pw = ttk.Label(self.hsbframeholder, text="Loading... Please Wait... ")
         self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode=ttk.INDETERMINATE)
         self.start_progress()
-        self.show_status_bar()
+        self.statusbar.pack(anchor=tk.W, side=tk.BOTTOM, fill=tk.X)
 
         self.choose_game_window = ttk.Toplevel(f"Bethini Pie {version}")
 
@@ -293,12 +293,6 @@ class bethini_app(ttk.Window):
             logger.debug(message)
         self.statusbar_text.set(message)
         self.update()
-
-    def show_sub_container(self) -> None:
-        self.sub_container.pack(fill=tk.BOTH, expand=True)
-
-    def show_status_bar(self) -> None:
-        self.statusbar.pack(anchor=tk.W, side=tk.BOTTOM, fill=tk.X)
 
     @staticmethod
     def choose_color(button_to_modify: tk.Button, color_value_type: str = "hex"):
@@ -1692,7 +1686,6 @@ class bethini_app(ttk.Window):
                 self.tab_dictionary[each_tab]["TkFrameForTab"] = ttk.Frame(self.sub_container)
                 self.sub_container.add(self.tab_dictionary[each_tab]["TkFrameForTab"], text=self.tab_dictionary[each_tab]["Name"], image=self.tab_dictionary[each_tab]["TkPhotoImageForTab"], compound=tk.LEFT)
 
-
             self.label_frames_for_tab(each_tab)
 
         self.stop_progress()
@@ -1701,9 +1694,7 @@ class bethini_app(ttk.Window):
         self.start_progress()
         self.bindTkVars()
 
-        # self.theCanvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        self.show_sub_container()
-        # self.showStatusBar()
+        self.sub_container.pack(fill=tk.BOTH, expand=True)
         self.stop_progress()
         self.sme("Loading complete.")
 
@@ -1727,7 +1718,6 @@ class bethini_app(ttk.Window):
         self.stop_progress()
 
     def dependents(self) -> None:
-        # self.dependent_settings_dictionary
         for each_setting in self.dependent_settings_dictionary:
             for masterSetting in self.dependent_settings_dictionary[each_setting]:
 
@@ -1851,7 +1841,7 @@ class bethini_app(ttk.Window):
 
         return settingValues
 
-def on_closing(root) -> None:
+def on_closing(root: bethini_app) -> None:
     """Ask if the user wants to save INI files if any have been modified before quitting.
 
     This is bound to the main app window closing.
@@ -1913,6 +1903,7 @@ def open_ini(location: str, ini: str):
             open_ini_id += 1
             if open_ini_location[each_location]["at"] == location:
                 return open_ini_location[each_location].get("object")
+
         # If the location is not found, add it
         open_ini_id += 1
         open_ini_id_str = str(open_ini_id)
@@ -1921,6 +1912,7 @@ def open_ini(location: str, ini: str):
             }
         open_inis[ini]["located"][open_ini_id_str]["object"] = ModifyINI(Path(location) / ini)
         return open_inis[ini]["located"][open_ini_id_str]["object"]
+
     # If the ini has not been opened before
     open_ini_id_str = "1"
     open_inis[ini] = {
