@@ -40,13 +40,7 @@ class AppName:
         of the given ini file.
         """
 
-        if not ini:
-            return ""
-        ini_setting = self.bethini["INIs"].get(ini)
-        if ini_setting is None:
-            msg = f"Unknown INI: {ini}"
-            raise KeyError(msg)
-        return ini_setting
+        return self.bethini["INIs"].get(ini, "") if ini else ""
 
 
     def get_setting_values(self) -> dict[Any, Any]:
