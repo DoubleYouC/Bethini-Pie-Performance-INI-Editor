@@ -105,7 +105,7 @@ my_app_name = "Bethini Pie"
 my_app_short_name = "Bethini"
 
 def set_theme(style_object: ttk.Style, theme_name: str) -> None:
-    """ Set the application theme."""
+    """Set the application theme."""
 
     style_object.theme_use(theme_name)
     style_object.configure("choose_game_button.TButton", font=("Segoe UI", 14))
@@ -449,7 +449,7 @@ class bethini_app(ttk.Window):
             app_config.assign_setting_value("General","sAppName", game)
             from_choose_game_window = True
 
-        tk.Tk.wm_title(self,f"{my_app_name} {version} - {game}")
+        self.wm_title(f"{my_app_name} {version} - {game}")
 
         # #############
         # App globals
@@ -715,17 +715,23 @@ class bethini_app(ttk.Window):
                     self.sme(f"No section {target_section} exists for {target_setting} in {the_target_ini}.")
 
     def create_tab_image(self, each_tab) -> None:
+        icon_path = Path.cwd() / f"icons/{self.tab_dictionary[each_tab]['Name']}.png"
         try:
-            icon_path = Path.cwd() / "icons" / f"{self.tab_dictionary[each_tab]["Name"]}.png"
-            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file=icon_path, height=16, width=16)
+            if not icon_path.is_file():
+                icon_path = icon_path.with_name("Blank.png")
+                if not icon_path.is_file():
+                    self.sme(f"No icon for tab '{each_tab}'")
+                    tab_icon = tk.PhotoImage(data=Icon.warning)
+                    return
+
+            tab_icon = tk.PhotoImage(file=icon_path, height=16, width=16)
+
         except tk.TclError as e:
-            self.sme(f"No image for tab '{each_tab}': {e}", exception=e)
-            icon_path = icon_path.with_name("Blank.png")
-            try:
-                self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file=icon_path)
-            except tk.TclError as e:
-                self.sme(f"Failed to load blank icon at {icon_path}\n\n{e}", exception=e)
-                self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(data=Icon.warning)
+            self.sme(f"Failed to load icon for tab '{each_tab}':\n{icon_path}", exception=e)
+            tab_icon = tk.PhotoImage(data=Icon.warning)
+
+        finally:
+            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tab_icon
 
     def label_frames_for_tab(self, each_tab) -> None:
         the_dict = self.tab_dictionary[each_tab]
@@ -1967,9 +1973,8 @@ if __name__ == "__main__":
 
     # Start the app class
 
-    window = bethini_app(themename=theme, iconphoto=(Path("Icons") / "Icon.png"))
+    window = bethini_app(themename=theme, iconphoto=Path("Icons/Icon.png"), minsize=(400, 200))
     window.choose_game()
-    window.minsize(400,200)
 
     window.protocol("WM_DELETE_WINDOW", lambda: on_closing(window))
     window.mainloop()
