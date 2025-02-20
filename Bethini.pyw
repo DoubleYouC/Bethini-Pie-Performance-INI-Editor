@@ -18,7 +18,7 @@ from operator import eq, ge, gt, le, lt, ne
 from pathlib import Path
 from shutil import copyfile
 from tkinter import colorchooser, messagebox, simpledialog
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import ttkbootstrap as ttk
 from simpleeval import simple_eval
@@ -1770,41 +1770,28 @@ class bethini_app(ttk.Window):
                     "setToOff": set_to_off
                     }
 
-    def validate(self, valueChangedTo, _valueWas, validate) -> bool:
-        badValue = f"'{valueChangedTo}' is an invalid value for this option."
-        if validate == "integer":
-            try:
+    def validate(self, valueChangedTo: str, _valueWas: str, validate: Literal["integer", "whole", "counting", "float"]) -> bool:
+        try:
+            if validate == "integer":
                 if not valueChangedTo or str(abs(int(valueChangedTo))).isdigit():
                     return True
-            except:
-                pass
-            self.sme(badValue)
-            return False
 
-        if validate == "whole":
-            if not valueChangedTo or valueChangedTo.isdigit():
+            elif validate == "float" and (not valueChangedTo or isinstance(float(valueChangedTo), float)):
                 return True
-            self.sme(badValue)
-            return False
 
-        if validate == "counting":
-            if valueChangedTo == "0":
-                self.sme(badValue)
-                return False
-            if not valueChangedTo or valueChangedTo.isdigit():
-                return True
-            self.sme(badValue)
-            return False
+        except ValueError:
+            pass
 
-        if validate == "float":
-            if not valueChangedTo:
+        else:
+            if validate == "whole":
+                if not valueChangedTo or valueChangedTo.isdigit():
+                    return True
+
+            elif validate == "counting" and valueChangedTo != "0" and (not valueChangedTo or valueChangedTo.isdigit()):
                 return True
-            try:
-                float(valueChangedTo)
-            except:
-                self.sme(badValue)
-                return False
-        return True
+
+        self.sme(f"'{valueChangedTo}' is an invalid value for this option.")
+        return False
 
     @staticmethod
     def getINILocation(ini_name: str):
