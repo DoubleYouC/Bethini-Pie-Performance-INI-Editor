@@ -32,7 +32,7 @@ class ModifyINI:
         self.ini_to_manage = ini_to_manage
         self.config = customConfigParser()
         if preserve_case:
-            self.config.optionxform = lambda option: option
+            self.config.optionxform = lambda optionstr: optionstr
         logger.info(f"Successfully read {self.config.read(self.ini_to_manage)}")
 
         self.case_insensitive_config = customConfigParser()
