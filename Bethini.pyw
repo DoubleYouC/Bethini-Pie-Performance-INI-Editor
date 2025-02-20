@@ -382,7 +382,7 @@ class bethini_app(ttk.Window):
 
             # Iterates through the dictionary and makes a formatted string to append to the bottom of the tooltip description.
             tooltip_INI_targets = ""
-            for iterator, target_ini in enumerate(settings_location_dict):
+            for iterator, target_ini in enumerate(settings_location_dict, start=1):
                 if iterator > 1:
                     tooltip_INI_targets += "\n"
                 tooltip_INI_targets += str(target_ini)
@@ -481,7 +481,7 @@ class bethini_app(ttk.Window):
                     tk_frame.destroy()
 
         self.tab_dictionary = {}
-        for tab_number, tab in enumerate(APP.bethini["displayTabs"]):
+        for tab_number, tab in enumerate(APP.bethini["displayTabs"], start=1):
             self.tab_dictionary[f"Page{tab_number}"] = {"Name":tab}
 
         self.setup_dictionary = {}
@@ -731,7 +731,7 @@ class bethini_app(ttk.Window):
     def label_frames_for_tab(self, each_tab) -> None:
         the_dict = self.tab_dictionary[each_tab]
         the_dict["LabelFrames"] = {}
-        for label_frame_number, label_frame in enumerate(APP.bethini["displayTabs"][the_dict["Name"]]):
+        for label_frame_number, label_frame in enumerate(APP.bethini["displayTabs"][the_dict["Name"]], start=1):
             the_label_frame=f"LabelFrame{label_frame_number}"
             the_dict["LabelFrames"][the_label_frame] = {"Name":label_frame}
             if "NoLabelFrame" not in label_frame:
@@ -751,7 +751,7 @@ class bethini_app(ttk.Window):
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"] = {}
         number_of_vertically_stacked_settings = int(APP.number_of_vertically_stacked_settings(self.tab_dictionary[each_tab]["Name"], label_frame))
 
-        for setting_number, each_setting in enumerate(APP.bethini["displayTabs"][self.tab_dictionary[each_tab]["Name"]][label_frame]["Settings"]):
+        for setting_number, each_setting in enumerate(APP.bethini["displayTabs"][self.tab_dictionary[each_tab]["Name"]][label_frame]["Settings"], start=1):
             on_frame = f"SettingFrame{math.ceil(setting_number / number_of_vertically_stacked_settings) - 1}"
             if on_frame not in self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"]:
                 self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame] = {}
