@@ -1779,16 +1779,15 @@ class bethini_app(ttk.Window):
             elif validate == "float" and (not valueChangedTo or isinstance(float(valueChangedTo), float)):
                 return True
 
-        except ValueError:
-            pass
-
-        else:
-            if validate == "whole":
+            elif validate == "whole":
                 if not valueChangedTo or valueChangedTo.isdigit():
                     return True
 
             elif validate == "counting" and valueChangedTo != "0" and (not valueChangedTo or valueChangedTo.isdigit()):
                 return True
+
+        except ValueError:
+            pass
 
         self.sme(f"'{valueChangedTo}' is an invalid value for this option.")
         return False
