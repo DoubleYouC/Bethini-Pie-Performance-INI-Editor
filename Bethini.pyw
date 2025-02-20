@@ -133,6 +133,9 @@ class bethini_app(ttk.Window):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(self, *args, **kwargs)
 
+        CustomFunctions.screenwidth = self.winfo_screenwidth()
+        CustomFunctions.screenheight = self.winfo_screenheight()
+
         # Variables
         self.setup_dictionary = {}
         self.tab_dictionary: dict[str, dict[str, Any]] = {}  # Temporary Any annotation to replace invalid type "tab"

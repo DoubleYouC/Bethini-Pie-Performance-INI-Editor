@@ -136,6 +136,10 @@ class Info:
 
 class CustomFunctions:
 
+    # Placeholders to be set when bethini_app initializes
+    screenwidth = 0
+    screenheight = 0
+
     @staticmethod
     def restore_backup(game_name: str, choice: str) -> None:
         if choice in {"Choose...", "None found"}:
@@ -171,10 +175,8 @@ class CustomFunctions:
     @staticmethod
     def getCurrentResolution(_game_name: str) -> str:
         # _game_name is required for CustomFunction calls
-        root = tk.Tk()
-        root.withdraw()
-        WIDTH, HEIGHT = root.winfo_screenwidth(), root.winfo_screenheight()
-        return f"{WIDTH}x{HEIGHT}"
+
+        return f"{CustomFunctions.screenwidth}x{CustomFunctions.screenheight}"
 
     @staticmethod
     def getBethesdaGameFolder(game_name: str):
