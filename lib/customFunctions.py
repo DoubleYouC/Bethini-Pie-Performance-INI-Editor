@@ -138,49 +138,23 @@ class CustomFunctions:
 
     @staticmethod
     def restore_backup(game_name: str, choice: str) -> None:
-        logger.info(f"Restoring backup from {choice}.")
-        app = AppName(game_name)
-        ini_files = app.what_ini_files_are_used()
-
-        ini_files_with_location = {}
-
-        Bethini_key = ModifyINI("Bethini.ini")
-
-        for ini in ini_files:
-            ini_files_with_location[ini] = app.inis(ini)
-
-        files_to_replace = {}
-        for ini, file_paths in ini_files_with_location.items():
-            ini_location = str(Bethini_key.get_value("Directories", file_paths))
-            file_to_replace = f"{ini_location}{ini}"
-            backup_file = Path(ini_location) / "Bethini Pie backups" / choice / ini
-            files_to_replace[ini] = {"InitialFile": file_to_replace,
-                                 "NewFile": backup_file}
-
         if choice in {"Choose...", "None found"}:
             return
 
-        # An example of filesToReplace
-        # {
-        #    "Skyrim.ini":
-        #        {
-        #            "InitialFile": "S:\\Documents\\My Games\\Skyrim Special Edition\\Skyrim.ini",
-        #            "NewFile": "S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\Skyrim.ini"
-        #        },
-        #    "SkyrimPrefs.ini":
-        #        {
-        #            "InitialFile": "S:\\Documents\\My Games\\Skyrim Special Edition\\SkyrimPrefs.ini",
-        #            "NewFile": "S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\SkyrimPrefs.ini"
-        #        }
-        # }
-        for file_paths in files_to_replace.values():
-            initial_file = file_paths.get("InitialFile")
-            new_file = file_paths.get("NewFile")
+        logger.info(f"Restoring backup from {choice}.")
+        app = AppName(game_name)
+        Bethini_key = ModifyINI("Bethini.ini")
+
+        for ini in app.what_ini_files_are_used():
+            ini_location = Path(Bethini_key.get_value("Directories", app.inis(ini)))
+            initial_file = ini_location / ini
+            new_file = ini_location / "Bethini Pie backups" / choice / ini
             try:
-                shutil.copyfile(f"{new_file}", f"{initial_file}")
-                logger.debug(f"{initial_file} was replaced with backup from {new_file}.")
+                shutil.copyfile(new_file, initial_file)
             except FileNotFoundError:
                 logger.error(f"Restoring {new_file} to {initial_file} failed due to {new_file} not existing.")
+            else:
+                logger.debug(f"{initial_file} was replaced with backup from {new_file}.")
 
     @staticmethod
     def getBackups(game_name: str) -> list[str]:
