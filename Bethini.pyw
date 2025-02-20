@@ -1,8 +1,8 @@
 #
-#This work is licensed under the
-#Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-#To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
-#or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+# This work is licensed under the
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+# To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+# or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 #
 
 import ast
@@ -40,12 +40,12 @@ from lib.customFunctions import (
 from lib.ModifyINI import ModifyINI
 from lib.tooltips import Hovertip
 
-#from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
-#This is for changing file read-only access via os.chmod(filename, S_IREAD,
-#S_IRGRP, #S_IROTH) Not currently used.
+# from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
+# This is for changing file read-only access via os.chmod(filename, S_IREAD,
+# S_IRGRP, #S_IROTH) Not currently used.
 
 # Configure Logging
-# TODO refactor usage of "the_backup_directory"
+# TODO Refactor usage of "the_backup_directory"
 LOG_DIR_DATE: str = f"{datetime.now().strftime("%Y %m-%b %d %a - %H.%M.%S")}"
 APP_LOG_DIR = Path.cwd() / "logs" / LOG_DIR_DATE
 APP_LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -62,7 +62,7 @@ logger.addHandler(_log_stdout)
 logger.info(f"Logging to '{APP_LOG_FILE}'")
 
 
-#This dictionary maps the operator modules to specific text.
+# This dictionary maps the operator modules to specific text.
 operator_dictionary = {
     "greater-than": gt,
     "greater-or-equal-than": ge,
@@ -100,18 +100,19 @@ tkinter_switch_dict = {
 types_without_label = ["Checkbutton", "preset", "radioPreset", "description"]
 types_packed_left = ["Dropdown", "Combobox", "Entry", "Spinbox", "Slider", "Color"]
 
-#Specify the name of the application.
+# Specify the name of the application.
 my_app_name = "Bethini Pie"
 my_app_short_name = "Bethini"
 
 def set_theme(style_object: ttk.Style, theme_name: str) -> None:
-    """ Sets the theme. """
+    """ Set the application theme."""
+
     style_object.theme_use(theme_name)
     style_object.configure("choose_game_button.TButton", font=("Segoe UI", 14))
     app_config.assign_setting_value("General", "sTheme", theme_name)
 
 class Scalar(ttk.Scale):
-    """ ttk.Scale with limited decimal places """
+    """A ttk.Scale with limited decimal places."""
 
     def __init__(self, *args, **kwargs) -> None:
         self.decimal_places = kwargs.pop("decimal_places")
@@ -127,13 +128,12 @@ class Scalar(ttk.Scale):
         self.chain(new_value)
 
 class bethini_app(ttk.Window):
-    #This is the main app, the glue that creates the GUI.
+    """This is the main app, the glue that creates the GUI."""
 
     def __init__(self, *args, **kwargs) -> None:
-        #You need args for lists and kwargs for dictionaries passed to tkinter
         ttk.Window.__init__(self, *args, **kwargs)
 
-        #variables
+        # Variables
         self.setup_dictionary = {}
         self.tab_dictionary: dict[str, dict[str, Any]] = {}  # Temporary Any annotation to replace invalid type "tab"
         self.setting_dictionary = {}
@@ -174,8 +174,7 @@ class bethini_app(ttk.Window):
             "TkSlider": self.slider_assign_value
             }
 
-        # ttk style overrides
-        self.s = ttk.Style()
+        self.style_override = ttk.Style()
 
         self.the_canvas = ttk.Canvas(self)
         self.hsbframeholder = ttk.Frame(self)
@@ -224,7 +223,7 @@ class bethini_app(ttk.Window):
         self.choose_game_tree.column("#0", width=0, stretch=tk.NO)
         self.choose_game_tree.column("Name", anchor=tk.W, width=300)
 
-        self.s.configure("choose_game_button.TButton", font=("Segoe UI", 14))
+        self.style_override.configure("choose_game_button.TButton", font=("Segoe UI", 14))
         self.choose_game_button = ttk.Button(self.choose_game_frame_2, text="Select Game", style="choose_game_button.TButton",
                                              command=lambda: self.choose_game_done(self.choose_game_tree.focus()))
 
@@ -240,7 +239,7 @@ class bethini_app(ttk.Window):
         self.theme_name = tk.StringVar(self)
         self.theme_dropdown = ttk.OptionMenu(self.preferences_frame,
                                              self.theme_name, app_config.get_value("General", "sTheme", "superhero"), *theme_names,
-                                             command=lambda t: set_theme(self.s, t))
+                                             command=lambda t: set_theme(self.style_override, t))
         self.theme_dropdown.var = self.theme_name
 
         self.choose_game_frame.pack(fill=tk.BOTH, expand=True)
@@ -300,30 +299,31 @@ class bethini_app(ttk.Window):
 
     @staticmethod
     def choose_color(button_to_modify: tk.Button, color_value_type: str = "hex"):
-        #This allows us to have our very convenient tkinter colorchooser dialog
-        #window modify a button
+        """This allows us to have our very convenient tkinter colorchooser dialog."""
+
+        # Window modify a button
         old_color = button_to_modify.var.get()
         new_alpha: int | None = None
-        #old_color is in format (255, 255, 255)
+        # old_color is in format (255, 255, 255)
         if color_value_type == "rgb":
             old_color = rgb_to_hex(ast.literal_eval(old_color))
         elif color_value_type == "rgba":
-            #(255, 255, 255, 170)
+            # (255, 255, 255, 170)
             old_color_original = ast.literal_eval(old_color)
             old_color_hex = rgba_to_hex(old_color_original)
-            #ffffffaa
+            # ffffffaa
             old_color = old_color_hex[0:7]
-            #ffffff
+            # ffffff
             alpha = old_color_original[3]
-            #170
+            # 170
             try:
                 new_alpha = simpledialog.askinteger("Alpha", "Alpha transparency (0 - 255):", initialvalue=alpha, minvalue = 0, maxvalue = 255)
                 logger.debug(f"New alpha: {new_alpha}")
             except:
                 new_alpha = alpha
         elif color_value_type == "rgb 1":
-            #"(1.0000, 1.0000, 1.0000)"
-            #(255, 255, 255)
+            # "(1.0000, 1.0000, 1.0000)"
+            # (255, 255, 255)
             old_color = tuple(int(float(i)*255) for i in ast.literal_eval(old_color))
         elif color_value_type == "decimal":
             old_color = rgb_to_hex(decimal_to_rgb(old_color))
@@ -345,8 +345,8 @@ class bethini_app(ttk.Window):
             new_color_tuple = tuple(new_color_list)
             button_to_modify.var.set(str(new_color_tuple).replace(" ",""))
         elif color_value_type == "rgb 1":
-            #(255, 255, 255)
-            #"(1.0000, 1.0000, 1.0000)"
+            # (255, 255, 255)
+            # "(1.0000, 1.0000, 1.0000)"
             the_rgb = str(tuple(round(i/255,4) for i in hex_to_rgb(new_color)))
             button_to_modify.var.set(the_rgb)
         elif color_value_type == "decimal":
@@ -360,18 +360,18 @@ class bethini_app(ttk.Window):
     def tooltip(self, each_tab, the_label_frame, on_frame, the_setting, id_) -> None:
         """Sets the tooltips."""
 
-        #Fectches the tooltip description.
+        # Fectches the tooltip description.
         tooltip_description: str = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("tooltip", "No description available.")
 
         tooltip_wrap_length: int = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("tooltip_wrap_length", 200)
 
-        #Checks for INI settings specified, and adds them to the bottom of the tooltip if found.
+        # Checks for INI settings specified, and adds them to the bottom of the tooltip if found.
         target_ini_files: list[str] = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("targetINIs")
         if target_ini_files: #If there are INI settings specified
             target_sections: list[str] = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("targetSections")
             target_settings: list[str] = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("settings")
 
-            #Place INI settings into a dictionary to filter out duplicate target INI files and sections.
+            # Place INI settings into a dictionary to filter out duplicate target INI files and sections.
             settings_location_dict = {}
             for n in range(len(target_ini_files)):
                 if target_ini_files[n] not in settings_location_dict:
@@ -380,7 +380,7 @@ class bethini_app(ttk.Window):
                     settings_location_dict[target_ini_files[n]][target_sections[n]] = []
                 settings_location_dict[target_ini_files[n]][target_sections[n]].append(target_settings[n])
 
-            #Iterates through the dictionary and makes a formatted string to append to the bottom of the tooltip description.
+            # Iterates through the dictionary and makes a formatted string to append to the bottom of the tooltip description.
             tooltip_INI_targets = ""
             for iterator, target_ini in enumerate(settings_location_dict):
                 if iterator > 1:
@@ -394,7 +394,7 @@ class bethini_app(ttk.Window):
                 if iterator != len(settings_location_dict):
                     tooltip_INI_targets += "\n"
 
-            #Appends our formatted string of INI settings to the bottom of the tooltip description.
+            # Appends our formatted string of INI settings to the bottom of the tooltip description.
             tooltip_text = f"{tooltip_description}\n\n{tooltip_INI_targets}"
         else: #If there are no INI settings specified, only the tooltip description will be used.
             tooltip_text = tooltip_description
@@ -422,7 +422,7 @@ class bethini_app(ttk.Window):
                 # By calling the global variable GAME_NAME before it has been created,
                 # we raise an exception to force the app/game to be chosen only at startup.
                 GAME_NAME  # type: ignore[reportUnusedExpression] # noqa: B018
-            #raise Exception("Forcing you to choose")
+            # raise Exception("Forcing you to choose")
             self.choose_game_done(choose_game_var)
         except NameError:
             self.sme("Choose game/application.")
@@ -452,9 +452,9 @@ class bethini_app(ttk.Window):
 
         tk.Tk.wm_title(self,f"{my_app_name} {version} - {game}")
 
-        ##############
-        # app globals
-        ##############
+        # #############
+        # App globals
+        # #############
 
         global APP
         APP = AppName(game)
@@ -464,8 +464,8 @@ class bethini_app(ttk.Window):
             assert isinstance(GAME_NAME, str)
         self.sme(f"Application/game is {GAME_NAME}")
 
-        #The self.tab_dictionary lists all the tabs, which
-        #is variable, based upon the tabs listed in the associated Bethini.json
+        # The self.tab_dictionary lists all the tabs, which
+        # is variable, based upon the tabs listed in the associated Bethini.json
 
         for tab in self.tab_dictionary:
             if self.tab_dictionary[tab]["Name"] == "Setup":
@@ -501,7 +501,7 @@ class bethini_app(ttk.Window):
             self.quit()
             sys.exit(1)
 
-        self.menu(self.s)
+        self.menu(self.style_override)
 
 
     def menu(self, style_object: ttk.Style) -> None:
@@ -511,7 +511,7 @@ class bethini_app(ttk.Window):
         filemenu = tk.Menu(menubar, tearoff=False)
         filemenu.add_command(label="Save", command = self.save_ini_files)
         filemenu.add_separator()
-        filemenu.add_command(label="Choose game", command = lambda: self.choose_game(forced=True))
+        filemenu.add_command(label="Choose Game", command = lambda: self.choose_game(forced=True))
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command= lambda: on_closing(self))
 
@@ -566,7 +566,7 @@ class bethini_app(ttk.Window):
         self.updateValues()
 
     def save_ini_files(self, _event: "tk.Event[tk.Misc] | None" = None) -> None:
-        #self.openINIs = {
+        # self.openINIs = {
         #    my_app_config : {
         #        "located": {
         #            "1": {
@@ -597,7 +597,7 @@ class bethini_app(ttk.Window):
                     self.sme(f"{each_ini} has not been modified, so there is no reason to resave it.")
                     continue
                 if messagebox.askyesno(f"Save {each_ini}", f"Do you want to save {this_location / each_ini}?"):
-                    #we need to make a backup of each save before actually saving.
+                    # We need to make a backup of each save before actually saving.
                     do_first_time_backup = remove_excess_directory_files(this_location / f"{my_app_name} backups",
                                                                     int(app_config.get_value("General", "iMaxBackups", "-1")),
                                                                     files_to_remove)
@@ -668,8 +668,8 @@ class bethini_app(ttk.Window):
                                 if ";" in each_setting or "#" in each_setting:
                                     self.sme(f"{each_setting}:{section} will be preserved, as it is a comment.")
                                 elif not APP.does_setting_exist(each_ini, section, each_setting):
-                                    #sm(this_ini_object.remove_setting(section, each_setting))
-                                    #Disabling the removal of unknown settings.
+                                    # sm(this_ini_object.remove_setting(section, each_setting))
+                                    # Disabling the removal of unknown settings.
                                     self.sme(f"{each_setting}:{section} {each_ini} appears to be invalid.")
                                     if this_ini_object.get_settings(section) == []:
                                         this_ini_object.remove_section(section)
@@ -818,7 +818,8 @@ class bethini_app(ttk.Window):
             self.dependent_settings_dictionary[each_setting] = dependent_settings
 
     def checkbox(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
-        #creates the Checkbutton widget
+        """Create a ttk.Checkbutton."""
+
         id_ = "TkCheckbutton"
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["tk_var"] = tk.StringVar(self)
         on_value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("Onvalue")
@@ -838,7 +839,8 @@ class bethini_app(ttk.Window):
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
     def preset(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
-        #creates a preset button
+        """Create a Preset ttk.Button."""
+
         id_ = "TkPresetButton"
 
         preset_id = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("preset id")
@@ -849,7 +851,8 @@ class bethini_app(ttk.Window):
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
 
     def radio_preset(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
-        #creates the radio preset button
+        """Create a Preset Radiobutton."""
+
         id_ = "TkRadioPreset"
         value = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("value")
         self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting][id_] = ttk.Radiobutton(self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]["TkFinalSettingFrame"],
@@ -864,13 +867,14 @@ class bethini_app(ttk.Window):
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
     def dropdown(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
-        #creates the OptionMenu widget
+        """Create a ttk.OptionMenu."""
+
         id_ = "TkOptionMenu"
 
         options = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("choices")
 
-        #custom functions allow us to auto-detect certain
-        #predefined options that can then easily be selected.
+        # Custom functions allow us to auto-detect certain
+        # predefined options that can then easily be selected.
 
         if isinstance(options, str):
             if "FUNC" in options:
@@ -914,6 +918,8 @@ class bethini_app(ttk.Window):
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
     def combobox(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
+        """Create a ttk.Combobox."""
+
         id_ = "TkCombobox"
         options = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("choices")
         width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("width")
@@ -942,7 +948,8 @@ class bethini_app(ttk.Window):
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
     def entry(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
-        #creates the Entry widget
+        """Create a ttk.Entry."""
+
         id_ = "TkEntry"
         entry_width = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("entry_width")
         validate = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("validate")
@@ -1050,7 +1057,7 @@ class bethini_app(ttk.Window):
         self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
 
     def color(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
-        #chooseColor(colorToChange, buttonToModify)
+        # chooseColor(colorToChange, buttonToModify)
         id_ = "TkColor"
 
         color_value_type = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("colorValueType")
@@ -1257,7 +1264,7 @@ class bethini_app(ttk.Window):
                 new_color = this_value
             elif color_value_type == "decimal":
                 this_value = setting_value[0]
-                #convert decimal value to hex
+                # Convert decimal value to hex
                 new_color = rgb_to_hex(decimal_to_rgb(setting_value[0]))
             elif color_value_type == "rgb":
                 rgb_type = self.setting_dictionary[each_setting].get("rgbType")
@@ -1339,7 +1346,7 @@ class bethini_app(ttk.Window):
         tk_var = self.setting_dictionary[each_setting].get("tk_var")
 
         this_value = tk_var.get()
-        #this_value is whatever the state of the on_value/off_value is... not a simple boolean
+        # This_value is whatever the state of the on_value/off_value is... not a simple boolean
 
 
         targetINIs = self.setting_dictionary[each_setting].get("targetINIs")
@@ -1363,7 +1370,7 @@ class bethini_app(ttk.Window):
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
                 the_target_ini = open_ini(ini_location, targetINIs[n])
-                #1
+                # 1
                 if this_value in (on_value, off_value):
                     if type(this_value[n]) is list:
                         if setting_value[n] in this_value[n]:
@@ -1395,7 +1402,7 @@ class bethini_app(ttk.Window):
         setting_choices = self.setting_dictionary[each_setting].get("settingChoices")
         delimiter = self.setting_dictionary[each_setting].get("delimiter")
         file_format = self.setting_dictionary[each_setting].get("fileFormat")
-        #decimal_places = self.setting_dictionary[each_setting].get("decimal places")
+        # decimal_places = self.setting_dictionary[each_setting].get("decimal places")
         partial = self.setting_dictionary[each_setting].get("partial")
         theValueStr = ""
         if partial:
@@ -1419,7 +1426,7 @@ class bethini_app(ttk.Window):
                 theValue = ""
                 ini_location = self.getINILocation(targetINIs[n])
                 the_target_ini = open_ini(ini_location, targetINIs[n])
-                #1280x720
+                # 1280x720
                 if this_value in {"Manual...", "Browse..."}:
                     theValue = ""
                 elif delimiter:
@@ -1477,7 +1484,6 @@ class bethini_app(ttk.Window):
             for each_partial_setting in partial:
                 if each_partial_setting == each_setting:
                     theValueStr += "{}"
-                #self.widget_type_switcher(each_partial_setting)
                 elif self.setting_dictionary[each_partial_setting]["valueSet"]:
                     theValueStr += self.setting_dictionary[each_partial_setting]["tk_var"].get()
                 else:
@@ -1491,7 +1497,6 @@ class bethini_app(ttk.Window):
             theSettings = self.setting_dictionary[each_setting].get("settings")
 
             formula = self.setting_dictionary[each_setting].get("formula")
-            #decimal_places = self.setting_dictionary[each_setting].get("decimal places")
 
             for n in range(len(targetINIs)):
                 ini_location = self.getINILocation(targetINIs[n])
@@ -1503,8 +1508,6 @@ class bethini_app(ttk.Window):
                         this_value = str(round(simple_eval(formulaValue),8))
                     except:
                         self.sme(f"Failed to evaluate formula value for {this_value}.")
-                #if decimal_places:
-                #    this_value = round(this_value,int(decimal_places))
 
                 if partial:
                     this_value = theValueStr.format(this_value)
@@ -1577,7 +1580,6 @@ class bethini_app(ttk.Window):
                         self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def createTabs(self, *, from_choose_game_window: bool=False) -> None:
-
         # Preview Window
         global PREVIEW_WINDOW
         PREVIEW_WINDOW = ttk.Toplevel("Preview")
@@ -1590,8 +1592,8 @@ class bethini_app(ttk.Window):
         PREVIEW_WINDOW.withdraw()
 
         for each_tab in self.tab_dictionary:
-            #each_tab is Page1, Page2, etc.
-            #self.tab_dictionary[each_tab]["Name"] is the name of each tab
+            # each_tab is Page1, Page2, etc.
+            # self.tab_dictionary[each_tab]["Name"] is the name of each tab
 
             self.create_tab_image(each_tab)
             if self.tab_dictionary[each_tab]["Name"] == "Setup":
@@ -1634,9 +1636,9 @@ class bethini_app(ttk.Window):
         self.start_progress()
         self.bindTkVars()
 
-        #self.theCanvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        # self.theCanvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.show_sub_container()
-        #self.showStatusBar()
+        # self.showStatusBar()
         self.stop_progress()
         self.sme("Loading complete.")
 
@@ -1660,7 +1662,7 @@ class bethini_app(ttk.Window):
         self.stop_progress()
 
     def dependents(self) -> None:
-        #self.dependent_settings_dictionary
+        # self.dependent_settings_dictionary
         for each_setting in self.dependent_settings_dictionary:
             for masterSetting in self.dependent_settings_dictionary[each_setting]:
 
@@ -1735,38 +1737,28 @@ class bethini_app(ttk.Window):
         return True
 
     @staticmethod
-        return "" if not ini_location else app_config.get_value("Directories", ini_location)
     def getINILocation(ini_name: str):
         ini_location = APP.inis(ini_name)
+        return app_config.get_value("Directories", ini_location) if ini_location else ""
 
     def get_setting_values(self, targetINIs, targetSections, theSettings, setting_choices=None, delimiter=None):
-        #This function returns the current value of the each_setting.
-
-        #What it needs:
-        #targetINIs
-        #settings
-        #targetSections
-        #setting_choices
-        #delimiter
+        """Return the current values of a setting from the given INIs."""
 
         settingValues = []
-        #targetINIs = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get("targetINIs")
         if targetINIs:
             ININumber = -1
             for INI in targetINIs:
                 ININumber += 1
-                #Get the Bethini.ini key for the location of the target INI
+                # Get the Bethini.ini key for the location of the target INI
                 ini_location = self.getINILocation(INI)
                 if ini_location is not None:
-                    #If the INI location is known.
+                    # If the INI location is known.
 
                     currentSetting = theSettings[ININumber]
                     currentSection = targetSections[ININumber]
 
                     # This looks for a default value in the settings.json
                     defaultValue = None if my_app_config == INI else APP.setting_values[currentSetting]["default"]
-
-                    #target_ini = ModifyINI(str(ini_location) + str(INI))
 
                     target_ini = open_ini(str(ini_location), str(INI))
                     try:
@@ -1776,15 +1768,13 @@ class bethini_app(ttk.Window):
                         value = defaultValue
                     settingValues.append(value)
             if settingValues != []:
-                #Check to see if the settings correspond with specified
-                #each_setting choices.
+                # Check to see if the settings correspond with specified each_setting choices.
                 if setting_choices:
                     for choice in setting_choices:
                         if setting_choices[choice] == settingValues:
                             settingValues = [choice]
 
-                #Check to see if there are multiple values separated by a
-                #delimiter
+                # Check to see if there are multiple values separated by a delimiter
                 if delimiter:
                     delimitedValue = ""
                     for n in range(len(settingValues)):
@@ -1797,7 +1787,11 @@ class bethini_app(ttk.Window):
         return settingValues
 
 def on_closing(root) -> None:
-    """Initialized upon closing the app. Asks if the user wants to save INI files if any INI files have been modified before quitting."""
+    """Ask if the user wants to save INI files if any have been modified before quitting.
+
+    This is bound to the main app window closing.
+    """
+
     if messagebox.askyesno("Quit?", "Do you want to quit?"):
         if app_config.has_been_modified:
             app_config.save_ini_file(sort=True)
@@ -1805,11 +1799,13 @@ def on_closing(root) -> None:
         root.quit()
 
 def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_remove: list[str]) -> bool:
-    """Removes excess logs/backups.
-    directory: the directory to remove files from
-    max_to_keep: the maximum amount of directories that will be excluded from removal
-    files_to_remove: list of files that will be removed
+    """Remove excess logs or backups.
+
+    directory: The directory to remove files from.
+    max_to_keep: The maximum amount of directories that will be excluded from removal.
+    files_to_remove: List of files that will be removed.
     """
+
     try:
         subdirectories = [d for d in directory.iterdir() if d.name.lower() != "first-time-backup" and d.is_dir()]
     except OSError as e:
@@ -1842,7 +1838,8 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
     return False
 
 def open_ini(location: str, ini: str):
-    """Given the location and name of an INI file, opens the INI object and stores it in open_inis."""
+    """Open the INI with the given location and name and store it in open_inis."""
+
     open_ini = open_inis.get(ini)
     if open_ini:
         open_ini_location = open_inis[ini]["located"]
@@ -1851,7 +1848,7 @@ def open_ini(location: str, ini: str):
             open_ini_id += 1
             if open_ini_location[each_location]["at"] == location:
                 return open_ini_location[each_location].get("object")
-        #if the location is not found, add it
+        # If the location is not found, add it
         open_ini_id += 1
         open_ini_id_str = str(open_ini_id)
         open_inis[ini]["located"][open_ini_id_str] = {
@@ -1859,7 +1856,7 @@ def open_ini(location: str, ini: str):
             }
         open_inis[ini]["located"][open_ini_id_str]["object"] = ModifyINI(Path(location) / ini)
         return open_inis[ini]["located"][open_ini_id_str]["object"]
-    #if the ini has not been opened before
+    # If the ini has not been opened before
     open_ini_id_str = "1"
     open_inis[ini] = {
         "located": {
@@ -1876,23 +1873,23 @@ def open_ini(location: str, ini: str):
 
 if __name__ == "__main__":
 
-    #Get app config settings.
+    # Get app config settings.
     my_app_config = f"{my_app_short_name}.ini"
     app_config = ModifyINI(my_app_config)
     iMaxLogs = app_config.get_value("General", "iMaxLogs", "5")
     app_config.assign_setting_value("General", "iMaxLogs", iMaxLogs)
     app_config.assign_setting_value("General", "iMaxBackups", app_config.get_value("General", "iMaxBackups", "5"))
 
-    #theme
+    # Theme
     theme = app_config.get_value("General", "sTheme", default="superhero")
     if theme not in standThemes.STANDARD_THEMES:
         theme="superhero"
     app_config.assign_setting_value("General", "sTheme", theme)
 
-    #Remove excess log files.
+    # Remove excess log files.
     remove_excess_directory_files(Path.cwd() / "logs", int(iMaxLogs), ["log.log"])
 
-    #Initialize open_inis dictionary to store list of opened INI files in.
+    # Initialize open_inis dictionary to store list of opened INI files in.
     open_inis = {
         my_app_config: {
             "located": {
@@ -1904,14 +1901,14 @@ if __name__ == "__main__":
         }
     }
 
-    #Get version
+    # Get version
     try:
         with Path("changelog.txt").open(encoding="utf-8") as changelog:
             version = changelog.readline().replace("\n","")
     except FileNotFoundError:
         version = ""
 
-    #Start the app class
+    # Start the app class
 
     window = bethini_app(themename=theme, iconphoto=(Path("Icons") / "Icon.png"))
     window.choose_game()

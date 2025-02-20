@@ -13,6 +13,7 @@ if __name__ == "__main__":
 
 class Hovertip(OnHoverTooltipBase):
     """A tooltip that pops up when a mouse hovers over an anchor widget."""
+
     def __init__(self, anchor_widget, text, preview_list, wrap_length=250) -> None:
         """Create a text tooltip with a mouse hover delay.
 
@@ -23,6 +24,7 @@ class Hovertip(OnHoverTooltipBase):
         e.g. after hovering over the anchor widget with the mouse for enough
         time.
         """
+
         super().__init__(anchor_widget, hover_delay=500)
         self.text = text
         self.wrap_length = wrap_length
@@ -40,7 +42,8 @@ class Hovertip(OnHoverTooltipBase):
         label.pack()
 
     def show_preview(self, _event=None) -> None:
-        """Displays the preview window"""
+        """Displays the preview window."""
+
         for widget in self.preview_frame.winfo_children():
             widget.destroy()
         self.preview_image = None
@@ -54,6 +57,7 @@ class Hovertip(OnHoverTooltipBase):
 
     def show_photo(self) -> None:
         """Packs the image in the preview window."""
+
         self.preview_image = ImageTk.PhotoImage(Image.open(self.photo_for_setting))
         preview_label = ttk.Label(self.preview_frame, image=self.preview_image)
         preview_label.pack(anchor=tk.NW)

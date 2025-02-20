@@ -1,8 +1,8 @@
 #
-#This work is licensed under the
-#Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-#To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
-#or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+# This work is licensed under the
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+# To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+# or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 #
 
 import ctypes.wintypes
@@ -160,8 +160,8 @@ class CustomFunctions:
         if choice in {"Choose...", "None found"}:
             return
 
-        #An example of filesToReplace
-        #{
+        # An example of filesToReplace
+        # {
         #    "Skyrim.ini":
         #        {
         #            "InitialFile": "S:\\Documents\\My Games\\Skyrim Special Edition\\Skyrim.ini",
@@ -172,7 +172,7 @@ class CustomFunctions:
         #            "InitialFile": "S:\\Documents\\My Games\\Skyrim Special Edition\\SkyrimPrefs.ini",
         #            "NewFile": "S:\\Documents\\My Games\\Skyrim Special Edition\\Bethini Pie backups\\First-Time-Backup\\SkyrimPrefs.ini"
         #        }
-        #}
+        # }
         for file_paths in files_to_replace.values():
             initial_file = file_paths.get("InitialFile")
             new_file = file_paths.get("NewFile")

@@ -1,7 +1,9 @@
-"""This work is licensed under the
-Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
-To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
-or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA."""
+#
+# This work is licensed under the
+# Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+# To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/4.0/
+# or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+#
 
 import json
 import sys
@@ -14,8 +16,7 @@ if __name__ == "__main__":
 
 
 class AppName:
-    """This class handles the different apps/games supported, which are placed in
-    the apps folder."""
+    """This class handles the different apps/games supported, which are placed in the apps folder."""
 
     def __init__(self, appname: str) -> None:
         with (Path.cwd() / "apps" / appname / "settings.json").open(encoding="utf-8") as app_json:
@@ -31,11 +32,14 @@ class AppName:
 
     def what_ini_files_are_used(self) -> list[str]:
         """Returns a list of INI files used, with Bethini.ini removed from the list."""
+
         return [ini for ini in self.bethini["INIs"] if ini != "Bethini.ini"]
 
     def inis(self, ini: str) -> str | Literal[""]:
         """Returns the INI settings name used in Bethini.ini to store the location
-        of the given ini file."""
+        of the given ini file.
+        """
+
         if not ini:
             return ""
         ini_setting = self.bethini["INIs"].get(ini)
@@ -47,6 +51,7 @@ class AppName:
 
     def get_setting_values(self) -> dict[Any, Any]:
         """Returns a dictionary listing all the different value types for every setting."""
+
         setting_values = {}
         for ini_setting in self.data["iniValues"]:
             setting_values[ini_setting["name"]] = {}
@@ -60,7 +65,9 @@ class AppName:
 
     def get_ini_section_setting_dict(self) -> dict[Any, Any]:
         """Returns a dictionary listing all the INI files with their
-        sections and settings as specified in settings.json"""
+        sections and settings as specified in settings.json
+        """
+
         ini_section_setting_dict = {}
         for ini_setting in self.data["iniValues"]:
             ini = ini_setting.get("ini", self.default_ini)
@@ -68,7 +75,7 @@ class AppName:
             setting = ini_setting.get("name")
             if ini not in list(ini_section_setting_dict.keys()):
                 ini_section_setting_dict[ini] = {
-                    section: [setting]
+                    section: [setting],
                     }
             elif section not in list(ini_section_setting_dict[ini].keys()):
                 ini_section_setting_dict[ini][section] = [setting]
@@ -78,8 +85,8 @@ class AppName:
         return ini_section_setting_dict
 
     def does_setting_exist(self, ini, section, setting) -> bool:
-        """Checks if the given setting for the given
-        section and ini file exists in settings.json."""
+        """Checks if the given setting for the given section and ini file exists in settings.json."""
+
         section = section.lower()
         try:
             the_section_list = [x.lower() for x in self.ini_section_setting_dict[ini][section]]
@@ -90,12 +97,14 @@ class AppName:
 
     def preset_values(self, preset: str) -> dict[Any, Any]:
         """Returns a dictionary listing all the settings and values
-        for a given preset specified in settings.json."""
+        for a given preset specified in settings.json.
+        """
+
         preset_dict = {}
         for ini_setting in self.data["iniValues"]:
             preset_value = ini_setting["value"].get(preset)
             if preset_value or preset_value in {0, ""}:
-                #if a preset value was specified
+                # If a preset value was specified
                 ini = ini_setting.get("ini", self.default_ini)
                 preset_dict[f"{ini_setting['name']}:{ini_setting['section']}"] = {
                     "ini": ini,
@@ -106,7 +115,9 @@ class AppName:
 
     def can_remove(self) -> dict[Any, Any]:
         """Returns a dictionary listing all the settings and default values
-        NOT containing the alwaysPrint attribute as specified in settings.json."""
+        NOT containing the alwaysPrint attribute as specified in settings.json.
+        """
+
         can_remove = {}
         for ini_setting in self.data["iniValues"]:
             if not ini_setting.get("alwaysPrint"):
@@ -117,20 +128,22 @@ class AppName:
                 can_remove[f"{ini_setting['name']}:{ini_setting['section']}"] = {
                     "ini": ini,
                     "section": ini_setting["section"],
-                    "value": the_value
+                    "value": the_value,
                     }
         return can_remove
 
     def pack_settings(self, tab, label_frame) -> Any:
         """Returns the pack settings for the label frame."""
+
         default_pack_settings = {
             "Side": tk.TOP,
             "Anchor": tk.NW,
             "Fill": tk.BOTH,
-            "Expand": 1
+            "Expand": 1,
             }
         return self.bethini["displayTabs"][tab][label_frame].get("Pack", default_pack_settings)
 
     def number_of_vertically_stacked_settings(self, tab, label_frame) -> Any:
         """Returns the maximum number of vertically stacked settings desired for the label frame."""
+
         return self.bethini["displayTabs"][tab][label_frame]["NumberOfVerticallyStackedSettings"]
