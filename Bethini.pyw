@@ -855,6 +855,7 @@ class bethini_app(ttk.Window):
         """Create a Preset Radiobutton."""
 
         id_ = "TkRadioPreset"
+        setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
         value = setting.get("value")
         setting[id_] = ttk.Radiobutton(setting["TkFinalSettingFrame"], text=each_setting, variable=self.preset_var, value=value)
         setting[id_].pack(anchor=tk.CENTER, padx=5, pady=7)
