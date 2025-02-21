@@ -1727,7 +1727,7 @@ class bethini_app(ttk.Window):
         try:
             this_value = list(ast.literal_eval(this_value))
             for n in range(len(this_value)):
-                if type(this_value[n]) is tuple:
+                if isinstance(this_value[n], tuple):
                     this_value[n] = list(this_value[n])
         except Exception as e:
             self.sme(
@@ -1741,7 +1741,7 @@ class bethini_app(ttk.Window):
                 the_target_ini = open_ini(ini_location, targetINIs[n])
                 # 1
                 if this_value in (on_value, off_value):
-                    if type(this_value[n]) is list:
+                    if isinstance(this_value[n], list):
                         if setting_value[n] in this_value[n]:
                             theValue = setting_value[n]
                         elif this_value[n][0] in self.setting_dictionary:
