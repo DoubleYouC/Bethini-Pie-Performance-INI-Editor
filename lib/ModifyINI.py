@@ -7,9 +7,7 @@
 
 import configparser
 import logging
-import operator
 import sys
-from collections import OrderedDict
 from pathlib import Path
 
 if __name__ == "__main__":
@@ -121,6 +119,7 @@ class ModifyINI:
 
         Returns True if the section exists, False otherwise.
         """
+
         existing_section = self.get_existing_section(section)
         existing_setting = self.get_existing_setting(existing_section, setting)
         try:
@@ -142,11 +141,9 @@ class ModifyINI:
     def sort(self) -> None:
         """Sorts all sections and settings."""
 
-        for section in self.config._sections:
-            self.config._sections[section] = OrderedDict(
-                sorted(self.config._sections[section].items(), key=operator.itemgetter(0)),
-            )
-        self.config._sections = OrderedDict(sorted(self.config._sections.items(), key=operator.itemgetter(0)))
+        for section in self.config._sections:  # noqa: SLF001
+            self.config._sections[section] = dict(sorted(self.config._sections[section].items()))  # noqa: SLF001
+        self.config._sections = dict(sorted(self.config._sections.items()))  # noqa: SLF001
         self.has_been_modified = True
 
     def save_ini_file(self, *, sort: bool = False) -> None:
