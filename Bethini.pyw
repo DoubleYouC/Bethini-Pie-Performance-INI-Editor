@@ -1958,9 +1958,7 @@ class bethini_app(ttk.Window):
 
         settingValues = []
         if targetINIs:
-            ININumber = -1
-            for INI in targetINIs:
-                ININumber += 1
+            for ININumber, INI in enumerate(targetINIs):
                 # Get the Bethini.ini key for the location of the target INI
                 ini_location = self.getINILocation(INI)
                 if ini_location is not None:
