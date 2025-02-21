@@ -259,7 +259,7 @@ class Scalar(ttk.Scale):
         length: int = 100,
         orient: Literal["horizontal", "vertical"] = "horizontal",
         to: float = 1,
-        variable: ttk.IntVar | ttk.DoubleVar = ...,
+        variable: ttk.IntVar | ttk.DoubleVar | None = None,
         decimal_places: IntStr = "0",
     ) -> None:
         self.decimal_places = decimal_places

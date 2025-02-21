@@ -40,7 +40,7 @@ class ModifyINI:
 
         self.has_been_modified = False
 
-    def get_existing_section(self, section):
+    def get_existing_section(self, section: str) -> str:
         """Searches for and returns an existing case version of the given section."""
 
         if self.config.has_section(section):
@@ -55,7 +55,7 @@ class ModifyINI:
                 break
         return section
 
-    def get_existing_setting(self, section, setting):
+    def get_existing_setting(self, section: str, setting: str) -> str:
         """Searches for and returns an existing case version of the given setting."""
 
         section = self.get_existing_section(section)
@@ -69,7 +69,7 @@ class ModifyINI:
                 break
         return setting
 
-    def get_value(self, section, setting, default: str | None = None):
+    def get_value(self, section: str, setting: str, default: str | None = None) -> str | None:
         """Retrieves the value of a given setting, if it exists."""
 
         section = self.get_existing_section(section)
@@ -83,28 +83,31 @@ class ModifyINI:
 
         return self.case_insensitive_config.sections()
 
-    def get_settings(self, section, *, original_case: bool = False):
+    def get_settings(self, section: str, *, original_case: bool = False) -> list[str]:
         """Retrieves all settings within the given section."""
 
         section = self.get_existing_section(section)
         try:
             settings = self.config.options(section) if original_case else self.case_insensitive_config.options(section)
         except configparser.NoSectionError:
-            return []
+            settings = []
         return settings
 
-    def assign_setting_value(self, section, setting, value) -> bool:
+    def assign_setting_value(self, section: str, setting: str, value: str) -> bool:
         """Assigns the specified value to the specified setting only if
         different. Returns true if the value was changed.
         """
 
-        section = self.get_existing_section(section)  # preserves existing case for section
+        # Preserves existing case for section
+        section = self.get_existing_section(section)
 
-        if not self.config.has_section(section):  # if section not in self.config, make the section.
+        # If section not in self.config, make the section.
+        if not self.config.has_section(section):
             self.config.add_section(section)
             self.case_insensitive_config.add_section(section)
 
-        setting = self.get_existing_setting(section, setting)  # preserves existing case for setting
+        # Preserves existing case for setting
+        setting = self.get_existing_setting(section, setting)
 
         if self.get_value(section, setting) != value:
             self.config[section][setting] = value
@@ -113,7 +116,7 @@ class ModifyINI:
             return True
         return False
 
-    def remove_setting(self, section, setting) -> bool:
+    def remove_setting(self, section: str, setting: str) -> bool:
         """Remove the specified setting.
 
         Returns True if the section exists, False otherwise.
@@ -128,7 +131,7 @@ class ModifyINI:
             return False
         return True
 
-    def remove_section(self, section) -> None:
+    def remove_section(self, section: str) -> None:
         """Removes the specified section."""
 
         existing_section = self.get_existing_section(section)
