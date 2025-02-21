@@ -911,7 +911,7 @@ class bethini_app(ttk.Window):
     def apply_ini_dict(self, ini_dict, *, only_if_missing: bool = False) -> None:
         for each_setting in ini_dict:
             target_setting = each_setting.split(":")[0]
-            if target_setting in APP.bethini["presetsIgnoreTheseSettings"] and not only_if_missing:
+            if not only_if_missing and target_setting in APP.bethini["presetsIgnoreTheseSettings"]:
                 continue
             target_ini = ini_dict[each_setting]["ini"]
             target_section = ini_dict[each_setting]["section"]
