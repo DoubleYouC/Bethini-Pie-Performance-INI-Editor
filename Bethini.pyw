@@ -818,7 +818,7 @@ class bethini_app(ttk.Window):
                     locations_without_first_backup.add(this_location)
 
         if not inis_by_location_modified:
-            self.sme("No files were modified.")
+            self.sme("No files were modified. Saving skipped.")
             return
 
         files_saved = False
@@ -858,7 +858,7 @@ class bethini_app(ttk.Window):
                     copyfile(APP_LOG_FILE, current_backup_path / APP_LOG_FILE.name)
 
         if not files_saved:
-            self.sme("No files were modified.")
+            self.sme("No files were modified. Saving skipped.")
 
 
     def set_preset(self, preset_id) -> None:
