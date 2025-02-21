@@ -262,7 +262,7 @@ class Scalar(ttk.Scale):
         variable: ttk.IntVar | ttk.DoubleVar | None = None,
         decimal_places: IntStr = "0",
     ) -> None:
-        self.decimal_places = decimal_places
+        self.decimal_places = int(decimal_places)
         if command:
             self.chain = command
         else:
@@ -270,9 +270,8 @@ class Scalar(ttk.Scale):
         super().__init__(master, command=self._value_changed, from_=from_, length=length, orient=orient, to=to, variable=variable)
 
     def _value_changed(self, new_value: str) -> None:
-        decimal_places = int(self.decimal_places)
-        value = round(float(new_value), decimal_places)
-        if decimal_places == 0:
+        value = round(float(new_value), self.decimal_places)
+        if self.decimal_places == 0:
             value = int(value)
         self.winfo_toplevel().globalsetvar(self.cget("variable"), (value))
         self.chain(value)
