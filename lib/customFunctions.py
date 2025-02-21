@@ -77,7 +77,7 @@ def browse_to_location(choice: str, browse: list[str], function: str, game_name:
                     pass
 
             except OSError:
-                logger.error(f"Failed to open file: {location}")
+                logger.exception("Failed to open file")
                 return None
 
             if browse[0] == "directory" and location.is_file():
@@ -173,7 +173,7 @@ class CustomFunctions:
             try:
                 shutil.copyfile(new_file, initial_file)
             except FileNotFoundError:
-                logger.error(f"Restoring {new_file} to {initial_file} failed due to {new_file} not existing.")
+                logger.exception(f"Restoring {new_file} to {initial_file} failed due to {new_file} not existing.")
             else:
                 logger.debug(f"{initial_file} was replaced with backup from {new_file}.")
 
@@ -208,8 +208,8 @@ class CustomFunctions:
                 OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f"SOFTWARE\\Bethesda Softworks\\{gameReg}"),
                 "installed path",
             )[0]
-        except:
-            logger.error("Did not find game folder in the registry (no WOW6432Node location).")
+        except OSError:
+            logger.exception("Did not find game folder in the registry (no WOW6432Node location).")
 
         if game_folder is None:
             try:
@@ -217,8 +217,8 @@ class CustomFunctions:
                     OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f"SOFTWARE\\WOW6432Node\\Bethesda Softworks\\{gameReg}"),
                     "installed path",
                 )[0]
-            except:
-                logger.error("Did not find game folder in the registry.")
+            except OSError:
+                logger.exception("Did not find game folder in the registry.")
 
         return game_folder
 
