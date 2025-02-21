@@ -11,6 +11,7 @@ import shutil
 import sys
 from pathlib import Path
 from tkinter import filedialog, simpledialog
+import winreg
 
 if __name__ == "__main__":
     sys.exit(1)
@@ -19,11 +20,6 @@ from lib.app import AppName
 from lib.ModifyINI import ModifyINI
 
 logger = logging.getLogger(__name__)
-
-try:
-    from winreg import HKEY_LOCAL_MACHINE, ConnectRegistry, OpenKey, QueryValueEx
-except ModuleNotFoundError:
-    logger.exception("winreg module not found")
 
 
 def rgb_to_hex(rgb: tuple[int, int, int]) -> str:
@@ -201,26 +197,18 @@ class CustomFunctions:
         if game_folder is not None:
             return game_folder
 
-        gameReg = Info.game_reg(game_name)
+        key_name = Info.game_reg(game_name)
 
         try:
-            game_folder = QueryValueEx(
-                OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f"SOFTWARE\\Bethesda Softworks\\{gameReg}"),
-                "installed path",
-            )[0]
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, Rf"SOFTWARE\WOW6432Node\Bethesda Softworks\{key_name}") as reg_handle:
+                value, value_type = winreg.QueryValueEx(reg_handle, "Installed Path")
+
+            if value and value_type == winreg.REG_SZ and isinstance(value, str):
+                return value
+
         except OSError:
-            logger.exception("Did not find game folder in the registry (no WOW6432Node location).")
-
-        if game_folder is None:
-            try:
-                game_folder = QueryValueEx(
-                    OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f"SOFTWARE\\WOW6432Node\\Bethesda Softworks\\{gameReg}"),
-                    "installed path",
-                )[0]
-            except OSError:
-                logger.exception("Did not find game folder in the registry.")
-
-        return game_folder
+            logger.exception("Game path not found in the registry. Run the game launcher to set it.")
+            # TODO: Handle what happens next
 
     @staticmethod
     def getGamePath(game_name: str):
