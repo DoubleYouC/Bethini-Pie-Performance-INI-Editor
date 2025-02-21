@@ -2,6 +2,8 @@
 
 import configparser
 import sys
+from io import TextIOWrapper
+from os import PathLike
 
 if __name__ == "__main__":
     sys.exit(1)
@@ -16,7 +18,7 @@ class customConfigParser(configparser.RawConfigParser):
         super().__init__(allow_no_value=True, delimiters=("=",), comment_prefixes=(), strict=False)
         # comment_prefixes=() is necessary to preserve comments.
 
-    def _read(self, fp, fpname) -> None:
+    def _read(self, fp: TextIOWrapper, fpname: str | bytes | PathLike) -> None:
         """Parse a sectioned configuration file.
 
         Each section in a configuration file contains a header, indicated by
@@ -37,10 +39,9 @@ class customConfigParser(configparser.RawConfigParser):
         # This read function was modified to pick the first option value if there is a
         # duplicate option. Any subsequent duplicate option values are discarded.
         elements_added = set()
-        cursect: dict | None = None
+        cursect: dict[str, list[str | int] | None] | None = None
         sectname = None
         optname = None
-        lineno = 0
         indent_level = 0
         e: Exception | None = None
         for lineno, line in enumerate(fp, start=1):
@@ -50,12 +51,12 @@ class customConfigParser(configparser.RawConfigParser):
             while comment_start == sys.maxsize and inline_prefixes:
                 next_prefixes = {}
                 for prefix, index in inline_prefixes.items():
-                    index = line.find(prefix, index+1)
-                    if index == -1:
+                    line_index = line.find(prefix, index + 1)
+                    if line_index == -1:
                         continue
-                    next_prefixes[prefix] = index
-                    if index == 0 or (index > 0 and line[index-1].isspace()):
-                        comment_start = min(comment_start, index)
+                    next_prefixes[prefix] = line_index
+                    if line_index == 0 or (line_index > 0 and line[line_index-1].isspace()):
+                        comment_start = min(comment_start, line_index)
                 inline_prefixes = next_prefixes
             # Strip full line comments
             for prefix in self._comment_prefixes:
@@ -115,7 +116,6 @@ class customConfigParser(configparser.RawConfigParser):
                     self._proxies[sectname] = configparser.SectionProxy(self, sectname)
                     elements_added.add(sectname)
                     optname = None
-                    # raise configparser.MissingSectionHeaderError(fpname, lineno, line)
 
                 # An option line?
                 else:
