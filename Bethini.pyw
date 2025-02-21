@@ -631,15 +631,9 @@ class bethini_app(ttk.Window):
         self.choose_game_window.withdraw()
 
         # Once the app/game is selected, this loads it.
-        try:
-            self.choose_game_var = app_config.get_value("General", "sAppName")
-            if self.choose_game_var != game:
-                self.sme(f"Change of game from {self.choose_game_var} to {game}")
-                msg = f"App/Game specified in {my_app_config} differs from the game chosen, so it will be changed to the one you chose."
-                raise Exception(msg)
-
-        except Exception as e:
-            self.sme("Change of game/application", exception=e)
+        self.choose_game_var = app_config.get_value("General", "sAppName")
+        if self.choose_game_var != game:
+            self.sme(f"App/Game specified in {my_app_config} differs from the game chosen, so it will be changed to the one you chose.")
             app_config.assign_setting_value("General", "sAppName", game)
             from_choose_game_window = True
 
@@ -1459,9 +1453,10 @@ class bethini_app(ttk.Window):
             try:
                 logger.debug(f"{each_setting} = {this_value}")
                 self.setting_dictionary[each_setting]["valueSet"] = True
-                return this_value
             except:
                 logger.warning(f"No value set for checkbox {each_setting}.")
+            else:
+                return this_value
         return None
 
     def dropdown_value(self, each_setting):
@@ -1772,8 +1767,8 @@ class bethini_app(ttk.Window):
                         else:
                             self.sme(f"{each_partial_setting} is not set yet.")
                             return
-                    except Exception as e:
-                        self.sme(f"{each_partial_setting} is not set yet.", exception=e)
+                    except KeyError:
+                        self.sme(f"{each_partial_setting} is not set yet.")
                         return
 
         if targetINIs:
@@ -2158,35 +2153,42 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
     files_to_remove: List of files that will be removed.
     """
 
-    try:
-        subdirectories = [d for d in directory.iterdir() if d.name.lower() != "first-time-backup" and d.is_dir()]
-    except OSError as e:
-        logger.debug(f"Info: {directory} : {e.strerror}")
+    if max_to_keep <= -1:
+        return False
+
+    subdirectories = [d for d in directory.iterdir() if d.is_dir()]
+    if not subdirectories:
         return True
-    subdirectories.sort(key=lambda d: d.name)
 
-    if max_to_keep > -1:
-        for n in range(len(subdirectories)):
-            dir_path = subdirectories[n]
-            if n < max_to_keep:
-                logger.debug(f"{subdirectories[n]} will be kept.")
-            else:
-                file_delete_failed = False
-                for file in files_to_remove:
-                    file_path = dir_path / file
-                    try:
-                        file_path.unlink(missing_ok=True)
-                    except OSError:
-                        logger.exception("Failed to delete file.")
-                        file_delete_failed = True
+    subdirectories = [d for d in subdirectories if d.name != "First-Time-Backup"]
+    if len(subdirectories) <= max_to_keep:
+        return False
 
-                if not file_delete_failed:
-                    try:
-                        dir_path.rmdir()
-                    except OSError:
-                        logger.exception("Failed to delete folder.")
-                    else:
-                        logger.debug(f"{dir_path} was removed.")
+    subdirectories.sort(key=os.path.getctime, reverse=True)
+    for index, dir_path in enumerate(subdirectories):
+        if index < max_to_keep:
+            logger.debug(f"{dir_path} will be kept.")
+            continue
+
+        file_delete_failed = False
+        for file in files_to_remove:
+            file_path = dir_path / file
+            try:
+                file_path.unlink(missing_ok=True)
+            except OSError:
+                logger.exception("Failed to delete file old.")
+                file_delete_failed = True
+
+        if file_delete_failed:
+            logger.error(f"Old folder can not be deleted: {dir_path}")
+            continue
+
+        try:
+            dir_path.rmdir()
+        except OSError:
+            logger.exception(f"Failed to delete old folder: {dir_path}")
+        else:
+            logger.debug(f"Old folder was deleted: {dir_path}")
     return False
 
 
