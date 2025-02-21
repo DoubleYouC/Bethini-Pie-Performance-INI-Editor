@@ -2156,8 +2156,11 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
     if max_to_keep <= -1:
         return False
 
-    subdirectories = [d for d in directory.iterdir() if d.is_dir()]
-    if not subdirectories:
+    try:
+        subdirectories = [d for d in directory.iterdir() if d.is_dir()]
+        if not subdirectories:
+            return True
+    except FileNotFoundError:
         return True
 
     subdirectories = [d for d in subdirectories if d.name != "First-Time-Backup"]
