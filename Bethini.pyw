@@ -2034,15 +2034,15 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
                     file_path = dir_path / file
                     try:
                         file_path.unlink(missing_ok=True)
-                    except OSError as e:
-                        logger.error(f"{file_path}: {e.strerror}")
+                    except OSError:
+                        logger.exception("Failed to delete file.")
                         file_delete_failed = True
 
                 if not file_delete_failed:
                     try:
                         dir_path.rmdir()
-                    except OSError as e:
-                        logger.error(f"{dir_path} : {e.strerror}")
+                    except OSError:
+                        logger.exception("Failed to delete folder.")
                     else:
                         logger.debug(f"{dir_path} was removed.")
     return False

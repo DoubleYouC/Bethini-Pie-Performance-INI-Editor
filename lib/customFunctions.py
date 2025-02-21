@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 try:
     from winreg import HKEY_LOCAL_MACHINE, ConnectRegistry, OpenKey, QueryValueEx
 except ModuleNotFoundError:
-    logger.error("winreg module not found")
+    logger.exception("winreg module not found")
 
 def rgb_to_hex(rgb: tuple[int, int, int]) -> str:
     return "#{:02x}{:02x}{:02x}".format(*rgb)
