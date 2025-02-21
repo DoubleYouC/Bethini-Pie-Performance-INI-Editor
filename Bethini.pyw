@@ -179,7 +179,7 @@ class OpenINI(TypedDict):
 
 # Configure Logging
 # TODO Refactor usage of "the_backup_directory"
-LOG_DIR_DATE: str = f"{datetime.now().strftime("%Y %m-%b %d %a - %H.%M.%S")}"
+LOG_DIR_DATE: str = datetime.now().strftime("%Y %m-%b %d %a - %H.%M.%S")
 APP_LOG_DIR = Path.cwd() / "logs" / LOG_DIR_DATE
 APP_LOG_DIR.mkdir(parents=True, exist_ok=True)
 APP_LOG_FILE = APP_LOG_DIR / "log.log"
