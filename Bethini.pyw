@@ -795,8 +795,6 @@ class bethini_app(ttk.Window):
             return
 
         files_to_remove = [*list(open_inis)[1:], APP_LOG_FILE.name]
-
-        # ini_locations_modified: set[Path] = set()
         inis_by_location: dict[Path, list[ModifyINI]] = {}
         inis_by_location_modified: dict[Path, list[ModifyINI]] = {}
         locations_without_first_backup: set[Path] = set()
@@ -2235,7 +2233,7 @@ def open_ini(location: str, ini: str) -> ModifyINI:
                 return open_ini_location[each_location]["object"]
 
         # If the location is not found, add it
-        new_ini_id = str(len(open_ini_id))
+        new_ini_id = str(len(open_ini_location))
         modify_ini = ModifyINI(Path(location) / ini)
         open_inis[ini]["located"][new_ini_id] = {
             "at": location,
