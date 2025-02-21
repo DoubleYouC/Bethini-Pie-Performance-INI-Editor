@@ -269,11 +269,11 @@ class Scalar(ttk.Scale):
             self.chain = lambda *_a: None
         super().__init__(master, command=self._value_changed, from_=from_, length=length, orient=orient, to=to, variable=variable)
 
-    def _value_changed(self, new_value: str) -> None:
-        value = round(float(new_value), self.decimal_places)
+    def _value_changed(self, _new_value: str) -> None:
         if self.decimal_places == 0:
-            value = int(value)
-        self.winfo_toplevel().globalsetvar(self.cget("variable"), (value))
+            value = int(self.get())
+        else:
+            value = round(self.get(), self.decimal_places)
         self.chain(value)
 
 
