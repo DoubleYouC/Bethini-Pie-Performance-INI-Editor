@@ -1117,12 +1117,11 @@ class bethini_app(ttk.Window):
         setting[id_].pack(anchor=tk.W, padx=5, pady=7)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
-        stuff_to_add_to_setting_dictionary = {
+        self.setting_dictionary[each_setting].update({
             "tk_var": setting["tk_var"],
             "onvalue": on_value,
             "offvalue": off_value,
-        }
-        self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
+        })
 
     def preset(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
         """Create a Preset ttk.Button."""
@@ -1149,8 +1148,7 @@ class bethini_app(ttk.Window):
         setting[id_].pack(anchor=tk.CENTER, padx=5, pady=7)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
-        stuff_to_add_to_setting_dictionary = {"tk_var": self.preset_var}
-        self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
+        self.setting_dictionary[each_setting].update({"tk_var": self.preset_var})
 
     def dropdown(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
         """Create a ttk.OptionMenu."""
@@ -1211,7 +1209,7 @@ class bethini_app(ttk.Window):
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
-        stuff_to_add_to_setting_dictionary = {
+        self.setting_dictionary[each_setting].update({
             "tk_var": setting["tk_var"],
             "options": options,
             "settingChoices": setting.get("settingChoices"),
@@ -1220,8 +1218,7 @@ class bethini_app(ttk.Window):
             "fileFormat": setting.get("fileFormat"),
             "forceSelect": setting.get("forceSelect"),
             "partial": setting.get("partial"),
-        }
-        self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
+        })
 
     def combobox(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
         """Create a ttk.Combobox."""
@@ -1257,12 +1254,11 @@ class bethini_app(ttk.Window):
         setting[id_].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
-        stuff_to_add_to_setting_dictionary = {
+        self.setting_dictionary[each_setting].update({
             "tk_var": setting["tk_var"],
             "options": options,
             "decimal places": setting.get("decimal places"),
-        }
-        self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
+        })
 
     def entry(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
         """Create a ttk.Entry."""
@@ -1292,14 +1288,13 @@ class bethini_app(ttk.Window):
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
-        stuff_to_add_to_setting_dictionary = {
+        self.setting_dictionary[each_setting].update({
             "tk_var": setting["tk_var"],
             "formula": setting.get("formula"),
             "decimal places": setting.get("decimal places"),
             "partial": setting.get("partial"),
             "fileFormat": setting.get("fileFormat"),
-        }
-        self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
+        })
 
     def slider(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
         id_ = "TkSlider"
@@ -1361,12 +1356,11 @@ class bethini_app(ttk.Window):
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
-        stuff_to_add_to_setting_dictionary = {
+        self.setting_dictionary[each_setting].update({
             "tk_var": setting["tk_var"],
             "decimal places": setting.get("decimal places"),
             "second_tk_widget": setting["second_tk_widget"],
-        }
-        self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
+        })
 
     def spinbox(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
         id_ = "TkSpinbox"
@@ -1407,10 +1401,9 @@ class bethini_app(ttk.Window):
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
-        stuff_to_add_to_setting_dictionary = {
+        self.setting_dictionary[each_setting].update({
             "tk_var": setting["tk_var"],
-        }
-        self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
+        })
 
     def color(self, each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting) -> None:
         # chooseColor(colorToChange, buttonToModify)
@@ -1443,12 +1436,11 @@ class bethini_app(ttk.Window):
         self.tooltip(each_tab, the_label_frame, on_frame, the_setting, id_)
 
         self.add_to_setting_dictionary(each_tab, label_frame, the_label_frame, on_frame, each_setting, the_setting, id_)
-        stuff_to_add_to_setting_dictionary = {
+        self.setting_dictionary[each_setting].update({
             "tk_var": setting["tk_var"],
             "colorValueType": color_value_type,
             "rgbType": setting.get("rgbType"),
-        }
-        self.setting_dictionary[each_setting].update(stuff_to_add_to_setting_dictionary)
+        })
 
     def radio_preset_value(self, _each_setting) -> str:
         return self.preset_var.get()
