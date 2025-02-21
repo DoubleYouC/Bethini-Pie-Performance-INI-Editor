@@ -893,7 +893,7 @@ class bethini_app(ttk.Window):
 
                     for section in sections:
                         settings = this_ini_object.get_settings(section)
-                        if settings == []:
+                        if not settings:
                             this_ini_object.remove_section(section)
                             self.sme(f"{section} was removed because it was empty.")
                         else:
@@ -904,7 +904,7 @@ class bethini_app(ttk.Window):
                                     # sm(this_ini_object.remove_setting(section, each_setting))
                                     # Disabling the removal of unknown settings.
                                     self.sme(f"{each_setting}:{section} {each_ini} appears to be invalid.")
-                                    if this_ini_object.get_settings(section) == []:
+                                    if not this_ini_object.get_settings(section):
                                         this_ini_object.remove_section(section)
                                         self.sme(f"{section} was removed because it was empty.")
 
@@ -2132,7 +2132,7 @@ class bethini_app(ttk.Window):
                         )
                         value = defaultValue
                     settingValues.append(value)
-            if settingValues != []:
+            if settingValues:
                 # Check to see if the settings correspond with specified each_setting choices.
                 if setting_choices:
                     for choice in setting_choices:
