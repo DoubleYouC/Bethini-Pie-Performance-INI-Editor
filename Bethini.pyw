@@ -164,6 +164,15 @@ class AppSettings(TypedDict):
     valueTypes: list[str]
 
 
+class Located(TypedDict):
+    at: str
+    object: ModifyINI
+
+
+class OpenINI(TypedDict):
+    located: dict[str, Located]
+
+
 # from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
 # This is for changing file read-only access via os.chmod(filename, S_IREAD,
 # S_IRGRP, #S_IROTH) Not currently used.
@@ -1963,7 +1972,7 @@ class bethini_app(ttk.Window):
                     # This looks for a default value in the settings.json
                     defaultValue = None if my_app_config == INI else APP.setting_values[currentSetting]["default"]
 
-                    target_ini = open_ini(str(ini_location), str(INI))
+                    target_ini = open_ini(ini_location, INI)
                     try:
                         value = str(target_ini.get_value(currentSection, currentSetting, default=defaultValue))
                     except AttributeError as e:
@@ -2040,44 +2049,44 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
                         logger.debug(f"{dir_path} was removed.")
     return False
 
-def open_ini(location: str, ini: str):
+def open_ini(location: str, ini: str) -> ModifyINI:
     """Open the INI with the given location and name and store it in open_inis."""
 
     open_ini = open_inis.get(ini)
     if open_ini:
         open_ini_location = open_inis[ini]["located"]
-        open_ini_id = 0
         for each_location in open_ini_location:
-            open_ini_id += 1
             if open_ini_location[each_location]["at"] == location:
-                return open_ini_location[each_location].get("object")
+                return open_ini_location[each_location]["object"]
 
         # If the location is not found, add it
-        open_ini_id += 1
-        open_ini_id_str = str(open_ini_id)
-        open_inis[ini]["located"][open_ini_id_str] = {
-            "at":location
-            }
-        open_inis[ini]["located"][open_ini_id_str]["object"] = ModifyINI(Path(location) / ini)
-        return open_inis[ini]["located"][open_ini_id_str]["object"]
+        new_ini_id = str(len(open_ini_id))
+        modify_ini = ModifyINI(Path(location) / ini)
+        open_inis[ini]["located"][new_ini_id] = {
+            "at": location,
+            "object": modify_ini,
+        }
+        return modify_ini
 
     # If the ini has not been opened before
-    open_ini_id_str = "1"
-    open_inis[ini] = {
-        "located": {
-            open_ini_id_str: {
-                "at": location
-                }
-            }
-        }
     try:
-        open_inis[ini]["located"][open_ini_id_str]["object"] = ModifyINI(Path(location) / ini)
+        modify_ini = ModifyINI(Path(location) / ini)
     except configparser.MissingSectionHeaderError:
         logger.error(f"Failed to open ini: {ini}", exc_info=True)
-    return open_inis[ini]["located"][open_ini_id_str]["object"]
+        # TODO: As-is, this would continue below and error after the exception.
+
+    open_inis[ini] = {
+        "located": {
+            "1": {
+                "at": location,
+                "object": modify_ini,
+            }
+        }
+    }
+
+    return modify_ini
 
 if __name__ == "__main__":
-
     # Get app config settings.
     my_app_config = f"{my_app_short_name}.ini"
     app_config = ModifyINI(my_app_config)
@@ -2095,7 +2104,7 @@ if __name__ == "__main__":
     remove_excess_directory_files(Path.cwd() / "logs", int(iMaxLogs), ["log.log"])
 
     # Initialize open_inis dictionary to store list of opened INI files in.
-    open_inis = {
+    open_inis: dict[str, OpenINI] = {
         my_app_config: {
             "located": {
                 "1": {
