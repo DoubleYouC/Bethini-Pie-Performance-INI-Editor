@@ -2122,7 +2122,7 @@ if __name__ == "__main__":
 
     # Start the app class
 
-    window = bethini_app(themename=theme, iconphoto=Path("Icons/Icon.png"), minsize=(400, 200))
+    window = bethini_app(themename=theme)
     window.choose_game()
 
     window.protocol("WM_DELETE_WINDOW", lambda: on_closing(window))
