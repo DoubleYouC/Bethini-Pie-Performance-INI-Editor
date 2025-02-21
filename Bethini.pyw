@@ -85,7 +85,7 @@ class DependentSetting(TypedDict):
 
 class BethiniSetting(
     TypedDict(
-        "Setting",
+        "BethiniSetting",
         {
             "decimal places": NotRequired[IntStr],
             "from": NotRequired[IntStr],
