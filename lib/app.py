@@ -21,7 +21,7 @@ class AppName:
     def __init__(self, appname: str) -> None:
         with (Path.cwd() / "apps" / appname / "settings.json").open(encoding="utf-8") as app_json:
             self.data: dict = json.load(app_json)
-        with (Path.cwd() /"apps" / appname / "Bethini.json").open(encoding="utf-8") as bethini:
+        with (Path.cwd() / "apps" / appname / "Bethini.json").open(encoding="utf-8") as bethini:
             self.bethini: dict = json.load(bethini)
 
         self.default_ini = list(self.bethini["INIs"])[1] if len(self.bethini["INIs"]) > 1 else None
@@ -41,7 +41,6 @@ class AppName:
         """
 
         return self.bethini["INIs"].get(ini, "") if ini else ""
-
 
     def get_setting_values(self) -> dict[Any, Any]:
         """Returns a dictionary listing all the different value types for every setting."""
@@ -70,7 +69,7 @@ class AppName:
             if ini not in list(ini_section_setting_dict.keys()):
                 ini_section_setting_dict[ini] = {
                     section: [setting],
-                    }
+                }
             elif section not in list(ini_section_setting_dict[ini].keys()):
                 ini_section_setting_dict[ini][section] = [setting]
             else:
@@ -104,7 +103,7 @@ class AppName:
                     "ini": ini,
                     "section": ini_setting["section"],
                     "value": str(preset_value),
-                    }
+                }
         return preset_dict
 
     def can_remove(self) -> dict[Any, Any]:
@@ -123,7 +122,7 @@ class AppName:
                     "ini": ini,
                     "section": ini_setting["section"],
                     "value": the_value,
-                    }
+                }
         return can_remove
 
     def pack_settings(self, tab, label_frame) -> Any:
@@ -134,7 +133,7 @@ class AppName:
             "Anchor": tk.NW,
             "Fill": tk.BOTH,
             "Expand": 1,
-            }
+        }
         return self.bethini["displayTabs"][tab][label_frame].get("Pack", default_pack_settings)
 
     def number_of_vertically_stacked_settings(self, tab, label_frame) -> Any:

@@ -83,7 +83,7 @@ class ModifyINI:
 
         return self.case_insensitive_config.sections()
 
-    def get_settings(self, section, *, original_case: bool=False):
+    def get_settings(self, section, *, original_case: bool = False):
         """Retrieves all settings within the given section."""
 
         section = self.get_existing_section(section)
@@ -98,13 +98,13 @@ class ModifyINI:
         different. Returns true if the value was changed.
         """
 
-        section = self.get_existing_section(section) #preserves existing case for section
+        section = self.get_existing_section(section)  # preserves existing case for section
 
-        if not self.config.has_section(section): #if section not in self.config, make the section.
+        if not self.config.has_section(section):  # if section not in self.config, make the section.
             self.config.add_section(section)
             self.case_insensitive_config.add_section(section)
 
-        setting = self.get_existing_setting(section, setting) #preserves existing case for setting
+        setting = self.get_existing_setting(section, setting)  # preserves existing case for setting
 
         if self.get_value(section, setting) != value:
             self.config[section][setting] = value
@@ -140,10 +140,10 @@ class ModifyINI:
         """Sorts all sections and settings."""
 
         for section in self.config._sections:
-            self.config._sections[section] = OrderedDict(sorted(self.config._sections[section].items(),
-                                                                key=operator.itemgetter(0)))
-        self.config._sections = OrderedDict(sorted(self.config._sections.items(),
-                                                   key=operator.itemgetter(0)))
+            self.config._sections[section] = OrderedDict(
+                sorted(self.config._sections[section].items(), key=operator.itemgetter(0)),
+            )
+        self.config._sections = OrderedDict(sorted(self.config._sections.items(), key=operator.itemgetter(0)))
         self.has_been_modified = True
 
     def save_ini_file(self, *, sort: bool = False) -> None:
@@ -152,5 +152,5 @@ class ModifyINI:
         if sort:
             self.sort()
         with Path(self.ini_to_manage).open("w", encoding="utf-8") as config_file:
-            self.config.write(config_file, space_around_delimiters = False)
+            self.config.write(config_file, space_around_delimiters=False)
         self.has_been_modified = False

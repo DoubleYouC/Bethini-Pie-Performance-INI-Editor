@@ -9,6 +9,7 @@ if __name__ == "__main__":
 
 class AutoScrollbar(tk.Scrollbar):
     """This creates a scrollbar if necessary."""
+
     def set(self, first: float | str, last: float | str) -> None:
         if float(first) <= 0.0 and float(last) >= 1.0:
             self.pack_forget()

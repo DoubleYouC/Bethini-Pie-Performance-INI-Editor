@@ -55,7 +55,7 @@ class customConfigParser(configparser.RawConfigParser):
                     if line_index == -1:
                         continue
                     next_prefixes[prefix] = line_index
-                    if line_index == 0 or (line_index > 0 and line[line_index-1].isspace()):
+                    if line_index == 0 or (line_index > 0 and line[line_index - 1].isspace()):
                         comment_start = min(comment_start, line_index)
                 inline_prefixes = next_prefixes
             # Strip full line comments
@@ -69,11 +69,8 @@ class customConfigParser(configparser.RawConfigParser):
             if not value:
                 if self._empty_lines_in_values:
                     # Add empty line to the value, but only if there was no comment on the line
-                    if (comment_start is None and
-                        cursect is not None and
-                        optname and
-                        cursect[optname] is not None):
-                        cursect[optname].append("") # newlines added at join
+                    if comment_start is None and cursect is not None and optname and cursect[optname] is not None:
+                        cursect[optname].append("")  # newlines added at join
                 else:
                     # Empty line marks end of value
                     indent_level = sys.maxsize
@@ -81,8 +78,7 @@ class customConfigParser(configparser.RawConfigParser):
             # Continuation line?
             first_nonspace = self.NONSPACECRE.search(line)
             cur_indent_level = first_nonspace.start() if first_nonspace else 0
-            if (cursect is not None and optname and
-                cur_indent_level > indent_level):
+            if cursect is not None and optname and cur_indent_level > indent_level:
                 cursect[optname].append(value)
             # A section header or option header?
             else:
@@ -125,8 +121,7 @@ class customConfigParser(configparser.RawConfigParser):
                         if not optname:
                             e = self._handle_error(e, fpname, lineno, line)
                         optname = self.optionxform(optname.rstrip())
-                        if (self._strict and
-                            (sectname, optname) in elements_added):
+                        if self._strict and (sectname, optname) in elements_added:
                             raise configparser.DuplicateOptionError(sectname, optname, fpname, lineno)
                         elements_added.add((sectname, optname))
                         # This check is fine because the OPTCRE cannot
@@ -134,9 +129,9 @@ class customConfigParser(configparser.RawConfigParser):
                         if optval is not None:
                             optval = optval.strip()
                             # Check if this optname already exists
-                            if (optname not in cursect):
+                            if optname not in cursect:
                                 cursect[optname] = [optval]
-                        elif (optname not in cursect):
+                        elif optname not in cursect:
                             # Valueless option handling
                             cursect[optname] = None
                     else:

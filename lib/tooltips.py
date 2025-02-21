@@ -36,9 +36,16 @@ class Hovertip(OnHoverTooltipBase):
         self.anchor_widget.bind("<Button-3>", self.show_preview)
 
     def showcontents(self) -> None:
-        label = tk.Label(self.tipwindow, text=self.text, justify=tk.LEFT,
-                         background="#fff", relief=tk.SOLID, borderwidth=1,
-                         font=("Segoe UI", 10), wraplength=self.wrap_length)
+        label = tk.Label(
+            self.tipwindow,
+            text=self.text,
+            justify=tk.LEFT,
+            background="#fff",
+            relief=tk.SOLID,
+            borderwidth=1,
+            font=("Segoe UI", 10),
+            wraplength=self.wrap_length,
+        )
         label.pack()
 
     def show_preview(self, _event=None) -> None:

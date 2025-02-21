@@ -25,24 +25,29 @@ try:
 except ModuleNotFoundError:
     logger.exception("winreg module not found")
 
+
 def rgb_to_hex(rgb: tuple[int, int, int]) -> str:
     return "#{:02x}{:02x}{:02x}".format(*rgb)
 
+
 def rgba_to_hex(rgba: tuple[int, int, int, int]) -> str:
     return "#{:02x}{:02x}{:02x}{:02x}".format(*rgba)
+
 
 def hex_to_rgb(value: str) -> tuple[int, int, int] | tuple[int, ...]:
     value = value.lstrip("#")
     lv = len(value)
     if lv == 1:
-        v = int(value, 16)*17
+        v = int(value, 16) * 17
         return v, v, v
     if lv == 3:
-        return tuple(int(value[i:i + 1], 16)*17 for i in range(3))
-    return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
+        return tuple(int(value[i : i + 1], 16) * 17 for i in range(3))
+    return tuple(int(value[i : i + lv // 3], 16) for i in range(0, lv, lv // 3))
+
 
 def hex_to_decimal(hex_) -> str:
-    return str(int(str(hex_).lstrip("#"),16))
+    return str(int(str(hex_).lstrip("#"), 16))
+
 
 def decimal_to_rgb(decimal) -> tuple[int, int, int]:
     decimal = int(decimal)
@@ -50,6 +55,7 @@ def decimal_to_rgb(decimal) -> tuple[int, int, int]:
     green = (decimal >> 8) & 255
     red = (decimal >> 16) & 255
     return (red, green, blue)
+
 
 def browse_to_location(choice: str, browse: list[str], function: str, game_name: str) -> str | None:
     if choice == "Browse...":
@@ -92,11 +98,12 @@ def browse_to_location(choice: str, browse: list[str], function: str, game_name:
 
     return choice
 
+
 class Info:
     @staticmethod
     def get_documents_path() -> Path:
-        CSIDL_PERSONAL = 5       # My Documents
-        SHGFP_TYPE_CURRENT = 0   # Get current, not default value
+        CSIDL_PERSONAL = 5  # My Documents
+        SHGFP_TYPE_CURRENT = 0  # Get current, not default value
 
         buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
         ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
@@ -108,14 +115,16 @@ class Info:
 
     @staticmethod
     def game_documents_name(game_name: str) -> str:
-        game_name_documents_location_dict = {"Skyrim Special Edition": "Skyrim Special Edition",
-                                         "Skyrim": "Skyrim",
-                                         "Starfield": "Starfield",
-                                         "Fallout 3": "Fallout3",
-                                         "Fallout New Vegas": "FalloutNV",
-                                         "Fallout 4": "Fallout4",
-                                         "Enderal": "Enderal",
-                                         "Oblivion": "Oblivion"}
+        game_name_documents_location_dict = {
+            "Skyrim Special Edition": "Skyrim Special Edition",
+            "Skyrim": "Skyrim",
+            "Starfield": "Starfield",
+            "Fallout 3": "Fallout3",
+            "Fallout New Vegas": "FalloutNV",
+            "Fallout 4": "Fallout4",
+            "Enderal": "Enderal",
+            "Oblivion": "Oblivion",
+        }
 
         game_documents_name = game_name_documents_location_dict.get(game_name, "")
         if game_documents_name:
@@ -126,13 +135,15 @@ class Info:
 
     @staticmethod
     def game_reg(game_name: str) -> str:
-        game_name_registry_dict = {"Skyrim Special Edition": "Skyrim Special Edition",
-                                "Skyrim": "skyrim",
-                                "Fallout 3": "fallout3",
-                                "Fallout New Vegas": "falloutnv",
-                                "Fallout 4": "Fallout4",
-                                "Enderal": "skyrim",
-                                "Oblivion": "oblivion"}
+        game_name_registry_dict = {
+            "Skyrim Special Edition": "Skyrim Special Edition",
+            "Skyrim": "skyrim",
+            "Fallout 3": "fallout3",
+            "Fallout New Vegas": "falloutnv",
+            "Fallout 4": "Fallout4",
+            "Enderal": "skyrim",
+            "Oblivion": "oblivion",
+        }
 
         game_reg = game_name_registry_dict.get(game_name, "")
         if not game_reg:
@@ -140,8 +151,8 @@ class Info:
 
         return game_reg
 
-class CustomFunctions:
 
+class CustomFunctions:
     # Placeholders to be set when bethini_app initializes
     screenwidth = 0
     screenheight = 0
@@ -193,13 +204,19 @@ class CustomFunctions:
         gameReg = Info.game_reg(game_name)
 
         try:
-            game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f"SOFTWARE\\Bethesda Softworks\\{gameReg}"), "installed path")[0]
+            game_folder = QueryValueEx(
+                OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f"SOFTWARE\\Bethesda Softworks\\{gameReg}"),
+                "installed path",
+            )[0]
         except:
             logger.error("Did not find game folder in the registry (no WOW6432Node location).")
 
         if game_folder is None:
             try:
-                game_folder = QueryValueEx(OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f"SOFTWARE\\WOW6432Node\\Bethesda Softworks\\{gameReg}"), "installed path")[0]
+                game_folder = QueryValueEx(
+                    OpenKey(ConnectRegistry(None, HKEY_LOCAL_MACHINE), f"SOFTWARE\\WOW6432Node\\Bethesda Softworks\\{gameReg}"),
+                    "installed path",
+                )[0]
             except:
                 logger.error("Did not find game folder in the registry.")
 
