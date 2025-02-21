@@ -2238,17 +2238,19 @@ def open_ini(location: str, ini: str) -> ModifyINI:
     except configparser.MissingSectionHeaderError:
         logger.error(f"Failed to open ini: {ini}", exc_info=True)
         # TODO: As-is, this would continue below and error after the exception.
-
-    open_inis[ini] = {
-        "located": {
-            "1": {
-                "at": location,
-                "object": modify_ini,
+    else:
+        open_inis[ini] = {
+            "located": {
+                "1": {
+                    "at": location,
+                    "object": modify_ini,
+                },
             },
-        },
-    }
+        }
 
-    return modify_ini
+        return modify_ini
+
+    raise NotImplementedError
 
 
 if __name__ == "__main__":
