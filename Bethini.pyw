@@ -282,7 +282,7 @@ class bethini_app(ttk.Window):
     """This is the main app, the glue that creates the GUI."""
 
     def __init__(self, themename: str) -> None:
-        super().__init__(self, themename=themename, iconphoto=Path("Icons/Icon.png"), minsize=(400, 200))
+        super().__init__(f"{my_app_name} {version}", themename, "Icons/Icon.png", minsize=(400, 200))
 
         CustomFunctions.screenwidth = self.winfo_screenwidth()
         CustomFunctions.screenheight = self.winfo_screenheight()
