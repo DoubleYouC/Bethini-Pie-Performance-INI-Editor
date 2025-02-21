@@ -2109,45 +2109,47 @@ class bethini_app(ttk.Window):
         """Return the current values of a setting from the given INIs."""
 
         settingValues = []
-        if targetINIs:
-            for ININumber, INI in enumerate(targetINIs):
-                # Get the Bethini.ini key for the location of the target INI
-                ini_location = self.getINILocation(INI)
-                if ini_location is not None:
-                    # If the INI location is known.
+        if not targetINIs:
+            return settingValues
 
-                    currentSetting = theSettings[ININumber]
-                    currentSection = targetSections[ININumber]
+        for ININumber, INI in enumerate(targetINIs):
+            # Get the Bethini.ini key for the location of the target INI
+            ini_location = self.getINILocation(INI)
+            if ini_location is not None:
+                # If the INI location is known.
 
-                    # This looks for a default value in the settings.json
-                    defaultValue = None if my_app_config == INI else APP.setting_values[currentSetting]["default"]
+                currentSetting = theSettings[ININumber]
+                currentSection = targetSections[ININumber]
 
-                    target_ini = open_ini(ini_location, INI)
-                    try:
-                        value = str(target_ini.get_value(currentSection, currentSetting, default=defaultValue))
-                    except AttributeError as e:
-                        self.sme(
-                            f"There was a problem with the existing {target_ini} [{currentSection}] {currentSetting}, so {defaultValue} will be used.",
-                            exception=e,
-                        )
-                        value = defaultValue
-                    settingValues.append(value)
-            if settingValues:
-                # Check to see if the settings correspond with specified each_setting choices.
-                if setting_choices:
-                    for choice in setting_choices:
-                        if setting_choices[choice] == settingValues:
-                            settingValues = [choice]
+                # This looks for a default value in the settings.json
+                defaultValue = None if my_app_config == INI else APP.setting_values[currentSetting]["default"]
 
-                # Check to see if there are multiple values separated by a delimiter
-                if delimiter:
-                    delimitedValue = ""
-                    for n in range(len(settingValues)):
-                        if n != len(settingValues) - 1:
-                            delimitedValue += settingValues[n] + delimiter
-                        else:
-                            delimitedValue += settingValues[n]
-                    settingValues = [delimitedValue]
+                target_ini = open_ini(ini_location, INI)
+                try:
+                    value = str(target_ini.get_value(currentSection, currentSetting, default=defaultValue))
+                except AttributeError as e:
+                    self.sme(
+                        f"There was a problem with the existing {target_ini} [{currentSection}] {currentSetting}, so {defaultValue} will be used.",
+                        exception=e,
+                    )
+                    value = defaultValue
+                settingValues.append(value)
+        if settingValues:
+            # Check to see if the settings correspond with specified each_setting choices.
+            if setting_choices:
+                for choice in setting_choices:
+                    if setting_choices[choice] == settingValues:
+                        settingValues = [choice]
+
+            # Check to see if there are multiple values separated by a delimiter
+            if delimiter:
+                delimitedValue = ""
+                for n in range(len(settingValues)):
+                    if n != len(settingValues) - 1:
+                        delimitedValue += settingValues[n] + delimiter
+                    else:
+                        delimitedValue += settingValues[n]
+                settingValues = [delimitedValue]
 
         return settingValues
 
