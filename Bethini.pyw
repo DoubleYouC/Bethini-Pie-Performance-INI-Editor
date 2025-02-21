@@ -966,8 +966,7 @@ class bethini_app(ttk.Window):
             self.sme(f"Failed to load icon for tab '{each_tab}':\n{icon_path}", exception=e)
             tab_icon = tk.PhotoImage(data=Icon.warning)
 
-        finally:
-            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tab_icon
+        self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tab_icon
 
     def label_frames_for_tab(self, each_tab) -> None:
         the_dict = self.tab_dictionary[each_tab]
