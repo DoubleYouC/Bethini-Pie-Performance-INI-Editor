@@ -28,15 +28,15 @@ class ModifyINI:
     apply to every instance of modifying the INI files.
     """
 
-    def __init__(self, ini_to_manage: str, *, preserve_case: bool = True) -> None:
-        self.ini_to_manage = ini_to_manage
+    def __init__(self, ini_path: str | Path, *, preserve_case: bool = True) -> None:
+        self.ini_path = Path(ini_path) if isinstance(ini_path, str) else ini_path
         self.config = customConfigParser()
         if preserve_case:
             self.config.optionxform = lambda optionstr: optionstr
-        logger.info(f"Successfully read {self.config.read(self.ini_to_manage)}")
+        logger.info(f"Successfully read {self.config.read(self.ini_path)}")
 
         self.case_insensitive_config = customConfigParser()
-        logger.info(f"Successfully read {self.case_insensitive_config.read(self.ini_to_manage)} (case insensitive)")
+        logger.info(f"Successfully read {self.case_insensitive_config.read(self.ini_path)} (case insensitive)")
 
         self.has_been_modified = False
 
@@ -151,6 +151,6 @@ class ModifyINI:
 
         if sort:
             self.sort()
-        with Path(self.ini_to_manage).open("w", encoding="utf-8") as config_file:
+        with self.ini_path.open("w", encoding="utf-8") as config_file:
             self.config.write(config_file, space_around_delimiters=False)
         self.has_been_modified = False

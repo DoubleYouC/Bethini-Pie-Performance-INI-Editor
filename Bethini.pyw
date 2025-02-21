@@ -761,6 +761,21 @@ class bethini_app(ttk.Window):
         self.deiconify()
         self.updateValues()
 
+    def create_first_time_backup(self, ini_location: Path, ini_objects: list[ModifyINI]) -> None:
+        backups_path = ini_location / f"{my_app_name} backups"
+        first_time_backup_path = backups_path / "First-Time-Backup"
+        first_time_backup_path.mkdir(parents=True)
+        for ini_file in ini_objects:
+            try:
+                copyfile(ini_file.ini_path, first_time_backup_path / ini_file.ini_path.name)
+            except FileNotFoundError as e:
+                self.sme(
+                    f"{ini_file.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.",
+                    exception=e,
+                )
+        copyfile(APP_LOG_FILE, first_time_backup_path / APP_LOG_FILE.name)
+
+
     def save_ini_files(self, _event: "tk.Event[tk.Misc] | None" = None) -> None:
         # self.openINIs = {
         #    my_app_config : {
@@ -772,7 +787,6 @@ class bethini_app(ttk.Window):
         #            }
         #        }
         #    }
-        files_saved = False
         self.remove_invalid_settings()
         try:
             self.apply_ini_dict(APP.preset_values("fixedDefault"), only_if_missing=True)
@@ -780,57 +794,74 @@ class bethini_app(ttk.Window):
             self.sme(f"NameError: {e}", exception=e)
             return
 
-        files_to_remove = [*list(open_inis)[1:], "log.log"]
+        files_to_remove = [*list(open_inis)[1:], APP_LOG_FILE.name]
+
+        # ini_locations_modified: set[Path] = set()
+        inis_by_location: dict[Path, list[ModifyINI]] = {}
+        inis_by_location_modified: dict[Path, list[ModifyINI]] = {}
+        locations_without_first_backup: set[Path] = set()
+
         for each_ini in open_inis:
-            location_list = list(open_inis[each_ini]["located"].keys())
-            for n in range(len(location_list)):
+            if each_ini == my_app_config:
+                continue
+
+            for n in range(len(open_inis[each_ini]["located"])):
                 located_at = open_inis[each_ini]["located"][str(n + 1)].get("at")
                 this_location = Path(located_at) if located_at else Path.cwd()
                 this_ini_object = open_inis[each_ini]["located"][str(n + 1)]["object"]
-                if each_ini == my_app_config:
-                    continue
-                if not this_ini_object.has_been_modified:
-                    self.sme(f"{each_ini} has not been modified, so there is no reason to resave it.")
-                    continue
-                if messagebox.askyesno(f"Save {each_ini}", f"Do you want to save {this_location / each_ini}?"):
-                    # We need to make a backup of each save before actually saving.
-                    do_first_time_backup = remove_excess_directory_files(
-                        this_location / f"{my_app_name} backups",
+
+                inis_by_location.setdefault(this_location, []).append(this_ini_object)
+                if this_ini_object.has_been_modified:
+                    inis_by_location_modified.setdefault(this_location, []).append(this_ini_object)
+
+                backups_path = this_location / f"{my_app_name} backups"
+                first_time_backup_path = backups_path / "First-Time-Backup"
+                if not first_time_backup_path.exists():
+                    locations_without_first_backup.add(this_location)
+
+        if not inis_by_location_modified:
+            self.sme("No files were modified.")
+            return
+
+        files_saved = False
+        for ini_location, inis in inis_by_location_modified.items():
+            for ini_object in inis:
+                backups_path = ini_location / f"{my_app_name} backups"
+                if messagebox.askyesno(
+                    f"Save {ini_object.ini_path.name}?",
+                    f"Do you want to save this ini?\n{ini_object.ini_path}?",
+                ):
+                    remove_excess_directory_files(
+                        backups_path,
                         int(app_config.get_value("General", "iMaxBackups", "-1")),
                         files_to_remove,
                     )
-                    if do_first_time_backup:
-                        the_backup_directory = this_location / f"{my_app_name} backups" / "First-Time-Backup"
-                        the_backup_directory.mkdir(parents=True, exist_ok=True)
-                        if (the_backup_directory / each_ini).exists():
-                            self.sme(f"{the_backup_directory / each_ini} exists, so it will not be overwritten.")
-                        else:
-                            try:
-                                copyfile(this_location / each_ini, the_backup_directory / each_ini)
-                            except FileNotFoundError as e:
-                                self.sme(
-                                    f"{this_location / each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.",
-                                    exception=e,
-                                )
-                        copyfile(APP_LOG_FILE, the_backup_directory / "log.log")
-                    the_backup_directory = this_location / f"{my_app_name} backups" / LOG_DIR_DATE
-                    the_backup_directory.mkdir(parents=True, exist_ok=True)
-                    if (the_backup_directory / each_ini).exists():
-                        self.sme(f"{the_backup_directory / each_ini} exists, so it will not be overwritten.")
-                    else:
-                        try:
-                            copyfile(this_location / each_ini, the_backup_directory / each_ini)
-                        except FileNotFoundError as e:
-                            self.sme(
-                                f"{this_location / each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.",
-                                exception=e,
-                            )
-                    copyfile(APP_LOG_FILE, the_backup_directory / "log.log")
-                    this_ini_object.save_ini_file(sort=True)
+                    if ini_location in locations_without_first_backup:
+                        locations_without_first_backup.remove(ini_location)
+                        self.create_first_time_backup(ini_location, inis_by_location[ini_location])
+
+                    current_backup_path = backups_path / LOG_DIR_DATE
+                    current_backup_path.mkdir(parents=True, exist_ok=True)
+                    current_backup_file_path = current_backup_path / ini_object.ini_path.name
+                    if current_backup_file_path.exists():
+                        self.sme(f"{current_backup_file_path} already exists, so it will not be overwritten.")
+                        continue
+
+                    try:
+                        copyfile(ini_object.ini_path, current_backup_file_path)
+                    except FileNotFoundError as e:
+                        self.sme(
+                            f"{ini_object.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.",
+                            exception=e,
+                        )
+                    ini_object.save_ini_file(sort=True)
                     files_saved = True
-                    self.sme(f"{this_location / each_ini} saved.")
+                    self.sme(f"{ini_object.ini_path} saved.")
+                    copyfile(APP_LOG_FILE, current_backup_path / APP_LOG_FILE.name)
+
         if not files_saved:
             self.sme("No files were modified.")
+
 
     def set_preset(self, preset_id) -> None:
         self.start_progress()
@@ -2145,7 +2176,7 @@ def on_closing(root: bethini_app) -> None:
         root.quit()
 
 
-def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_remove: list[str]) -> bool:
+def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_remove: list[str]) -> None:
     """Remove excess logs or backups.
 
     directory: The directory to remove files from.
@@ -2154,18 +2185,17 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
     """
 
     if max_to_keep <= -1:
-        return False
+        return
 
     try:
         subdirectories = [d for d in directory.iterdir() if d.is_dir()]
-        if not subdirectories:
-            return True
     except FileNotFoundError:
-        return True
+        return
 
-    subdirectories = [d for d in subdirectories if d.name != "First-Time-Backup"]
+    if subdirectories:
+        subdirectories = [d for d in subdirectories if d.name != "First-Time-Backup"]
     if len(subdirectories) <= max_to_keep:
-        return False
+        return
 
     subdirectories.sort(key=os.path.getctime, reverse=True)
     for index, dir_path in enumerate(subdirectories):
@@ -2192,7 +2222,6 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
             logger.exception(f"Failed to delete old folder: {dir_path}")
         else:
             logger.debug(f"Old folder was deleted: {dir_path}")
-    return False
 
 
 def open_ini(location: str, ini: str) -> ModifyINI:
@@ -2248,7 +2277,7 @@ if __name__ == "__main__":
     app_config.assign_setting_value("General", "sTheme", theme)
 
     # Remove excess log files.
-    remove_excess_directory_files(Path.cwd() / "logs", int(iMaxLogs), ["log.log"])
+    remove_excess_directory_files(Path.cwd() / "logs", int(iMaxLogs), [APP_LOG_FILE.name])
 
     # Initialize open_inis dictionary to store list of opened INI files in.
     open_inis: dict[str, OpenINI] = {my_app_config: {"located": {"1": {"at": "", "object": app_config}}}}
