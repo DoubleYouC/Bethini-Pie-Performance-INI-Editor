@@ -5,6 +5,8 @@ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 from collections import OrderedDict
 import configparser #This is allowing us to sort the INI files
+import logging
+logger = logging.getLogger(__name__)
 
 from lib.customConfigParser import customConfigParser
 
@@ -14,15 +16,15 @@ class ModifyINI:
     It also modifies the configparser to work in the way that we desire.
     This by nature allows us to make the changes in how we use the confiparser
     apply to every instance of modifying the INI files."""
-    def __init__(self, ini_to_manage, preserve_case=True):
-        self.ini_to_manage = ini_to_manage
-        self.config = customConfigParser()
+    def __init__(self, ini_to_manage: str, preserve_case: bool =True) -> None:
+        self.ini_to_manage: str = ini_to_manage
+        self.config: customConfigParser = customConfigParser()
         if preserve_case:
             self.config.optionxform = lambda option: option
-        self.config.read(self.ini_to_manage)
+        logger.info(f"Successfully read {self.config.read(self.ini_to_manage)}") # returns list of successfully read files
 
-        self.case_insensitive_config = customConfigParser()
-        self.case_insensitive_config.read(self.ini_to_manage)
+        self.case_insensitive_config = customConfigParser() # TODO why 2nd parser?
+        logger.info(f"Successfully read {self.case_insensitive_config.read(self.ini_to_manage)} (case insensitive)") # returns list of successfully read files
 
         self.has_been_modified = False
 

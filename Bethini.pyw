@@ -8,8 +8,8 @@
 import ast
 import configparser
 import os
+import sys
 import math
-import logging
 import webbrowser
 from shutil import copyfile
 from datetime import datetime
@@ -17,6 +17,25 @@ from operator import gt, ge, lt, le, ne, eq
 #from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
 #This is for changing file read-only access via os.chmod(filename, S_IREAD,
 #S_IRGRP, #S_IROTH) Not currently used.
+
+import logging
+
+# configure logging
+LOG_DIR_DATE: str = f'{datetime.now().strftime("%Y %m-%b %d %a - %H.%M.%S")}' # TODO refactor usage of 'the_backup_directory'
+APP_LOG_DIR = os.path.join("logs",LOG_DIR_DATE)  
+APP_LOG_FILE: str = os.path.join("logs", LOG_DIR_DATE, "log.log")
+
+fmt: str = '%(asctime)s  [%(levelname)s]  %(filename)s  %(funcName)s:%(lineno)s:  %(message)s'
+datefmt: str  = '%Y-%m-%d %H:%M:%S'
+if not os.path.exists(APP_LOG_DIR):
+    os.makedirs(APP_LOG_DIR)
+    
+logging.basicConfig(filename=APP_LOG_FILE, filemode='w', format=fmt, datefmt=datefmt, encoding='utf-8', level=logging.DEBUG)
+logger = logging.getLogger() # this is the root logger
+_log_stdout = logging.StreamHandler(sys.stdout) # to console
+_log_stdout.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
+logger.addHandler(_log_stdout)
+logger.info(f"Logging to '{APP_LOG_FILE}'")
 
 import tkinter as tk
 import ttkbootstrap as ttk
@@ -32,8 +51,7 @@ from lib.app import AppName
 from lib.AutoScrollbar import AutoScrollbar
 from lib.tooltips import Hovertip
 from lib.ModifyINI import ModifyINI
-from lib.customFunctions import CustomFunctions, sm, browse_to_location, rgb_to_hex, rgba_to_hex,hex_to_rgb, hex_to_decimal, decimal_to_rgb
-
+from lib.customFunctions import CustomFunctions, browse_to_location, rgb_to_hex, rgba_to_hex,hex_to_rgb, hex_to_decimal, decimal_to_rgb
 
 #This dictionary maps the operator modules to specific text.
 operator_dictionary = {
@@ -261,8 +279,11 @@ class bethini_app(ttk.Window):
         self.pw = ttk.Label(self.hsbframeholder, text='Loading... Please Wait... ')
         self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode='indeterminate')
 
-    def sme(self, message, exception=False):
-        sm(message, exception)
+    def sme(self, message: str, exception: bool=False):
+        if exception:
+            logger.error(message)
+        else:
+            logger.debug(message)
         self.statusbar_text.set(message)
         self.update()
 
@@ -290,7 +311,7 @@ class bethini_app(ttk.Window):
             #170
             try:
                 new_alpha = tk.simpledialog.askinteger("Alpha", "Alpha transparency (0 - 255):", initialvalue=alpha, minvalue = 0, maxvalue = 255)
-                sm(f"New alpha: {new_alpha}")
+                logger.debug(f"New alpha: {new_alpha}")
             except:
                 new_alpha = alpha
         elif color_value_type == 'rgb 1':
@@ -378,7 +399,7 @@ class bethini_app(ttk.Window):
             tooltip_text = tooltip_description
 
         setting_name = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting].get('Name')
-        photo_for_setting = f'apps\\{GAME_NAME}\\images\\{setting_name}.jpg'
+        photo_for_setting = os.path.join('apps', GAME_NAME, 'images', f'{setting_name}.jpg')
         if not os.path.isfile(photo_for_setting):
             photo_for_setting = None
             
@@ -578,7 +599,7 @@ class bethini_app(ttk.Window):
                     if first_time_backup_trigger:
                         first_time_backup = True
                     if first_time_backup:
-                        the_backup_directory = f'{this_location}\\{my_app_name} backups\\First-Time-Backup\\'
+                        the_backup_directory = os.path.join(this_location, f'{my_app_name} backups', 'First-Time-Backup')
                         if not os.path.isdir(the_backup_directory):
                             os.makedirs(the_backup_directory)
                         if os.path.exists(f"{the_backup_directory}{each_ini}"):
@@ -588,8 +609,8 @@ class bethini_app(ttk.Window):
                                 copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
                             except FileNotFoundError:
                                 self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
-                        copyfile(my_app_log, f"{the_backup_directory}log.log")
-                    the_backup_directory = f'{this_location}\\{my_app_name} backups\\{log_directory_date}\\'
+                        copyfile(APP_LOG_FILE, f"{the_backup_directory}log.log")
+                    the_backup_directory = os.path.join(this_location, f'{my_app_name} backups', LOG_DIR_DATE)
                     if not os.path.isdir(the_backup_directory):
                         os.makedirs(the_backup_directory)
                     if os.path.exists(f"{the_backup_directory}{each_ini}"):
@@ -599,7 +620,7 @@ class bethini_app(ttk.Window):
                             copyfile(f"{this_location}{each_ini}", f"{the_backup_directory}{each_ini}")
                         except FileNotFoundError:
                             self.sme(f"{this_location}{each_ini} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.", True)
-                    copyfile(my_app_log, f"{the_backup_directory}log.log")
+                    copyfile(APP_LOG_FILE, f"{the_backup_directory}log.log")
                     this_ini_object.save_ini_file(1)
                     files_saved = True
                     self.sme(f"{this_location}{each_ini} saved.")
@@ -696,13 +717,13 @@ class bethini_app(ttk.Window):
 
     def create_tab_image(self, each_tab):
         try:
-            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "icons\\" + self.tab_dictionary[each_tab]["Name"] + ".png", height=16, width=16)
+            self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = os.path.join("icons", f"{self.tab_dictionary[each_tab]['Name']}.png"), height=16, width=16)
         except tk.TclError as e:
-            self.sme(f'No image for tab.\n\n{e}', exception=1)
+            self.sme(f'No image for tab "{each_tab}": {e}', exception=1)
             try:
-                self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = "icons\\Blank.png")
+                self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(file = os.path.join("icons", "Blank.png"))
             except tk.TclError as e:
-                self.sme(f'Failed to load blank icon at {current_working_directory}\\icons\\Blank.png\n\n{e}', exception=1)
+                self.sme(f'Failed to load blank icon at {os.path.join(current_working_directory, "icons", "Blank.png")}\n\n{e}', exception=1)
                 self.tab_dictionary[each_tab]["TkPhotoImageForTab"] = tk.PhotoImage(data=Icon.warning)
 
     def label_frames_for_tab(self, each_tab):
@@ -1095,11 +1116,11 @@ class bethini_app(ttk.Window):
                     this_value = off_value
                 self.setting_dictionary[each_setting]["tk_var"].set(this_value)
             try:
-                self.sme(f"{each_setting} = {this_value}")
+                logger.debug(f"{each_setting} = {this_value}")
                 self.setting_dictionary[each_setting]['valueSet'] = True
                 return this_value
             except:
-                self.sme(f'No value set for checkbox {each_setting}.')
+                logger.warning(f'No value set for checkbox {each_setting}.')
 
     def dropdown_value(self, each_setting):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
@@ -1138,7 +1159,7 @@ class bethini_app(ttk.Window):
                     else:
                         this_value = setting_value[0]
                         self.setting_dictionary[each_setting]["tk_var"].set(this_value)
-            self.sme(f"{each_setting} = {this_value}")
+            logger.debug(f"{each_setting} = {this_value}")
             self.setting_dictionary[each_setting]['valueSet'] = True
             return this_value
 
@@ -1157,7 +1178,7 @@ class bethini_app(ttk.Window):
                     this_value = int(this_value)
             
             self.setting_dictionary[each_setting]["tk_var"].set(this_value)
-            self.sme(f"{each_setting} = {this_value}")
+            logger.debug(f"{each_setting} = {this_value}")
             self.setting_dictionary[each_setting]['valueSet'] = True
             return this_value
 
@@ -1182,11 +1203,11 @@ class bethini_app(ttk.Window):
                 this_value = setting_value[0]
             try:
                 self.setting_dictionary[each_setting]['tk_var'].set(this_value)
-                self.sme(f"{each_setting} = {this_value}")
+                logger.debug(f"{each_setting} = {this_value}")
                 self.setting_dictionary[each_setting]['valueSet'] = True
                 return this_value
             except:
-                self.sme(f'No value set for entry {each_setting}.')
+                logger.warning(f'No value set for entry {each_setting}.')
 
     def slider_value(self, each_setting):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
@@ -1205,11 +1226,11 @@ class bethini_app(ttk.Window):
             
             try:
                 self.setting_dictionary[each_setting]['tk_var'].set(this_value)
-                self.sme(f'{each_setting} = {this_value}')
+                logger.debug(f'{each_setting} = {this_value}')
                 self.setting_dictionary[each_setting]['valueSet'] = True
                 return this_value
             except:
-                self.sme(f'no value set for slider {each_setting}')
+                logger.warning(f'no value set for slider {each_setting}')
 
     def spinbox_value(self, each_setting):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
@@ -1219,11 +1240,11 @@ class bethini_app(ttk.Window):
             this_value = setting_value[0]
             try:
                 self.setting_dictionary[each_setting]['tk_var'].set(this_value)
-                self.sme(f'{each_setting} = {this_value}')
+                logger.debug(f'{each_setting} = {this_value}')
                 self.setting_dictionary[each_setting]['valueSet'] = True
                 return this_value
             except:
-                self.sme(f'no value set for spinbox {each_setting}')
+                logger.warning(f'no value set for spinbox {each_setting}')
 
     def color_value(self, each_setting):
         setting_value = self.get_setting_values(self.setting_dictionary[each_setting].get('targetINIs'),
@@ -1280,7 +1301,7 @@ class bethini_app(ttk.Window):
             else:
                 the_text_color = '#000000'
             tk_widget.configure(bg=new_color, activebackground=new_color, fg=the_text_color)
-            self.sme(f"{each_setting} = {this_value}")
+            logger.debug(f"{each_setting} = {this_value}")
             self.setting_dictionary[each_setting]['valueSet'] = True
             return this_value
 
@@ -1823,7 +1844,7 @@ def remove_excess_directory_files(directory, max_to_keep, files_to_remove):
     try:
         subdirectories = os.listdir(directory)
     except OSError as e:
-        sm(f"Info: {directory} : {e.strerror}")
+        logger.debug(f"Info: {directory} : {e.strerror}")
         return True
     subdirectories.sort()
     if 'First-Time-Backup' in subdirectories:
@@ -1831,19 +1852,19 @@ def remove_excess_directory_files(directory, max_to_keep, files_to_remove):
     if max_to_keep > -1:
         for n in range(len(subdirectories)):
             if n < max_to_keep:
-                sm(subdirectories[n] + ' will be kept.')
+                logger.debug(subdirectories[n] + ' will be kept.')
             else:
-                dir_path = f'{directory}\\' + subdirectories[n]
+                dir_path = os.path.join(directory, subdirectories[n])
                 try:
                     for file in files_to_remove:
                         try:
-                            os.remove(f'{dir_path}\\{file}')
+                            os.remove(os.path.join(dir_path, file))
                         except OSError as e:
-                            sm(f'Error: {dir_path}\\{file} : {e.strerror}')
+                            logger.error(f"{os.path.join(dir_path, file)}: {e.strerror}")
                     os.rmdir(dir_path)
-                    sm(subdirectories[n] + ' was removed.')
+                    logger.debug(subdirectories[n] + ' was removed.')
                 except OSError as e:
-                    sm(f"Error: {dir_path} : {e.strerror}")
+                    logger.error(f"{dir_path} : {e.strerror}")
     return False
 
 def open_ini(location, ini):
@@ -1877,18 +1898,11 @@ def open_ini(location, ini):
         open_inis[ini]['located'][open_ini_id]['object'] = ModifyINI(location + ini)
         #open_inis[ini]['located'][open_ini_id]['original'] = ModifyINI(location + ini)
     except configparser.MissingSectionHeaderError as e:
-        sm(f"Error: {e.strerror}")
+        logger.error(f"{e.strerror}")
     return open_inis[ini]['located'][open_ini_id]['object']
 
 if __name__ == '__main__':
-    #Make logs.
-    today = datetime.now()
-    log_directory_date = today.strftime("%Y %m-%b %d %a - %H.%M.%S")
-    my_app_log_directory = f'logs\\{log_directory_date}'
-    my_app_log = f'{my_app_log_directory}\\log.log'
-    os.makedirs(my_app_log_directory)
-    logging.basicConfig(filename=my_app_log, filemode='w', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
-
+        
     #Get app config settings.
     my_app_config = f'{my_app_short_name}.ini'
     app_config = ModifyINI(my_app_config)
@@ -1903,7 +1917,7 @@ if __name__ == '__main__':
     app_config.assign_setting_value('General', 'sTheme', theme)
 
     #Remove excess log files.
-    remove_excess_directory_files(f'{current_working_directory}\\logs', int(iMaxLogs), ['log.log'])
+    remove_excess_directory_files(os.path.join(current_working_directory, 'logs'), int(iMaxLogs), ['log.log'])
     
     #Initialize open_inis dictionary to store list of opened INI files in.
     open_inis = {
@@ -1926,7 +1940,7 @@ if __name__ == '__main__':
 
     #Start the app class
 
-    window = bethini_app(themename=theme, iconphoto='Icons\\Icon.png')
+    window = bethini_app(themename=theme, iconphoto=os.path.join('Icons', 'Icon.png'))
     window.choose_game()
     window.minsize(400,200)
 

@@ -4,6 +4,7 @@ To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-
 or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA."""
 
 import json
+import os
 
 def iter_items_list(items):
     """Given a dictionary, returns a list of all items."""
@@ -17,9 +18,9 @@ class AppName:
     the apps folder."""
 
     def __init__(self, appname):
-        with open('apps\\' + appname + '\\settings.json', encoding='utf-8') as app_json:
+        with open(os.path.join('apps', appname, 'settings.json'), encoding='utf-8') as app_json:
             self.data = json.load(app_json)
-        with open('apps\\' + appname + '\\Bethini.json', encoding='utf-8') as bethini:
+        with open(os.path.join('apps', appname, 'Bethini.json'), encoding='utf-8') as bethini:
             self.bethini = json.load(bethini)
 
         ini_files = list(self.bethini["INIs"].keys())
