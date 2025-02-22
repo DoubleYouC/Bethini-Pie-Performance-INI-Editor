@@ -2,15 +2,18 @@ v4.12
 Bethini Pie update notes:
 -Bugfix: Fix missing font for Linux users. (#8, #9, #10)
 
+Fallout 4 plugin update notes:
+-Bugfix: Survival difficulty incorrectly used 5 instead of 6.
+
 Skyrim Special Edition plugin update notes:
 -Bugfix: Difficulty settings used Fallout 4 names instead of their Skyrim equivalents.
 -Presets ignore bFreebiesSeen
 
 Starfield plugin update notes:
--Updated for official update 1.14.70
+-Updated for official update 1.14.74
 -Bugfix: Fixed incorrect sResourceIndexFileList default value (#16)
 -Don't add Starfield.ini settings to StarfieldCustom.ini by default
--Removed Aspect Ration dropdown, since the official default value is now expanded enough to not really need it
+-Removed Aspect Ratio dropdown, since the official default value is now expanded enough to not really need it
 -Updated Upscaling dropdown
 -Updated Gamma slider to also set the UI Gamma as well, since that is the same as the in-game settings menu behavior
 
