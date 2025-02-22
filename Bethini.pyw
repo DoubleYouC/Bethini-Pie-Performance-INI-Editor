@@ -842,15 +842,14 @@ class bethini_app(ttk.Window):
                     current_backup_file_path = current_backup_path / ini_object.ini_path.name
                     if current_backup_file_path.exists():
                         self.sme(f"{current_backup_file_path} already exists, so it will not be overwritten.")
-                        continue
-
-                    try:
-                        copyfile(ini_object.ini_path, current_backup_file_path)
-                    except FileNotFoundError as e:
-                        self.sme(
-                            f"{ini_object.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.",
-                            exception=e,
-                        )
+                    else:
+                        try:
+                            copyfile(ini_object.ini_path, current_backup_file_path)
+                        except FileNotFoundError as e:
+                            self.sme(
+                                f"{ini_object.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.",
+                                exception=e,
+                            )
                     ini_object.save_ini_file(sort=True)
                     files_saved = True
                     self.sme(f"{ini_object.ini_path} saved.")
