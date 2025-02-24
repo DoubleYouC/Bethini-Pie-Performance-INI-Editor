@@ -114,35 +114,6 @@ def set_theme(style_object: ttk.Style, theme_name: str) -> None:
     app_config.assign_setting_value("General", "sTheme", theme_name)
 
 
-class Scalar(ttk.Scale):
-    """A ttk.Scale with limited decimal places."""
-
-    def __init__(
-        self,
-        master: tk.Misc | None = None,
-        command: str | Callable[[str], object] = "",
-        from_: float = 0,
-        length: int = 100,
-        orient: Literal["horizontal", "vertical"] = "horizontal",
-        to: float = 1,
-        variable: ttk.IntVar | ttk.DoubleVar | None = None,
-        decimal_places: IntStr = "0",
-    ) -> None:
-        self.decimal_places = int(decimal_places)
-        if command:
-            self.chain = command
-        else:
-            self.chain = lambda *_a: None
-        super().__init__(master, command=self._value_changed, from_=from_, length=length, orient=orient, to=to, variable=variable)
-
-    def _value_changed(self, _new_value: str) -> None:
-        if self.decimal_places == 0:
-            value = int(self.get())
-        else:
-            value = round(self.get(), self.decimal_places)
-        self.chain(value)
-
-
 class bethini_app(ttk.Window):
     """This is the main app, the glue that creates the GUI."""
 
