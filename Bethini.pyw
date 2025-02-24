@@ -1604,7 +1604,7 @@ class bethini_app(ttk.Window):
             else:
                 set_to_off = self.settings_that_settings_depend_on[setting_name][dependent_setting_name].get("setToOff")
                 if set_to_off:
-                    off_value = self.setting_dictionary[dependent_setting_name].get("OOffvalue")
+                    off_value = self.setting_dictionary[dependent_setting_name].get("Offvalue")
 
                     self.setting_dictionary[dependent_setting_name]["tk_var"].set(off_value)
                 self.setting_dictionary[dependent_setting_name]["tk_widget"].configure(state=tk.DISABLED)
