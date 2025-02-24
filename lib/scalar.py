@@ -26,7 +26,7 @@ class Scalar(ttk.Scale):
         orient: Literal["horizontal", "vertical"] = "horizontal",
         to: float = 1,
         variable: ttk.IntVar | ttk.DoubleVar | None = None,
-        decimal_places: IntStr = "0",
+        decimal_places: "IntStr" = "0",
     ) -> None:
         self.decimal_places = int(decimal_places)
         # Currently unused. Supports the above commented command parameter.

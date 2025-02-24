@@ -41,6 +41,7 @@ from lib.customFunctions import (
     rgba_to_hex,
 )
 from lib.ModifyINI import ModifyINI
+from lib.scalar import Scalar
 from lib.tooltips import Hovertip
 from lib.type_helpers import *
 
