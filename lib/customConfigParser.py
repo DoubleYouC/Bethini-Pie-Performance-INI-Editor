@@ -38,7 +38,7 @@ class customConfigParser(configparser.RawConfigParser):
 
         # This read function was modified to pick the first option value if there is a
         # duplicate option. Any subsequent duplicate option values are discarded.
-        elements_added = set()
+        elements_added: set[str] = set()
         cursect: dict[str, list[str | int] | None] | None = None
         sectname = None
         optname = None

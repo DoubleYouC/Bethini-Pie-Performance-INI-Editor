@@ -9,15 +9,17 @@ import ctypes.wintypes
 import logging
 import shutil
 import sys
+import winreg
 from pathlib import Path
 from tkinter import filedialog, simpledialog
-import winreg
+from typing import cast
 
 if __name__ == "__main__":
     sys.exit(1)
 
 from lib.app import AppName
 from lib.ModifyINI import ModifyINI
+from lib.type_helpers import *
 
 logger = logging.getLogger(__name__)
 
@@ -41,19 +43,19 @@ def hex_to_rgb(value: str) -> tuple[int, int, int] | tuple[int, ...]:
     return tuple(int(value[i : i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
-def hex_to_decimal(hex_) -> str:
-    return str(int(str(hex_).lstrip("#"), 16))
+def hex_to_decimal(hex_: str) -> str:
+    return str(int(hex_.lstrip("#"), 16))
 
 
-def decimal_to_rgb(decimal) -> tuple[int, int, int]:
-    decimal = int(decimal)
+def decimal_to_rgb(decimal_string: str) -> tuple[int, int, int]:
+    decimal = int(decimal_string)
     blue = decimal & 255
     green = (decimal >> 8) & 255
     red = (decimal >> 16) & 255
     return (red, green, blue)
 
 
-def browse_to_location(choice: str, browse: list[str], function: str, game_name: str) -> str | None:
+def browse_to_location(choice: str, browse: Browse, function: str, game_name: str) -> str | None:
     if choice == "Browse...":
         if browse[2] == "directory":
             response = filedialog.askdirectory()
@@ -177,7 +179,7 @@ class CustomFunctions:
     def getBackups(game_name: str) -> list[str]:
         gameDocumentsName = Info.game_documents_name(game_name)
         defaultINILocation = str(Info.get_documents_path() / "My Games" / gameDocumentsName) if gameDocumentsName else ""
-        INIPath = ModifyINI("Bethini.ini").get_value("Directories", f"s{game_name}INIPath", default=defaultINILocation)
+        INIPath = cast("str", ModifyINI("Bethini.ini").get_value("Directories", f"s{game_name}INIPath", defaultINILocation))
         backup_directory = Path(INIPath) / "Bethini Pie backups"
         try:
             backups = [b.name for b in backup_directory.iterdir()]
@@ -192,7 +194,7 @@ class CustomFunctions:
         return f"{CustomFunctions.screenwidth}x{CustomFunctions.screenheight}"
 
     @staticmethod
-    def getBethesdaGameFolder(game_name: str):
+    def getBethesdaGameFolder(game_name: str) -> str:
         game_folder = ModifyINI("Bethini.ini").get_value("Directories", f"s{game_name}Path")
         if game_folder is not None:
             return game_folder
@@ -209,9 +211,10 @@ class CustomFunctions:
         except OSError:
             logger.exception("Game path not found in the registry. Run the game launcher to set it.")
             # TODO: Handle what happens next
+        raise NotImplementedError
 
     @staticmethod
-    def getGamePath(game_name: str):
+    def getGamePath(game_name: str) -> str | None:
         return ModifyINI("Bethini.ini").get_value("Directories", f"s{game_name}Path")
 
     @staticmethod
