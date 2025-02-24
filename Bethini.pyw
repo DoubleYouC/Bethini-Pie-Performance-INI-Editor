@@ -1507,6 +1507,7 @@ class bethini_app(ttk.Window):
                 this_value = simple_eval(formula.format(setting_value[0]))
                 decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
                 if decimal_places_str:
+                    decimal_places = int(decimal_places_str)
                     this_value = round(this_value, decimal_places)
                     if decimal_places == 0:
                         this_value = int(this_value)
