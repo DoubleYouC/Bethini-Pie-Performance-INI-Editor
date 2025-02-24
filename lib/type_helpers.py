@@ -15,12 +15,8 @@ from lib.ModifyINI import ModifyINI
 if TYPE_CHECKING:
     from lib.scalar import Scalar
 
-
 IntStr: TypeAlias = str
 """A string representing an integer."""
-
-BoolIntStr: TypeAlias = Literal["0", "1"]
-"""A string representing an integer boolean."""
 
 FloatStr: TypeAlias = str
 """A string representing an float."""
@@ -31,6 +27,27 @@ Browse: TypeAlias = tuple[Literal["directory"], Literal["directory"] | str, Lite
 
 ColorType: TypeAlias = Literal["rgb", "rgb 1", "rgba", "decimal", "hex"]
 ColorValue: TypeAlias = str | tuple[int, ...]
+
+TabId: TypeAlias = str
+"""A string in the format Page1, Page2, etc."""
+
+SettingId: TypeAlias = str
+"""A string in the format Setting1, Setting2, etc."""
+
+SettingFrameId: TypeAlias = str
+"""A string in the format SettingFrame1, SettingFrame2, etc."""
+
+LabelFrameId: TypeAlias = str
+"""A string in the format LabelFrame1, LabelFrame2, etc."""
+
+ValueType: TypeAlias = Literal["boolean", "float", "number", "string"]
+
+ValueList: TypeAlias = list[list[Literal[""] | IntStr | FloatStr | str]]
+
+TkAnchor: TypeAlias = Literal["nw", "n", "ne", "w", "center", "e", "sw", "s", "se"]
+TkFill: TypeAlias = Literal["none", "x", "y", "both"]
+TkSide: TypeAlias = Literal["left", "right", "top", "bottom"]
+
 
 SettingType: TypeAlias = Literal[
     "Checkbutton",
@@ -44,13 +61,24 @@ SettingType: TypeAlias = Literal[
     "Spinbox",
 ]
 
+WidgetId: TypeAlias = Literal[
+    "TkCheckbutton",
+    "TkColor",
+    "TkCombobox",
+    "TkEntry",
+    "TkOptionMenu",
+    "TkRadioPreset",
+    "TkSlider",
+    "TkSpinbox",
+]
 
-class GameSetting(TypedDict):
-    name: str
-    section: str
+
+class GameSetting(TypedDict, total=False):
     alwaysPrint: bool
     ini: str
-    type: Literal["boolean", "float", "number", "string"]
+    name: str
+    section: str
+    type: ValueType
     value: dict[Literal["default", "recommended"] | str, int | float | str]
 
 
@@ -58,46 +86,57 @@ class DependentSetting(TypedDict):
     operator: Literal["greater-than", "greater-or-equal-than", "less-than", "less-or-equal-than", "not-equal", "equal"]
     value: str | list[list[str]]
 
+    var: tk.Variable
+    setToOff: bool
+
 
 class BethiniSetting(
     TypedDict(
         "BethiniSetting",
         {
-            "decimal places": NotRequired[IntStr],
+            "decimal places": NotRequired[IntStr | None],
             "from": NotRequired[IntStr],
             "preset id": NotRequired[str],
         },
     ),
+    total=False,
 ):
     """Type annotations for setting dictionary values.
 
     :Usage:
-    setting: Setting = self.tab_dictionary[each_tab]["LabelFrames"][the_label_frame]["SettingFrames"][on_frame][the_setting]
+    setting: Setting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][frame_id][setting_id]
     """
 
-    Name: str
     browse: Browse
-    choices: str | list[Literal["Browse...", "Manual..."] | str]
+    choices: str | list[Literal["Browse...", "Manual..."] | str] | None
     colorValueType: ColorType
     custom_function: str
     customWidth: IntStr
-    delimiter: Literal["x"]
+    delimiter: Literal["x"] | None
     dependentSettings: dict[str, DependentSetting]
     entry_width: IntStr
-    fileFormat: Literal["directory", "file"]
-    forceSelect: IntStr
+    fileFormat: Literal["directory", "file"] | None
+    forceSelect: IntStr | None
+    formula: str | None
     increment: IntStr
+    label_frame_id: LabelFrameId
+    label_frame_name: str
     length: IntStr
-    Offvalue: list[list[Literal[""] | BoolIntStr | IntStr | FloatStr | str]]
-    Onvalue: list[list[Literal[""] | BoolIntStr | IntStr | FloatStr | str]]
-    partial: list[str]
-    rgbType: Literal["multiple settings"]
-    second_tk_widget: ttk.Spinbox
-    settingChoices: dict[str, list[str]]
-    settings: list[str]
-    targetINIs: list[str]
-    targetSections: list[str]
+    Name: str
+    Offvalue: ValueList | None
+    Onvalue: ValueList | None
+    partial: list[str] | None
+    rgbType: Literal["multiple settings"] | None
+    second_tk_widget: tk.Widget  # ttk.Spinbox
+    setting_frame_id: SettingFrameId
+    setting_id: SettingId
+    settingChoices: dict[str, list[str]] | None
+    settings: list[str] | None
+    tab_id: TabId
+    targetINIs: list[str] | None
+    targetSections: list[str] | None
     tk_var: tk.StringVar
+    tk_widget: tk.Widget
     TkCheckbutton: ttk.Checkbutton
     TkColor: tk.Button
     TkCombobox: ttk.Combobox
@@ -117,29 +156,83 @@ class BethiniSetting(
     type: SettingType
     validate: ValidationType | str
     value: str
+    valueSet: bool
+    widget_id: WidgetId
     width: IntStr
 
 
 class PackSettings(TypedDict):
-    Anchor: Literal["NW", "N", "NE", "W", "Center", "E", "SW", "S", "SE"]
-    Expand: Literal[0, 1]
-    Fill: Literal["None", "X", "Y", "Both"]
-    Side: Literal["Left", "Right", "Top", "Bottom"]
+    Anchor: TkAnchor
+    Expand: Literal[0, 1] | bool
+    Fill: TkFill
+    Side: TkSide
 
 
-class DisplayTab(TypedDict):
+class SettingFrame(TypedDict, total=False):
+    TkSettingFrame: ttk.Frame
+
+
+class SettingsLabelFrame(TypedDict, total=False):
+    Name: str
     NumberOfVerticallyStackedSettings: IntStr
     Pack: PackSettings
-    Settings: dict[str, BethiniSetting]
+    Settings: dict[SettingId, BethiniSetting]
+    SettingFrames: dict[SettingFrameId, dict[SettingId, BethiniSetting]]
+    TkLabelFrame: ttk.Labelframe | ttk.Frame
 
 
-class AppSettings(TypedDict):
+class DisplayTab(TypedDict, total=False):
+    Name: (
+        Literal[
+            "Setup",
+            "Preferences",
+            "Basic",
+            "General",
+            "Gameplay",
+            "Interface",
+            "Environment",
+            "Shadows",
+            "Visuals",
+            "View Distance",
+        ]
+        | str
+    )
+    SetupWindow: tk.BaseWidget
+    TkFrameForTab: ttk.Frame
+    TkPhotoImageForTab: tk.PhotoImage
+    LabelFrames: dict[LabelFrameId, SettingsLabelFrame]
+    PreferencesWindow: ttk.Toplevel
+
+
+class AppBethiniJSON(TypedDict):
     customFunctions: dict[str, str]
     Default: Literal[""]
-    displayTabs: dict[str, dict[Literal["NoLabelFrame"] | str, DisplayTab]]
+    displayTabs: dict[str, DisplayTab]
     INIs: dict[str, str]
     presetsIgnoreTheseSettings: list[str]
-    valueTypes: list[str]
+    valueTypes: list[
+        Literal[
+            "default",
+            "fixedDefault",
+            "Vanilla Low",
+            "Vanilla Medium",
+            "Vanilla High",
+            "Vanilla Ultra",
+            "Bethini Poor",
+            "Bethini Low",
+            "Bethini Medium",
+            "Bethini High",
+            "Bethini Ultra",
+        ]
+    ]
+
+
+class AppSettingsJSON(TypedDict):
+    gameId: str
+    gameName: str
+    iniPaths: list[str]
+    iniValues: list[GameSetting]
+    presetPaths: list[str]
 
 
 class Located(TypedDict):
@@ -149,3 +242,13 @@ class Located(TypedDict):
 
 class OpenINI(TypedDict):
     located: dict[str, Located]
+
+
+class SettingInfo(TypedDict):
+    ini: str
+    section: str
+    value: str
+
+
+GameSettingInfo: TypeAlias = dict[str, SettingInfo]
+"""A dict containing settings and their default or preset values."""
