@@ -316,7 +316,7 @@ class bethini_app(ttk.Window):
         elif color_value_type == "rgb 1":
             # "(1.0000, 1.0000, 1.0000)"
             # (255, 255, 255)
-            old_color = tuple(int(float(i) * 255) for i in ast.literal_eval(old_color))
+            old_color = rgb_to_hex(cast("tuple[int, int, int]", tuple(int(float(i) * 255) for i in ast.literal_eval(old_color))))
 
         elif color_value_type == "decimal":
             old_color = rgb_to_hex(decimal_to_rgb(old_color))
