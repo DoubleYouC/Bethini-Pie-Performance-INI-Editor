@@ -1897,8 +1897,8 @@ class bethini_app(ttk.Window):
             self.create_tab_image(tab_id)
             if self.tab_dictionary[tab_id]["Name"] == "Setup":
                 global SETUP_WINDOW
-                self.tab_dictionary[tab_id]["SetupWindow"] = ttk.Toplevel("Setup")
-                SETUP_WINDOW = self.tab_dictionary[tab_id]["SetupWindow"]
+                SETUP_WINDOW = ttk.Toplevel("Setup")
+                self.tab_dictionary[tab_id]["SetupWindow"] = SETUP_WINDOW
                 self.tab_dictionary[tab_id]["TkFrameForTab"] = ttk.Frame(SETUP_WINDOW)
                 self.tab_dictionary[tab_id]["TkFrameForTab"].pack()
 
