@@ -832,7 +832,8 @@ class bethini_app(ttk.Window):
 
         for setting_number, setting_name in enumerate(
             cast(
-                "dict[str, BethiniSetting]", APP.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"],
+                "dict[str, BethiniSetting]",
+                APP.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"],
             ),
             start=1,
         ):
@@ -1361,7 +1362,7 @@ class bethini_app(ttk.Window):
             self.setting_dictionary[setting_name].get("settings", []),
         )
 
-        if setting_value:
+        if setting_value and all(setting_value):
             on_value = self.setting_dictionary[setting_name].get("Onvalue")
             off_value = self.setting_dictionary[setting_name].get("Offvalue")
             if setting_value == on_value:
@@ -1391,14 +1392,14 @@ class bethini_app(ttk.Window):
 
     def dropdown_value(self, setting_name: str):
         setting_value = self.get_setting_values(
-            self.setting_dictionary[setting_name].get("targetINIs"),
-            self.setting_dictionary[setting_name].get("targetSections"),
-            self.setting_dictionary[setting_name].get("settings"),
+            self.setting_dictionary[setting_name].get("targetINIs", []),
+            self.setting_dictionary[setting_name].get("targetSections", []),
+            self.setting_dictionary[setting_name].get("settings", []),
             self.setting_dictionary[setting_name].get("settingChoices"),
             self.setting_dictionary[setting_name].get("delimiter"),
         )
 
-        if setting_value:
+        if setting_value and all(setting_value):
             decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
             if decimal_places_str:
                 decimal_places = int(decimal_places_str)
@@ -1432,11 +1433,11 @@ class bethini_app(ttk.Window):
 
     def combobox_value(self, setting_name: str) -> str | None:
         setting_value = self.get_setting_values(
-            self.setting_dictionary[setting_name].get("targetINIs"),
-            self.setting_dictionary[setting_name].get("targetSections"),
-            self.setting_dictionary[setting_name].get("settings"),
+            self.setting_dictionary[setting_name].get("targetINIs", []),
+            self.setting_dictionary[setting_name].get("targetSections", []),
+            self.setting_dictionary[setting_name].get("settings", []),
         )
-        if setting_value:
+        if setting_value and all(setting_value):
             str_value = setting_value[0]
 
             decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
@@ -1453,11 +1454,11 @@ class bethini_app(ttk.Window):
 
     def entry_value(self, setting_name: str):
         setting_value = self.get_setting_values(
-            self.setting_dictionary[setting_name].get("targetINIs"),
-            self.setting_dictionary[setting_name].get("targetSections"),
-            self.setting_dictionary[setting_name].get("settings"),
+            self.setting_dictionary[setting_name].get("targetINIs", []),
+            self.setting_dictionary[setting_name].get("targetSections", []),
+            self.setting_dictionary[setting_name].get("settings", []),
         )
-        if setting_value:
+        if setting_value and all(setting_value):
             formula = self.setting_dictionary[setting_name].get("formula")
             file_format = self.setting_dictionary[setting_name].get("fileFormat")
             if formula:
@@ -1487,12 +1488,12 @@ class bethini_app(ttk.Window):
 
     def slider_value(self, setting_name: str) -> str | None:
         setting_value = self.get_setting_values(
-            self.setting_dictionary[setting_name].get("targetINIs"),
-            self.setting_dictionary[setting_name].get("targetSections"),
-            self.setting_dictionary[setting_name].get("settings"),
+            self.setting_dictionary[setting_name].get("targetINIs", []),
+            self.setting_dictionary[setting_name].get("targetSections", []),
+            self.setting_dictionary[setting_name].get("settings", []),
         )
 
-        if setting_value:
+        if setting_value and all(setting_value):
             str_value = setting_value[0]
 
             decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
@@ -1513,11 +1514,11 @@ class bethini_app(ttk.Window):
 
     def spinbox_value(self, setting_name: str) -> str | None:
         setting_value = self.get_setting_values(
-            self.setting_dictionary[setting_name].get("targetINIs"),
-            self.setting_dictionary[setting_name].get("targetSections"),
-            self.setting_dictionary[setting_name].get("settings"),
+            self.setting_dictionary[setting_name].get("targetINIs", []),
+            self.setting_dictionary[setting_name].get("targetSections", []),
+            self.setting_dictionary[setting_name].get("settings", []),
         )
-        if setting_value:
+        if setting_value and all(setting_value):
             this_value = setting_value[0]
             try:
                 self.setting_dictionary[setting_name]["tk_var"].set(this_value)
@@ -1531,14 +1532,14 @@ class bethini_app(ttk.Window):
 
     def color_value(self, setting_name: str) -> str | None:
         setting_value = self.get_setting_values(
-            self.setting_dictionary[setting_name].get("targetINIs"),
-            self.setting_dictionary[setting_name].get("targetSections"),
-            self.setting_dictionary[setting_name].get("settings"),
+            self.setting_dictionary[setting_name].get("targetINIs", []),
+            self.setting_dictionary[setting_name].get("targetSections", []),
+            self.setting_dictionary[setting_name].get("settings", []),
         )
 
         this_value = None
         new_color = None
-        if setting_value:
+        if setting_value and all(setting_value):
             color_value_type = self.setting_dictionary[setting_name].get("colorValueType")
             if color_value_type == "hex":
                 this_value = setting_value[0]
