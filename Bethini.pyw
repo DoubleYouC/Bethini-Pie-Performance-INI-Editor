@@ -1386,7 +1386,7 @@ class bethini_app(ttk.Window):
                 return this_value
         return None
 
-    def dropdown_value(self, setting_name: str):
+    def dropdown_value(self, setting_name: str) -> int | float | str | tuple[str, str] | None:
         setting_value = self.get_setting_values(
             self.setting_dictionary[setting_name].get("targetINIs", []),
             self.setting_dictionary[setting_name].get("targetSections", []),
