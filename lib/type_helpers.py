@@ -125,18 +125,18 @@ class BethiniSetting(
     Name: str
     Offvalue: ValueList | None
     Onvalue: ValueList | None
-    partial: list[str]
+    partial: list[str] | None
     rgbType: Literal["multiple settings"] | None
-    second_tk_widget: tk.Widget
+    second_tk_widget: ttk.Spinbox | None
     setting_frame_id: SettingFrameId
     setting_id: SettingId
-    settingChoices: dict[str, list[str]]
+    settingChoices: dict[str, list[str]] | None
     settings: list[str]
     tab_id: TabId
     targetINIs: list[str]
     targetSections: list[str]
     tk_var: tk.StringVar
-    tk_widget: tk.Widget
+    tk_widget: "ttk.Checkbutton | tk.Button | ttk.Button | ttk.Combobox | ttk.Entry | ttk.OptionMenu | ttk.Radiobutton | Scalar | ttk.Spinbox"
     TkCheckbutton: ttk.Checkbutton
     TkColor: tk.Button
     TkCombobox: ttk.Combobox
@@ -166,10 +166,6 @@ class PackSettings(TypedDict):
     Expand: Literal[0, 1] | bool
     Fill: TkFill
     Side: TkSide
-
-
-class SettingFrame(TypedDict, total=False):
-    TkSettingFrame: ttk.Frame
 
 
 class SettingsLabelFrame(TypedDict, total=False):

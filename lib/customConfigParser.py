@@ -3,7 +3,7 @@
 import configparser
 import sys
 from io import TextIOWrapper
-from os import PathLike
+from typing import cast
 
 if __name__ == "__main__":
     sys.exit(1)
@@ -18,7 +18,7 @@ class customConfigParser(configparser.RawConfigParser):
         super().__init__(allow_no_value=True, delimiters=("=",), comment_prefixes=(), strict=False)
         # comment_prefixes=() is necessary to preserve comments.
 
-    def _read(self, fp: TextIOWrapper, fpname: str | bytes | PathLike[str]) -> None:
+    def _read(self, fp: TextIOWrapper, fpname: str) -> None:
         """Parse a sectioned configuration file.
 
         Each section in a configuration file contains a header, indicated by
@@ -40,10 +40,10 @@ class customConfigParser(configparser.RawConfigParser):
         # duplicate option. Any subsequent duplicate option values are discarded.
         elements_added: set[str | tuple[str, str]] = set()
         cursect: dict[str, list[str | int] | None] | None = None
-        sectname = None
+        sectname: str | None = None
         optname = None
         indent_level = 0
-        e: Exception | None = None
+        e: configparser.Error | None = None
         for lineno, line in enumerate(fp, start=1):
             comment_start: int | None = sys.maxsize
             # Strip inline comments
@@ -86,7 +86,7 @@ class customConfigParser(configparser.RawConfigParser):
                 # Is it a section header?
                 mo = self.SECTCRE.match(value)
                 if mo:
-                    sectname = mo.group("header")
+                    sectname = cast("str", mo.group("header"))
                     if sectname in self._sections:
                         if self._strict and sectname in elements_added:
                             raise configparser.DuplicateSectionError(sectname, fpname, lineno)
@@ -121,6 +121,7 @@ class customConfigParser(configparser.RawConfigParser):
                         if not optname:
                             e = self._handle_error(e, fpname, lineno, line)
                         optname = self.optionxform(optname.rstrip())
+                        sectname = cast("str", sectname)
                         if self._strict and (sectname, optname) in elements_added:
                             raise configparser.DuplicateOptionError(sectname, optname, fpname, lineno)
                         elements_added.add((sectname, optname))

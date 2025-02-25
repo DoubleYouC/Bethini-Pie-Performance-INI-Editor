@@ -734,7 +734,7 @@ class bethini_app(ttk.Window):
                                         this_ini_object.remove_section(section)
                                         self.sme(f"{section} was removed because it was empty.")
 
-    def apply_ini_dict(self, ini_dict: dict[str, GameSetting], *, only_if_missing: bool = False) -> None:
+    def apply_ini_dict(self, ini_dict: dict[str, SettingInfo], *, only_if_missing: bool = False) -> None:
         for setting_name in ini_dict:
             # Settings are in the format `setting:section`
             # e.g. sAntiAliasing:Display
@@ -756,7 +756,7 @@ class bethini_app(ttk.Window):
             the_target_ini.assign_setting_value(target_section, target_setting, this_value)
             self.sme(f"{target_ini} [{target_section}] {target_setting}={this_value}")
 
-    def remove_ini_dict(self, ini_dict: dict[str, GameSetting]) -> None:
+    def remove_ini_dict(self, ini_dict: dict[str, SettingInfo]) -> None:
         for setting_name in ini_dict:
             target_setting = setting_name.split(":")[0]
             target_ini = ini_dict[setting_name]["ini"]
@@ -832,22 +832,23 @@ class bethini_app(ttk.Window):
 
         for setting_number, setting_name in enumerate(
             cast(
-                "dict[str, BethiniSetting]", APP.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"]
+                "dict[str, BethiniSetting]", APP.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"],
             ),
             start=1,
         ):
             setting_frame_id = f"SettingFrame{math.ceil(setting_number / number_of_vertically_stacked_settings) - 1}"
             if setting_frame_id not in setting_frames:
                 setting_frames[setting_frame_id] = {}
-                setting_frames[setting_frame_id]["TkSettingFrame"] = ttk.Frame(
+                setting_frame = ttk.Frame(
                     self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["TkLabelFrame"],
                 )
-                setting_frames[setting_frame_id]["TkSettingFrame"].pack(side=tk.LEFT, anchor=tk.NW)
+                setting_frames[setting_frame_id]["TkSettingFrame"] = setting_frame  # type: ignore[reportArgumentType]
+                setting_frame.pack(side=tk.LEFT, anchor=tk.NW)
             setting_id = f"Setting{setting_number}"
             setting: BethiniSetting = {"Name": setting_name}
             setting_frames[setting_frame_id][setting_id] = setting
             setting["TkFinalSettingFrame"] = ttk.Frame(
-                setting_frames[setting_frame_id]["TkSettingFrame"],
+                cast("ttk.Frame", setting_frames[setting_frame_id]["TkSettingFrame"]),
             )
             setting["TkFinalSettingFrame"].pack(anchor=tk.W, padx=5, pady=2)
             if setting_name != "Placeholder":
@@ -1077,7 +1078,7 @@ class bethini_app(ttk.Window):
             setting["tk_var"],
             choices[0],
             *choices,
-            command=browse_to_loc,
+            command=lambda c: browse_to_loc(c),  # noqa: PLW0108
         )
         setting[widget_id].var = setting["tk_var"]
         setting[widget_id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
@@ -1154,7 +1155,7 @@ class bethini_app(ttk.Window):
 
         widget_id = "TkEntry"
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
-        entry_width = setting.get("entry_width")
+        entry_width = int(setting.get("entry_width") or 20)
         validate = setting.get("validate")
 
         setting["tk_var"] = tk.StringVar(self)
@@ -1595,7 +1596,6 @@ class bethini_app(ttk.Window):
             operator_func = self.settings_that_settings_depend_on[setting_name][dependent_setting_name].get("operator")
             value = self.settings_that_settings_depend_on[setting_name][dependent_setting_name].get("value")
             current_value = self.widget_type_switcher(setting_name)
-
             second_tk_widget = self.setting_dictionary[dependent_setting_name].get("second_tk_widget")
             if var == "float":
                 value = float(value)
@@ -1981,6 +1981,7 @@ class bethini_app(ttk.Window):
                 operator_func = operator_dictionary[operator_name]
                 setting = self.setting_dictionary[setting_name]
                 second_tk_widget = setting.get("second_tk_widget")
+
                 if operator_func(current_value, value):
                     setting["tk_widget"].configure(state=tk.NORMAL)
                     if second_tk_widget:
@@ -2058,13 +2059,13 @@ class bethini_app(ttk.Window):
 
                 target_ini = open_ini(ini_location, INI)
                 try:
-                    value = str(target_ini.get_value(currentSection, currentSetting, defaultValue))
+                    value = str(target_ini.get_value(currentSection, currentSetting, defaultValue))  # type: ignore[reportArgumentType]
                 except AttributeError as e:
                     self.sme(
                         f"There was a problem with the existing {target_ini} [{currentSection}] {currentSetting}, so {defaultValue} will be used.",
                         exception=e,
                     )
-                    value = defaultValue
+                    value = str(defaultValue)
                 settingValues.append(value)
 
         if settingValues:
