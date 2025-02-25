@@ -25,7 +25,9 @@
     <Compile Include="lib\customConfigParser.py" />
     <Compile Include="lib\customFunctions.py" />
     <Compile Include="lib\ModifyINI.py" />
+    <Compile Include="lib\scalar.py" />
     <Compile Include="lib\tooltips.py" />
+    <Compile Include="lib\type_helpers.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".vs\ProjectSettings.json" />
