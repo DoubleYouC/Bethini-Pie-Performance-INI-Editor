@@ -70,7 +70,7 @@ class customConfigParser(configparser.RawConfigParser):
                 if self._empty_lines_in_values:
                     # Add empty line to the value, but only if there was no comment on the line
                     if comment_start is None and cursect is not None and optname and cursect[optname] is not None:
-                        cursect[optname].append("")  # newlines added at join
+                        cast("list[str | int]", cursect[optname]).append("")  # newlines added at join
                 else:
                     # Empty line marks end of value
                     indent_level = sys.maxsize
@@ -79,7 +79,7 @@ class customConfigParser(configparser.RawConfigParser):
             first_nonspace = self.NONSPACECRE.search(line)
             cur_indent_level = first_nonspace.start() if first_nonspace else 0
             if cursect is not None and optname and cur_indent_level > indent_level:
-                cursect[optname].append(value)
+                cast("list[str | int]", cursect[optname]).append(value)
             # A section header or option header?
             else:
                 indent_level = cur_indent_level
@@ -142,7 +142,7 @@ class customConfigParser(configparser.RawConfigParser):
                         # list of all bogus lines.
                         e = self._handle_error(e, fpname, lineno, line)
 
-        self._join_multiline_values()
+        self._join_multiline_values()  # type: ignore[reportAttributeAccessIssue]
         # If any parsing errors occurred, raise an exception.
         if e:
             raise e

@@ -148,8 +148,8 @@ class bethini_app(ttk.Window):
         self.the_canvas = ttk.Canvas(self)
         self.hsbframeholder = ttk.Frame(self)
 
-        self.vsb = AutoScrollbar(self, orient=tk.VERTICAL, command=self.the_canvas.yview)
-        self.hsb = AutoScrollbar(self.hsbframeholder, orient=tk.HORIZONTAL, command=self.the_canvas.xview)
+        self.vsb = AutoScrollbar(self, orient=tk.VERTICAL, command=self.the_canvas.yview)  # type: ignore[reportUnknownArgumentType]
+        self.hsb = AutoScrollbar(self.hsbframeholder, orient=tk.HORIZONTAL, command=self.the_canvas.xview)  # type: ignore[reportUnknownArgumentType]
         self.the_canvas.configure(yscrollcommand=self.vsb.set, xscrollcommand=self.hsb.set)
 
         self.container = ttk.Frame(self.the_canvas)
@@ -230,7 +230,7 @@ class bethini_app(ttk.Window):
             *theme_names,
             command=lambda t: set_theme(self.style_override, t.get()),
         )
-        self.theme_dropdown.var = self.theme_name
+        self.theme_dropdown.var = self.theme_name  # type: ignore[reportAttributeAccessIssue]
 
         self.choose_game_frame.pack(fill=tk.BOTH, expand=True)
         self.choose_game_frame_2.pack(anchor=tk.CENTER, expand=True)
@@ -286,7 +286,7 @@ class bethini_app(ttk.Window):
 
         # Window modify a button
         new_alpha: int | None = None
-        old_color: ColorValue = cast("tk.StringVar", button_to_modify.var).get()
+        old_color: ColorValue = cast("tk.StringVar", button_to_modify.var).get()  # type: ignore[reportAttributeAccessIssue]
         # old_color is in format (255, 255, 255)
 
         if color_value_type == "rgb":
@@ -328,8 +328,10 @@ class bethini_app(ttk.Window):
         luminance = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
         the_text_color = "#FFFFFF" if luminance < 128 else "#000000"
         button_to_modify.configure(bg=new_color, activebackground=new_color, fg=the_text_color)
+        if TYPE_CHECKING:
+            assert isinstance(button_to_modify.var, tk.StringVar)  # type: ignore[reportAttributeAccessIssue]
         if color_value_type == "rgb":
-            button_to_modify.var.set(str(hex_to_rgb(new_color)).replace(" ", ""))
+            button_to_modify.var.set(str(hex_to_rgb(new_color)).replace(" ", ""))  # type: ignore[reportAttributeAccessIssue]
 
         elif color_value_type == "rgba":
             new_color_tuple = hex_to_rgb(new_color)
@@ -337,22 +339,19 @@ class bethini_app(ttk.Window):
             if new_alpha is not None:
                 new_color_list.append(new_alpha)
             new_color_tuple = tuple(new_color_list)
-            button_to_modify.var.set(str(new_color_tuple).replace(" ", ""))
+            button_to_modify.var.set(str(new_color_tuple).replace(" ", ""))  # type: ignore[reportAttributeAccessIssue]
 
         elif color_value_type == "rgb 1":
             # (255, 255, 255)
             # "(1.0000, 1.0000, 1.0000)"
             the_rgb = str(tuple(round(i / 255, 4) for i in hex_to_rgb(new_color)))
-            button_to_modify.var.set(the_rgb)
+            button_to_modify.var.set(the_rgb)  # type: ignore[reportAttributeAccessIssue]
 
         elif color_value_type == "decimal":
-            if isinstance(new_color, str):
-                button_to_modify.var.set(hex_to_decimal(new_color))
-            else:
-                raise NotImplementedError
+            button_to_modify.var.set(hex_to_decimal(new_color))  # type: ignore[reportAttributeAccessIssue]
 
         else:
-            button_to_modify.var.set(new_color)
+            button_to_modify.var.set(new_color)  # type: ignore[reportAttributeAccessIssue]
         preferencesWindow.lift()
 
         return new_color
@@ -964,8 +963,8 @@ class bethini_app(ttk.Window):
         widget_id = "TkCheckbutton"
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
         setting["tk_var"] = tk.StringVar(self)
-        on_value = setting.get("Onvalue")
-        off_value = setting.get("Offvalue")
+        on_value = setting["Onvalue"]
+        off_value = setting["Offvalue"]
         setting[widget_id] = ttk.Checkbutton(
             setting["TkFinalSettingFrame"],
             text=setting_name,
@@ -973,7 +972,7 @@ class bethini_app(ttk.Window):
             onvalue=on_value,
             offvalue=off_value,
         )
-        setting[widget_id].var = setting["tk_var"]
+        setting[widget_id].var = setting["tk_var"]  # type: ignore[reportAttributeAccessIssue]
         setting[widget_id].pack(anchor=tk.W, padx=5, pady=7)
         self.tooltip(tab_id, label_frame_id, setting_frame_id, setting_id, widget_id)
         self.add_to_setting_dictionary(tab_id, label_frame_name, label_frame_id, setting_frame_id, setting_name, setting_id, widget_id)
@@ -996,7 +995,7 @@ class bethini_app(ttk.Window):
 
         widget_id = "TkPresetButton"
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
-        preset_id = setting.get("preset id")
+        preset_id = setting["preset id"]
         setting[widget_id] = ttk.Button(setting["TkFinalSettingFrame"], text=setting_name, command=lambda: self.set_preset(preset_id))
         setting[widget_id].pack(anchor=tk.CENTER, padx=5, pady=0)
         self.tooltip(tab_id, label_frame_id, setting_frame_id, setting_id, widget_id)
@@ -1082,7 +1081,7 @@ class bethini_app(ttk.Window):
             *choices,
             command=lambda c: browse_to_loc(cast("str", c)),
         )
-        setting[widget_id].var = tk_var
+        setting[widget_id].var = tk_var  # type: ignore[reportAttributeAccessIssue]
         setting[widget_id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(tab_id, label_frame_id, setting_frame_id, setting_id, widget_id)
 
@@ -1344,7 +1343,7 @@ class bethini_app(ttk.Window):
             textvariable=setting["tk_var"],
             command=lambda: self.choose_color(setting[widget_id], color_value_type),
         )
-        setting[widget_id].var = setting["tk_var"]
+        setting[widget_id].var = setting["tk_var"]  # type: ignore[reportAttributeAccessIssue]
         setting[widget_id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(tab_id, label_frame_id, setting_frame_id, setting_id, widget_id)
 
@@ -1458,7 +1457,7 @@ class bethini_app(ttk.Window):
             return str_value
         return None
 
-    def entry_value(self, setting_name: str):
+    def entry_value(self, setting_name: str) -> int | float | str | None:
         setting_value = self.get_setting_values(
             self.setting_dictionary[setting_name].get("targetINIs", []),
             self.setting_dictionary[setting_name].get("targetSections", []),
@@ -1467,21 +1466,20 @@ class bethini_app(ttk.Window):
         if setting_value and all(setting_value):
             formula = self.setting_dictionary[setting_name].get("formula")
             file_format = self.setting_dictionary[setting_name].get("fileFormat")
+            this_value: float | str
             if formula:
-                this_value = simple_eval(formula.format(setting_value[0]))
+                this_value = cast("float", simple_eval(formula.format(setting_value[0])))
                 decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
                 if decimal_places_str:
                     decimal_places = int(decimal_places_str)
                     this_value = round(this_value, decimal_places)  # type: ignore[reportArgumentType]
                     if decimal_places == 0:
                         this_value = int(this_value)
-            elif file_format:
-                this_value = setting_value[0]
-                if file_format == "file":
-                    this_value = os.path.split(this_value)
-                    this_value = this_value[1]
             else:
                 this_value = setting_value[0]
+                if file_format and file_format == "file":
+                    this_value = os.path.split(this_value)[1]
+
             try:
                 self.setting_dictionary[setting_name]["tk_var"].set(this_value)  # type: ignore[reportArgumentType]
                 logger.debug(f"{setting_name} = {this_value}")
@@ -1639,8 +1637,8 @@ class bethini_app(ttk.Window):
         targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
         theSettings = self.setting_dictionary[setting_name].get("settings", [])
 
-        on_value = self.setting_dictionary[setting_name].get("Onvalue")
-        off_value = self.setting_dictionary[setting_name].get("Offvalue")
+        on_value = self.setting_dictionary[setting_name]["Onvalue"]
+        off_value = self.setting_dictionary[setting_name]["Offvalue"]
 
         setting_value = self.get_setting_values(targetINIs, targetSections, theSettings)
 
@@ -1663,7 +1661,7 @@ class bethini_app(ttk.Window):
             the_target_ini = open_ini(ini_location, targetINIs[n])
             # 1
             if this_value in (on_value, off_value):
-                if isinstance(this_value[n], list):
+                if isinstance(this_value[n], list):  # type: ignore[reportUnnecessaryIsInstance]
                     if setting_value[n] in this_value[n]:
                         theValue = setting_value[n]
                     elif this_value[n][0] in self.setting_dictionary:
@@ -1684,7 +1682,7 @@ class bethini_app(ttk.Window):
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
                     self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
                 else:
-                    the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value[n])
+                    the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value[n])  # type: ignore[reportArgumentType]
                     self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value[n]}")
 
     def dropdown_assign_value(self, setting_name: str) -> None:

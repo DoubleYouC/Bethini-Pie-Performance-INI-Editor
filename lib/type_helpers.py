@@ -131,8 +131,8 @@ class BethiniSetting(
     label_frame_name: str
     length: IntStr
     Name: str
-    Offvalue: ValueList | None
-    Onvalue: ValueList | None
+    Offvalue: ValueList
+    Onvalue: ValueList
     partial: list[str] | None
     rgbType: Literal["multiple settings"] | None
     second_tk_widget: ttk.Spinbox | None
