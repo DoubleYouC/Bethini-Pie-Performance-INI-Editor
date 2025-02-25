@@ -1366,25 +1366,16 @@ class bethini_app(ttk.Window):
 
         if setting_value and all(setting_value):
             tk_var = cast("tk.StringVar", self.setting_dictionary[setting_name]["tk_var"])
-
             on_value = self.setting_dictionary[setting_name]["Onvalue"]
             off_value = self.setting_dictionary[setting_name]["Offvalue"]
+
             if setting_value == on_value:
                 this_value = on_value
-                tk_var.set(this_value)
             elif setting_value == off_value:
                 this_value = off_value
-                tk_var.set(this_value)
             else:
-                this_value = []
-                for n in range(len(setting_value)):
-                    if setting_value[n] in on_value[n]:
-                        this_value.append(1)
-                    else:
-                        this_value.append(0)
-
-                this_value = on_value if all(this_value) else off_value
-                tk_var.set(this_value)
+                this_value = on_value if all(v in on_value[i] for i, v in enumerate(setting_value)) else off_value
+            tk_var.set(this_value)  # type: ignore[reportArgumentType]
 
             try:
                 logger.debug(f"{setting_name} = {this_value}")
