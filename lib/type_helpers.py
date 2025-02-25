@@ -6,13 +6,15 @@
 #
 
 import tkinter as tk
-from typing import TYPE_CHECKING, Literal, NotRequired, TypeAlias, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, NotRequired, TypeAlias, TypedDict
 
 import ttkbootstrap as ttk
 
 from lib.ModifyINI import ModifyINI
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from lib.scalar import Scalar
 
 IntStr: TypeAlias = str
@@ -62,11 +64,13 @@ SettingType: TypeAlias = Literal[
 ]
 
 WidgetId: TypeAlias = Literal[
+    "second_tk_widget",
     "TkCheckbutton",
     "TkColor",
     "TkCombobox",
     "TkEntry",
     "TkOptionMenu",
+    "TkPresetButton",
     "TkRadioPreset",
     "TkSlider",
     "TkSpinbox",
@@ -82,12 +86,16 @@ class GameSetting(TypedDict, total=False):
     value: dict[Literal["default", "recommended"] | str, int | float | str]
 
 
-class DependentSetting(TypedDict):
+class DependentSetting(TypedDict, total=False):
     operator: Literal["greater-than", "greater-or-equal-than", "less-than", "less-or-equal-than", "not-equal", "equal"]
-    value: str | list[list[str]]
+    operator_func: "Callable[[Any], Any] | None"
+    value: str | list[list[str]] | float
 
-    var: tk.Variable
+    var: Literal["string", "float"]
     setToOff: bool
+
+    Offvalue: ValueList | None
+    Onvalue: ValueList | None
 
 
 class BethiniSetting(
@@ -135,7 +143,7 @@ class BethiniSetting(
     tab_id: TabId
     targetINIs: list[str]
     targetSections: list[str]
-    tk_var: tk.StringVar
+    tk_var: tk.StringVar | tk.DoubleVar
     tk_widget: "ttk.Checkbutton | tk.Button | ttk.Button | ttk.Combobox | ttk.Entry | ttk.OptionMenu | ttk.Radiobutton | Scalar | ttk.Spinbox"
     TkCheckbutton: ttk.Checkbutton
     TkColor: tk.Button

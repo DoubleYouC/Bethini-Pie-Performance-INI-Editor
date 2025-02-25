@@ -250,8 +250,7 @@ class bethini_app(ttk.Window):
         self.choose_game_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(self))
         self.choose_game_window.minsize(300, 35)
 
-        self.preset_var = tk.StringVar(self)
-        self.preset_var.set("Bethini")
+        self.preset_var = tk.StringVar(self, "Bethini")
 
     def on_frame_configure(self, _event: "tk.Event[ttk.Frame]") -> None:
         self.the_canvas.configure(scrollregion=self.the_canvas.bbox("all"))
@@ -414,7 +413,9 @@ class bethini_app(ttk.Window):
         if not (photo_for_setting and photo_for_setting.is_file()):
             photo_for_setting = None
 
-        Hovertip(setting[widget_id], tooltip_text, PREVIEW_WINDOW, PREVIEW_FRAME, photo_for_setting, tooltip_wrap_length)
+        anchor_widget = setting[widget_id]
+        if anchor_widget is not None:
+            Hovertip(anchor_widget, tooltip_text, PREVIEW_WINDOW, PREVIEW_FRAME, photo_for_setting, tooltip_wrap_length)
 
     def choose_game(self, *, forced: bool = False) -> None:
         self.withdraw()
@@ -911,7 +912,7 @@ class bethini_app(ttk.Window):
         if func is not None:
             func(tab_id, label_frame_name, label_frame_id, setting_frame_id, setting_name, setting_id)
 
-    def widget_type_switcher(self, setting_name: str) -> ValueList | None:
+    def widget_type_switcher(self, setting_name: str) -> ValueList | str | None:
         setting: BethiniSetting = self.setting_dictionary[setting_name]
         func = self.widget_type_value.get(setting["widget_id"])
 
@@ -930,20 +931,20 @@ class bethini_app(ttk.Window):
         widget_id: WidgetId,
     ) -> None:
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
-        self.setting_dictionary.update({
-            setting_name: {
-                "tab_id": tab_id,
-                "label_frame_name": label_frame_name,
-                "label_frame_id": label_frame_id,
-                "setting_frame_id": setting_frame_id,
-                "setting_id": setting_id,
-                "widget_id": widget_id,
-                "tk_widget": setting[widget_id],
-                "targetINIs": setting.get("targetINIs", []),
-                "settings": setting.get("settings", []),
-                "targetSections": setting.get("targetSections", []),
-            },
-        })
+        tk_widget = setting[widget_id]
+        if TYPE_CHECKING:
+            assert tk_widget is not None
+        self.setting_dictionary[setting_name] = {
+            "tab_id": tab_id,
+            "label_frame_name": label_frame_name,
+            "setting_frame_id": setting_frame_id,
+            "setting_id": setting_id,
+            "widget_id": widget_id,
+            "tk_widget": tk_widget,
+            "targetINIs": setting.get("targetINIs", []),
+            "settings": setting.get("settings", []),
+            "targetSections": setting.get("targetSections", []),
+        }
 
         dependent_settings = setting.get("dependentSettings")
         if dependent_settings:
@@ -1055,14 +1056,14 @@ class bethini_app(ttk.Window):
                         value_to_insert = getattr(CustomFunctions, custom_function_name)(GAME_NAME)
                         choices[n] = option_string.format(value_to_insert)
 
-        setting["tk_var"] = tk.StringVar(self)
+        tk_var = setting["tk_var"] = tk.StringVar(self)
 
         browse = setting.get("browse", ("directory", "directory", "directory"))
         func = setting.get("custom_function", "")
 
         def browse_to_loc(
             choice: str,
-            var: tk.StringVar = setting["tk_var"],
+            var: tk.StringVar = tk_var,
             browse: Browse = browse,
             function: str = func,
         ) -> None:
@@ -1076,18 +1077,18 @@ class bethini_app(ttk.Window):
 
         setting[widget_id] = ttk.OptionMenu(
             setting["TkFinalSettingFrame"],
-            setting["tk_var"],
+            tk_var,
             choices[0],
             *choices,
-            command=lambda c: browse_to_loc(c),  # noqa: PLW0108
+            command=lambda c: browse_to_loc(cast("str", c)),
         )
-        setting[widget_id].var = setting["tk_var"]
+        setting[widget_id].var = tk_var
         setting[widget_id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         self.tooltip(tab_id, label_frame_id, setting_frame_id, setting_id, widget_id)
 
         self.add_to_setting_dictionary(tab_id, label_frame_name, label_frame_id, setting_frame_id, setting_name, setting_id, widget_id)
         self.setting_dictionary[setting_name].update({
-            "tk_var": setting["tk_var"],
+            "tk_var": tk_var,
             "choices": choices,
             "settingChoices": setting.get("settingChoices"),
             "delimiter": setting.get("delimiter"),
@@ -1107,11 +1108,11 @@ class bethini_app(ttk.Window):
         setting_id: SettingId,
     ) -> None:
         """Create a ttk.Combobox."""
-
         widget_id = "TkCombobox"
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
-        choices = setting.get("choices", [])
-        width = setting.get("width")
+
+        choices = cast("list[str]", setting.get("choices", []))
+        width = int(setting.get("width") or 20)
         validate = setting.get("validate")
 
         setting["tk_var"] = tk.StringVar(self)
@@ -1153,9 +1154,9 @@ class bethini_app(ttk.Window):
         setting_id: SettingId,
     ) -> None:
         """Create a ttk.Entry."""
-
         widget_id = "TkEntry"
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
+
         entry_width = int(setting.get("entry_width") or 20)
         validate = setting.get("validate")
 
@@ -1197,55 +1198,56 @@ class bethini_app(ttk.Window):
         widget_id = "TkSlider"
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
 
-        from_value = setting.get("from")
-        to_value = setting.get("to")
-        decimal_places = setting.get("decimal places")
-        length_value = setting.get("length")
+        from_value = float(setting["from"])
+        to_value = float(setting["to"])
+        decimal_places = setting["decimal places"] or "0"
+        increment = float(setting.get("increment", 0))
+        width = int(setting["width"])
+        length = int(setting["length"])
+        validate = setting["validate"]
 
-        setting["tk_var"] = tk.StringVar(self)
+        setting["tk_var"] = tk.DoubleVar(self)
 
         setting[widget_id] = Scalar(
             setting["TkFinalSettingFrame"],
             from_=from_value,
             to=to_value,
             orient=tk.HORIZONTAL,
-            length=length_value,
+            length=length,
             decimal_places=decimal_places,
             variable=setting["tk_var"],
         )
 
-        width = setting.get("width")
-        validate = setting.get("validate")
-        increment_value = setting.get("increment")
-
         reversed_ = setting.get("reversed")
         if reversed_:
-            from_value = setting.get("to")
-            to_value = setting.get("from")
+            from_value = float(setting["to"])
+            to_value = float(setting["from"])
 
+        second_tk_widget: ttk.Spinbox | None = None
         if validate:
             setting["validate"] = self.register(self.validate)
-            setting["second_tk_widget"] = ttk.Spinbox(
+            second_tk_widget = ttk.Spinbox(
                 setting["TkFinalSettingFrame"],
                 width=width,
                 validate="key",
-                increment=increment_value,
+                increment=increment,
                 from_=from_value,
                 to=to_value,
                 validatecommand=(setting["validate"], "%P", "%s", validate),
                 textvariable=setting["tk_var"],
             )
         else:
-            setting["second_tk_widget"] = ttk.Spinbox(
+            second_tk_widget = ttk.Spinbox(
                 setting["TkFinalSettingFrame"],
                 width=width,
-                increment=increment_value,
+                increment=increment,
                 from_=from_value,
                 to=to_value,
                 textvariable=setting["tk_var"],
             )
+        setting["second_tk_widget"] = second_tk_widget
 
-        setting["second_tk_widget"].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
+        second_tk_widget.pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
         setting[widget_id].pack(anchor=tk.CENTER, padx=5, pady=0, side=tk.RIGHT)
 
         self.tooltip(tab_id, label_frame_id, setting_frame_id, setting_id, "second_tk_widget")
@@ -1269,10 +1271,11 @@ class bethini_app(ttk.Window):
     ) -> None:
         widget_id = "TkSpinbox"
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
-        from_value = setting.get("from")
-        to_value = setting.get("to")
-        increment = setting.get("increment")
-        width = setting.get("width")
+
+        from_value = float(setting["from"])
+        to_value = float(setting["to"])
+        increment = float(setting.get("increment", 0))
+        width = int(setting["width"])
         validate = setting.get("validate")
 
         setting["tk_var"] = tk.StringVar(self)
@@ -1363,14 +1366,16 @@ class bethini_app(ttk.Window):
         )
 
         if setting_value and all(setting_value):
-            on_value = self.setting_dictionary[setting_name].get("Onvalue")
-            off_value = self.setting_dictionary[setting_name].get("Offvalue")
+            tk_var = cast("tk.StringVar", self.setting_dictionary[setting_name]["tk_var"])
+
+            on_value = self.setting_dictionary[setting_name]["Onvalue"]
+            off_value = self.setting_dictionary[setting_name]["Offvalue"]
             if setting_value == on_value:
-                this_value: ValueList | None = on_value
-                self.setting_dictionary[setting_name]["tk_var"].set(this_value)
+                this_value = on_value
+                tk_var.set(this_value)
             elif setting_value == off_value:
                 this_value = off_value
-                self.setting_dictionary[setting_name]["tk_var"].set(this_value)
+                tk_var.set(this_value)
             else:
                 this_value = []
                 for n in range(len(setting_value)):
@@ -1380,7 +1385,8 @@ class bethini_app(ttk.Window):
                         this_value.append(0)
 
                 this_value = on_value if all(this_value) else off_value
-                self.setting_dictionary[setting_name]["tk_var"].set(this_value)
+                tk_var.set(this_value)
+
             try:
                 logger.debug(f"{setting_name} = {this_value}")
                 self.setting_dictionary[setting_name]["valueSet"] = True
@@ -1406,26 +1412,26 @@ class bethini_app(ttk.Window):
                 this_value = round(float(setting_value[0]), decimal_places)
                 if decimal_places == 0:
                     this_value = int(this_value)
-                self.setting_dictionary[setting_name]["tk_var"].set(this_value)
+                self.setting_dictionary[setting_name]["tk_var"].set(this_value)  # type: ignore[reportArgumentType]
             else:
                 file_format = self.setting_dictionary[setting_name].get("fileFormat")
                 if file_format:
-                    this_value = os.path.split(setting_value[0])
+                    this_value = os.path.split(setting_value[0])  # type: ignore[assignment]
                     if file_format == "directory":
                         this_value = this_value[0]
                         if this_value and this_value[-1] != "\\":
                             this_value += "\\"
                     elif file_format == "file":
                         this_value = this_value[1]
-                    self.setting_dictionary[setting_name]["tk_var"].set(this_value)
+                    self.setting_dictionary[setting_name]["tk_var"].set(this_value)  # type: ignore[reportArgumentType]
                 else:
                     setting_choices = self.setting_dictionary[setting_name].get("settingChoices")
                     if setting_choices and setting_value[0] not in setting_choices:
-                        this_value = "Custom"
-                        self.setting_dictionary[setting_name]["tk_var"].set(this_value)
+                        this_value = "Custom"  # type: ignore[assignment]
+                        self.setting_dictionary[setting_name]["tk_var"].set(this_value)  # type: ignore[reportArgumentType]
                     else:
-                        this_value = setting_value[0]
-                        self.setting_dictionary[setting_name]["tk_var"].set(this_value)
+                        this_value = setting_value[0]  # type: ignore[assignment]
+                        self.setting_dictionary[setting_name]["tk_var"].set(this_value)  # type: ignore[reportArgumentType]
             logger.debug(f"{setting_name} = {this_value}")
             self.setting_dictionary[setting_name]["valueSet"] = True
             return this_value
@@ -1446,7 +1452,7 @@ class bethini_app(ttk.Window):
                 float_value = round(float(str_value), decimal_places)
                 str_value = str(int(float_value)) if decimal_places == 0 else str(float_value)
 
-            self.setting_dictionary[setting_name]["tk_var"].set(str_value)
+            self.setting_dictionary[setting_name]["tk_var"].set(str_value)  # type: ignore[reportArgumentType]
             logger.debug(f"{setting_name} = {str_value}")
             self.setting_dictionary[setting_name]["valueSet"] = True
             return str_value
@@ -1466,7 +1472,7 @@ class bethini_app(ttk.Window):
                 decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
                 if decimal_places_str:
                     decimal_places = int(decimal_places_str)
-                    this_value = round(this_value, decimal_places)
+                    this_value = round(this_value, decimal_places)  # type: ignore[reportArgumentType]
                     if decimal_places == 0:
                         this_value = int(this_value)
             elif file_format:
@@ -1477,7 +1483,7 @@ class bethini_app(ttk.Window):
             else:
                 this_value = setting_value[0]
             try:
-                self.setting_dictionary[setting_name]["tk_var"].set(this_value)
+                self.setting_dictionary[setting_name]["tk_var"].set(this_value)  # type: ignore[reportArgumentType]
                 logger.debug(f"{setting_name} = {this_value}")
                 self.setting_dictionary[setting_name]["valueSet"] = True
             except:
@@ -1503,7 +1509,7 @@ class bethini_app(ttk.Window):
                 str_value = str(int(float_value)) if decimal_places == 0 else str(float_value)
 
             try:
-                self.setting_dictionary[setting_name]["tk_var"].set(str_value)
+                self.setting_dictionary[setting_name]["tk_var"].set(str_value)  # type: ignore[reportArgumentType]
                 logger.debug(f"{setting_name} = {str_value}")
                 self.setting_dictionary[setting_name]["valueSet"] = True
             except:
@@ -1521,7 +1527,7 @@ class bethini_app(ttk.Window):
         if setting_value and all(setting_value):
             this_value = setting_value[0]
             try:
-                self.setting_dictionary[setting_name]["tk_var"].set(this_value)
+                self.setting_dictionary[setting_name]["tk_var"].set(this_value)  # type: ignore[reportArgumentType]
                 logger.debug(f"{setting_name} = {this_value}")
                 self.setting_dictionary[setting_name]["valueSet"] = True
             except:
@@ -1552,7 +1558,7 @@ class bethini_app(ttk.Window):
                 rgb_type = self.setting_dictionary[setting_name].get("rgbType")
                 if rgb_type == "multiple settings":
                     this_value_as_tuple = tuple(int(i) for i in setting_value)
-                    new_color = rgb_to_hex(this_value_as_tuple)
+                    new_color = rgb_to_hex(cast("tuple[int, int, int]", this_value_as_tuple))
                     this_value = str(this_value_as_tuple)
                 else:
                     this_value = "("
@@ -1564,7 +1570,7 @@ class bethini_app(ttk.Window):
                 rgb_type = self.setting_dictionary[setting_name].get("rgbType")
                 if rgb_type == "multiple settings":
                     this_value_as_tuple = tuple(int(i) for i in setting_value)
-                    new_color = rgb_to_hex(this_value_as_tuple[0:3])
+                    new_color = rgb_to_hex(cast("tuple[int, int, int]", this_value_as_tuple[:3]))
                     this_value = str(this_value_as_tuple)
                 else:
                     this_value = "("
@@ -1576,11 +1582,11 @@ class bethini_app(ttk.Window):
                 rgb_type = self.setting_dictionary[setting_name].get("rgbType")
                 if rgb_type == "multiple settings":
                     this_value_as_tuple = tuple(round(float(i), 4) for i in setting_value)
-                    new_color = rgb_to_hex(tuple(int(float(i) * 255) for i in setting_value))
+                    new_color = rgb_to_hex(cast("tuple[int, int, int]", tuple(int(float(i) * 255) for i in setting_value)))
                     this_value = str(this_value_as_tuple)
 
             if this_value is not None and new_color is not None:
-                self.setting_dictionary[setting_name]["tk_var"].set(this_value)
+                cast("tk.StringVar", self.setting_dictionary[setting_name]["tk_var"]).set(this_value)
                 tk_widget = cast("tk.Button", self.setting_dictionary[setting_name]["tk_widget"])
                 rgb = hex_to_rgb(new_color)
                 luminance = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
@@ -1594,13 +1600,13 @@ class bethini_app(ttk.Window):
         for dependent_setting_name in self.settings_that_settings_depend_on[setting_name]:
             var = self.settings_that_settings_depend_on[setting_name][dependent_setting_name].get("var")
 
-            operator_func = self.settings_that_settings_depend_on[setting_name][dependent_setting_name].get("operator")
+            operator_func = self.settings_that_settings_depend_on[setting_name][dependent_setting_name].get("operator_func")
             value = self.settings_that_settings_depend_on[setting_name][dependent_setting_name].get("value")
             current_value = self.widget_type_switcher(setting_name)
             second_tk_widget = self.setting_dictionary[dependent_setting_name].get("second_tk_widget")
             if var == "float":
-                value = float(value)
-                current_value = float(current_value)
+                value = float(cast("str", value))
+                current_value = float(current_value)  # type: ignore[assignment]
             if inspect.isroutine(operator_func) and operator_func(current_value, value):
                 self.setting_dictionary[dependent_setting_name]["tk_widget"].configure(state=tk.NORMAL)
                 if second_tk_widget:
@@ -1610,13 +1616,13 @@ class bethini_app(ttk.Window):
                 if set_to_off:
                     off_value = self.setting_dictionary[dependent_setting_name].get("Offvalue")
 
-                    self.setting_dictionary[dependent_setting_name]["tk_var"].set(off_value)
+                    self.setting_dictionary[dependent_setting_name]["tk_var"].set(off_value)  # type: ignore[reportArgumentType]
                 self.setting_dictionary[dependent_setting_name]["tk_widget"].configure(state=tk.DISABLED)
                 if second_tk_widget:
                     second_tk_widget.configure(state=tk.DISABLED)
 
     def assign_value(self, setting_name: str) -> None:
-        widget_id = self.setting_dictionary[setting_name].get("widget_id")
+        widget_id = self.setting_dictionary[setting_name]["widget_id"]
         func = self.widget_type_assign_value.get(widget_id)
         if func is not None:
             func(setting_name)
@@ -1639,7 +1645,7 @@ class bethini_app(ttk.Window):
         setting_value = self.get_setting_values(targetINIs, targetSections, theSettings)
 
         try:
-            this_value = list(ast.literal_eval(this_value))
+            this_value = list(ast.literal_eval(this_value))  # type: ignore[assignment]
             for n in range(len(this_value)):
                 if isinstance(this_value[n], tuple):
                     this_value[n] = list(this_value[n])
@@ -1682,7 +1688,7 @@ class bethini_app(ttk.Window):
                     self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value[n]}")
 
     def dropdown_assign_value(self, setting_name: str) -> None:
-        tk_var = self.setting_dictionary[setting_name]["tk_var"]
+        tk_var = cast("tk.StringVar", self.setting_dictionary[setting_name]["tk_var"])
         this_value = tk_var.get()
         targetINIs = self.setting_dictionary[setting_name].get("targetINIs", [])
         targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
@@ -1695,12 +1701,13 @@ class bethini_app(ttk.Window):
         theValueStr = ""
         if partial:
             for each_partial_setting in partial:
+                partial_setting = self.setting_dictionary[each_partial_setting]
                 if each_partial_setting == setting_name:
                     theValueStr += "{}"
                 else:
                     try:
-                        if self.setting_dictionary[each_partial_setting]["valueSet"]:
-                            theValueStr += self.setting_dictionary[each_partial_setting]["tk_var"].get()
+                        if partial_setting["valueSet"]:
+                            theValueStr += cast("tk.StringVar", partial_setting["tk_var"]).get()
                         else:
                             self.sme(f"{each_partial_setting} is not set yet.")
                             return
@@ -1746,7 +1753,7 @@ class bethini_app(ttk.Window):
         if not targetINIs:
             return
 
-        tk_var = self.setting_dictionary[setting_name]["tk_var"]
+        tk_var = cast("tk.StringVar", self.setting_dictionary[setting_name]["tk_var"])
         str_value = tk_var.get()
 
         targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
@@ -1772,17 +1779,18 @@ class bethini_app(ttk.Window):
         theValueStr = ""
         if partial:
             for each_partial_setting in partial:
+                partial_setting = self.setting_dictionary[each_partial_setting]
                 if each_partial_setting == setting_name:
                     theValueStr += "{}"
-                elif self.setting_dictionary[each_partial_setting]["valueSet"]:
-                    theValueStr += self.setting_dictionary[each_partial_setting]["tk_var"].get()
+                elif partial_setting["valueSet"]:
+                    theValueStr += cast("tk.StringVar", partial_setting["tk_var"]).get()
                 else:
                     return
 
         if not targetINIs:
             return
 
-        tk_var = self.setting_dictionary[setting_name]["tk_var"]
+        tk_var = cast("tk.StringVar", self.setting_dictionary[setting_name]["tk_var"])
         this_value = tk_var.get()
 
         targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
@@ -1797,7 +1805,7 @@ class bethini_app(ttk.Window):
             if formula:
                 formulaValue = formula.format(this_value)
                 try:
-                    this_value = str(round(simple_eval(formulaValue), 8))
+                    this_value = str(round(cast("float", simple_eval(formulaValue)), 8))
                 except:
                     self.sme(f"Failed to evaluate formula value for {this_value}.")
 
@@ -1813,7 +1821,7 @@ class bethini_app(ttk.Window):
         if not targetINIs:
             return
 
-        this_value = setting["tk_var"].get()
+        this_value = str(setting["tk_var"].get())
 
         targetSections = setting.get("targetSections", [])
         theSettings = setting.get("settings", [])
@@ -1837,7 +1845,7 @@ class bethini_app(ttk.Window):
         if not targetINIs:
             return
 
-        tk_var = self.setting_dictionary[setting_name]["tk_var"]
+        tk_var = cast("tk.StringVar", self.setting_dictionary[setting_name]["tk_var"])
         this_value = tk_var.get()
 
         targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
@@ -1856,7 +1864,7 @@ class bethini_app(ttk.Window):
         if not targetINIs:
             return
 
-        tk_var = self.setting_dictionary[setting_name]["tk_var"]
+        tk_var = cast("tk.StringVar", self.setting_dictionary[setting_name]["tk_var"])
         this_value = tk_var.get()
 
         targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
@@ -1969,38 +1977,40 @@ class bethini_app(ttk.Window):
     def dependents(self) -> None:
         for setting_name in self.dependent_settings_dictionary:
             for master_setting_name in self.dependent_settings_dictionary[setting_name]:
-                operator_name = self.dependent_settings_dictionary[setting_name][master_setting_name].get("operator")
-                set_to_off = self.dependent_settings_dictionary[setting_name][master_setting_name].get("setToOff", False)
-                if operator_name in {"equal", "not-equal"}:
-                    value = self.dependent_settings_dictionary[setting_name][master_setting_name].get("value")
-                    current_value = self.widget_type_switcher(master_setting_name)
-                    var = "string"
-                else:
-                    value = float(self.dependent_settings_dictionary[setting_name][master_setting_name].get("value"))
-                    current_value = float(self.widget_type_switcher(master_setting_name))
-                    var = "float"
+                dependent_setting = self.dependent_settings_dictionary[setting_name][master_setting_name]
+                operator_name = dependent_setting["operator"]
                 operator_func = operator_dictionary[operator_name]
+                set_to_off = dependent_setting.get("setToOff", False)
+                if operator_name in {"equal", "not-equal"}:
+                    value = dependent_setting.get("value")
+                    current_value = self.widget_type_switcher(master_setting_name)
+                    var: Literal["string", "float"] = "string"
+                else:
+                    value = float(dependent_setting["value"])  # type: ignore[reportArgumentType]
+                    current_value = float(self.widget_type_switcher(master_setting_name))  # type: ignore[assignment]
+                    var = "float"
                 setting = self.setting_dictionary[setting_name]
                 second_tk_widget = setting.get("second_tk_widget")
 
-                if operator_func(current_value, value):
+                if operator_func(current_value, value):  # type: ignore[reportArgumentType]
                     setting["tk_widget"].configure(state=tk.NORMAL)
                     if second_tk_widget:
                         second_tk_widget.configure(state=tk.NORMAL)
                 else:
                     if set_to_off:
-                        off_value = self.dependent_settings_dictionary[setting_name][master_setting_name].get("Offvalue")
-                        setting["tk_var"].set(off_value)
+                        off_value = dependent_setting.get("Offvalue")
+                        setting["tk_var"].set(off_value)  # type: ignore[reportArgumentType]
                     setting["tk_widget"].configure(state=tk.DISABLED)
                     if second_tk_widget:
                         second_tk_widget.configure(state=tk.DISABLED)
 
-                if not self.settings_that_settings_depend_on.get(master_setting_name):
+                if master_setting_name not in self.settings_that_settings_depend_on:
                     self.settings_that_settings_depend_on[master_setting_name] = {}
 
                 self.settings_that_settings_depend_on[master_setting_name][setting_name] = {
-                    "operator": operator_dictionary[self.dependent_settings_dictionary[setting_name][master_setting_name].get("operator")],
-                    "value": value,
+                    "operator": dependent_setting["operator"],
+                    "operator_func": cast("Callable[[Any], Any]", operator_func),
+                    "value": value or "",
                     "var": var,
                     "setToOff": set_to_off,
                 }

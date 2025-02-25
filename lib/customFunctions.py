@@ -165,9 +165,13 @@ class CustomFunctions:
         Bethini_key = ModifyINI("Bethini.ini")
 
         for ini in app.what_ini_files_are_used():
-            ini_location = Path(Bethini_key.get_value("Directories", app.inis(ini)))
-            initial_file = ini_location / ini
-            new_file = ini_location / "Bethini Pie backups" / choice / ini
+            ini_location = Bethini_key.get_value("Directories", app.inis(ini))
+            if ini_location is None:
+                msg = "Invalid INI path"
+                raise TypeError(msg)
+            ini_path = Path(ini_location)
+            initial_file = ini_path / ini
+            new_file = ini_path / "Bethini Pie backups" / choice / ini
             try:
                 shutil.copyfile(new_file, initial_file)
             except FileNotFoundError:
