@@ -18,7 +18,7 @@ class customConfigParser(configparser.RawConfigParser):
         super().__init__(allow_no_value=True, delimiters=("=",), comment_prefixes=(), strict=False)
         # comment_prefixes=() is necessary to preserve comments.
 
-    def _read(self, fp: TextIOWrapper, fpname: str | bytes | PathLike) -> None:
+    def _read(self, fp: TextIOWrapper, fpname: str | bytes | PathLike[str]) -> None:
         """Parse a sectioned configuration file.
 
         Each section in a configuration file contains a header, indicated by
@@ -38,7 +38,7 @@ class customConfigParser(configparser.RawConfigParser):
 
         # This read function was modified to pick the first option value if there is a
         # duplicate option. Any subsequent duplicate option values are discarded.
-        elements_added: set[str] = set()
+        elements_added: set[str | tuple[str, str]] = set()
         cursect: dict[str, list[str | int] | None] | None = None
         sectname = None
         optname = None

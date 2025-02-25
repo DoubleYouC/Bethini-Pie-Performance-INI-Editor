@@ -108,7 +108,7 @@ class BethiniSetting(
     """
 
     browse: Browse
-    choices: str | list[Literal["Browse...", "Manual..."] | str] | None
+    choices: str | list[Literal["Browse...", "Manual..."] | str]
     colorValueType: ColorType
     custom_function: str
     customWidth: IntStr
@@ -125,16 +125,16 @@ class BethiniSetting(
     Name: str
     Offvalue: ValueList | None
     Onvalue: ValueList | None
-    partial: list[str] | None
+    partial: list[str]
     rgbType: Literal["multiple settings"] | None
-    second_tk_widget: tk.Widget  # ttk.Spinbox
+    second_tk_widget: tk.Widget
     setting_frame_id: SettingFrameId
     setting_id: SettingId
-    settingChoices: dict[str, list[str]] | None
-    settings: list[str] | None
+    settingChoices: dict[str, list[str]]
+    settings: list[str]
     tab_id: TabId
-    targetINIs: list[str] | None
-    targetSections: list[str] | None
+    targetINIs: list[str]
+    targetSections: list[str]
     tk_var: tk.StringVar
     tk_widget: tk.Widget
     TkCheckbutton: ttk.Checkbutton

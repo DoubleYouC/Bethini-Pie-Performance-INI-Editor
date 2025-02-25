@@ -14,14 +14,12 @@ import os
 import sys
 import tkinter as tk
 import webbrowser
-
-# from collections.abc import Callable
 from datetime import datetime
 from operator import eq, ge, gt, le, lt, ne
 from pathlib import Path
 from shutil import copyfile
 from tkinter import colorchooser, messagebox, simpledialog
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 import ttkbootstrap as ttk
 from simpleeval import simple_eval  # type: ignore[reportUnknownVariableType]
@@ -44,6 +42,9 @@ from lib.ModifyINI import ModifyINI
 from lib.scalar import Scalar
 from lib.tooltips import Hovertip
 from lib.type_helpers import *
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 # from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
 # This is for changing file read-only access via os.chmod(filename, S_IREAD,
@@ -106,7 +107,7 @@ class bethini_app(ttk.Window):
         self.tab_dictionary: dict[TabId, DisplayTab] = {}
         self.setting_dictionary: dict[str, BethiniSetting] = {}
         self.dependent_settings_dictionary: dict[str, dict[str, DependentSetting]] = {}
-        self.settings_that_settings_depend_on: dict[str, dict[str, Any]] = {}
+        self.settings_that_settings_depend_on: dict[str, dict[str, DependentSetting]] = {}
         self.tab = []
 
         self.widget_type_function = {
@@ -286,7 +287,7 @@ class bethini_app(ttk.Window):
 
         # Window modify a button
         new_alpha: int | None = None
-        old_color: ColorValue = button_to_modify.var.get()
+        old_color: ColorValue = cast("tk.StringVar", button_to_modify.var).get()
         # old_color is in format (255, 255, 255)
 
         if color_value_type == "rgb":
@@ -319,10 +320,7 @@ class bethini_app(ttk.Window):
             old_color = tuple(int(float(i) * 255) for i in ast.literal_eval(old_color))
 
         elif color_value_type == "decimal":
-            if isinstance(old_color, str):
-                old_color = rgb_to_hex(decimal_to_rgb(old_color))
-            else:
-                raise NotImplementedError
+            old_color = rgb_to_hex(decimal_to_rgb(old_color))
 
         response = colorchooser.askcolor(color=old_color)
         new_color = response[1].upper() if response[1] else old_color
@@ -372,7 +370,7 @@ class bethini_app(ttk.Window):
 
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
 
-        # Fectches the tooltip description.
+        # Fetches the tooltip description.
         tooltip_description = setting.get("tooltip", "No description available.")
 
         tooltip_wrap_length = setting.get("tooltip_wrap_length", 200)
@@ -833,7 +831,9 @@ class bethini_app(ttk.Window):
         )
 
         for setting_number, setting_name in enumerate(
-            APP.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"],
+            cast(
+                "dict[str, BethiniSetting]", APP.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"]
+            ),
             start=1,
         ):
             setting_frame_id = f"SettingFrame{math.ceil(setting_number / number_of_vertically_stacked_settings) - 1}"
@@ -852,7 +852,10 @@ class bethini_app(ttk.Window):
             setting["TkFinalSettingFrame"].pack(anchor=tk.W, padx=5, pady=2)
             if setting_name != "Placeholder":
                 setting.update(
-                    APP.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"][setting_name],
+                    cast(
+                        "BethiniSetting",
+                        APP.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"][setting_name],
+                    ),
                 )
                 self.setting_label(tab_id, label_frame_name, label_frame_id, setting_frame_id, setting_name, setting_id)
 
@@ -934,9 +937,9 @@ class bethini_app(ttk.Window):
                 "setting_id": setting_id,
                 "widget_id": widget_id,
                 "tk_widget": setting[widget_id],
-                "targetINIs": setting.get("targetINIs"),
-                "settings": setting.get("settings"),
-                "targetSections": setting.get("targetSections"),
+                "targetINIs": setting.get("targetINIs", []),
+                "settings": setting.get("settings", []),
+                "targetSections": setting.get("targetSections", []),
             },
         })
 
@@ -1038,16 +1041,16 @@ class bethini_app(ttk.Window):
             if "FUNC" in choices:
                 option_string = APP.bethini["customFunctions"][choices]
                 if "{}" in option_string:
-                    custom_function = APP.bethini["customFunctions"][f"{choices}Format"]
-                    value_to_insert = getattr(CustomFunctions, custom_function)(GAME_NAME)
-                    choices = value_to_insert
+                    custom_function_name = APP.bethini["customFunctions"][f"{choices}Format"]
+                    custom_function = cast("Callable[[str], list[str]]", getattr(CustomFunctions, custom_function_name))
+                    choices = custom_function(GAME_NAME)
         else:
             for n in range(len(choices)):
                 if "FUNC" in choices[n]:
                     option_string = APP.bethini["customFunctions"][choices[n]]
                     if "{}" in option_string:
-                        custom_function = APP.bethini["customFunctions"][f"{choices[n]}Format"]
-                        value_to_insert = getattr(CustomFunctions, custom_function)(GAME_NAME)
+                        custom_function_name = APP.bethini["customFunctions"][f"{choices[n]}Format"]
+                        value_to_insert = getattr(CustomFunctions, custom_function_name)(GAME_NAME)
                         choices[n] = option_string.format(value_to_insert)
 
         setting["tk_var"] = tk.StringVar(self)
@@ -1105,7 +1108,7 @@ class bethini_app(ttk.Window):
 
         widget_id = "TkCombobox"
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
-        choices = setting.get("choices")
+        choices = setting.get("choices", [])
         width = setting.get("width")
         validate = setting.get("validate")
 
@@ -1352,9 +1355,9 @@ class bethini_app(ttk.Window):
 
     def checkbox_value(self, setting_name: str) -> ValueList | None:
         setting_value = self.get_setting_values(
-            self.setting_dictionary[setting_name].get("targetINIs"),
-            self.setting_dictionary[setting_name].get("targetSections"),
-            self.setting_dictionary[setting_name].get("settings"),
+            self.setting_dictionary[setting_name].get("targetINIs", []),
+            self.setting_dictionary[setting_name].get("targetSections", []),
+            self.setting_dictionary[setting_name].get("settings", []),
         )
 
         if setting_value:
@@ -1576,7 +1579,7 @@ class bethini_app(ttk.Window):
 
             if this_value is not None and new_color is not None:
                 self.setting_dictionary[setting_name]["tk_var"].set(this_value)
-                tk_widget = self.setting_dictionary[setting_name]["tk_widget"]
+                tk_widget = cast("tk.Button", self.setting_dictionary[setting_name]["tk_widget"])
                 rgb = hex_to_rgb(new_color)
                 luminance = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
                 the_text_color = "#FFFFFF" if luminance < 128 else "#000000"
@@ -1625,11 +1628,9 @@ class bethini_app(ttk.Window):
         this_value = setting["tk_var"].get()
         # this_value is whatever the state of the on_value/off_value is... not a simple boolean
 
-        targetINIs = self.setting_dictionary[setting_name].get("targetINIs")
-        targetSections = self.setting_dictionary[setting_name].get("targetSections")
-        theSettings = self.setting_dictionary[setting_name].get("settings")
-        if targetINIs is None or targetSections is None or theSettings is None:
-            raise TypeError
+        targetINIs = self.setting_dictionary[setting_name].get("targetINIs", [])
+        targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
+        theSettings = self.setting_dictionary[setting_name].get("settings", [])
 
         on_value = self.setting_dictionary[setting_name].get("Onvalue")
         off_value = self.setting_dictionary[setting_name].get("Offvalue")
@@ -1647,41 +1648,44 @@ class bethini_app(ttk.Window):
                 exception=e,
             )
 
-        if targetINIs:
-            for n in range(len(targetINIs)):
-                ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(ini_location, targetINIs[n])
-                # 1
-                if this_value in (on_value, off_value):
-                    if isinstance(this_value[n], list):
-                        if setting_value[n] in this_value[n]:
-                            theValue = setting_value[n]
-                        elif this_value[n][0] in self.setting_dictionary:
-                            self.assign_value(this_value[n][0])
-                            continue
-                        else:
-                            theValue = this_value[n][0]
-                            try:
-                                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
-                                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
-                            except AttributeError as e:
-                                self.sme(
-                                    f"Failed to assign {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue} because the {targetINIs[n]} has an issue.",
-                                    exception=e,
-                                )
+        if not targetINIs:
+            return
 
-                        the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
-                        self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
+        for n in range(len(targetINIs)):
+            ini_location = self.getINILocation(targetINIs[n])
+            the_target_ini = open_ini(ini_location, targetINIs[n])
+            # 1
+            if this_value in (on_value, off_value):
+                if isinstance(this_value[n], list):
+                    if setting_value[n] in this_value[n]:
+                        theValue = setting_value[n]
+                    elif this_value[n][0] in self.setting_dictionary:
+                        self.assign_value(this_value[n][0])
+                        continue
+
                     else:
-                        the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value[n])
-                        self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value[n]}")
+                        theValue = this_value[n][0]
+                        try:
+                            the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
+                            self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
+                        except AttributeError as e:
+                            self.sme(
+                                f"Failed to assign {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue} because the {targetINIs[n]} has an issue.",
+                                exception=e,
+                            )
+
+                    the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
+                    self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
+                else:
+                    the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value[n])
+                    self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value[n]}")
 
     def dropdown_assign_value(self, setting_name: str) -> None:
         tk_var = self.setting_dictionary[setting_name]["tk_var"]
         this_value = tk_var.get()
-        targetINIs = self.setting_dictionary[setting_name].get("targetINIs")
-        targetSections = self.setting_dictionary[setting_name].get("targetSections")
-        theSettings = self.setting_dictionary[setting_name].get("settings")
+        targetINIs = self.setting_dictionary[setting_name].get("targetINIs", [])
+        targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
+        theSettings = self.setting_dictionary[setting_name].get("settings", [])
 
         setting_choices = self.setting_dictionary[setting_name].get("settingChoices")
         delimiter = self.setting_dictionary[setting_name].get("delimiter")
@@ -1703,58 +1707,62 @@ class bethini_app(ttk.Window):
                         self.sme(f"{each_partial_setting} is not set yet.")
                         return
 
-        if targetINIs:
-            for n in range(len(targetINIs)):
+        if not targetINIs:
+            return
+
+        for n in range(len(targetINIs)):
+            theValue = ""
+            ini_location = self.getINILocation(targetINIs[n])
+            the_target_ini = open_ini(ini_location, targetINIs[n])
+
+            if this_value in {"Manual...", "Browse..."}:
                 theValue = ""
-                ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(ini_location, targetINIs[n])
-
-                if this_value in {"Manual...", "Browse..."}:
+            elif delimiter:
+                listOfValues = this_value.split(delimiter)
+                try:
+                    theValue = listOfValues[n]
+                except IndexError:
                     theValue = ""
-                elif delimiter:
-                    listOfValues = this_value.split(delimiter)
-                    try:
-                        theValue = listOfValues[n]
-                    except IndexError:
-                        theValue = ""
-                elif setting_choices:
-                    if this_value not in setting_choices:
-                        return
-                    theValue = setting_choices[this_value][n]
-                elif file_format:
-                    if file_format == "directory" and this_value == "\\":
-                        this_value = this_value[:-1]
-                    theValue = this_value
-                else:
-                    theValue = this_value
+            elif setting_choices:
+                if this_value not in setting_choices:
+                    return
+                theValue = setting_choices[this_value][n]
+            elif file_format:
+                if file_format == "directory" and this_value == "\\":
+                    this_value = this_value[:-1]
+                theValue = this_value
+            else:
+                theValue = this_value
 
-                if partial:
-                    theValue = theValueStr.format(this_value)
-                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
-                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
+            if partial:
+                theValue = theValueStr.format(this_value)
+            the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
+            self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
 
     def combobox_assign_value(self, setting_name: str) -> None:
         targetINIs = self.setting_dictionary[setting_name].get("targetINIs")
 
-        if targetINIs:
-            tk_var = self.setting_dictionary[setting_name]["tk_var"]
-            str_value = tk_var.get()
+        if not targetINIs:
+            return
 
-            targetSections = self.setting_dictionary[setting_name].get("targetSections")
-            theSettings = self.setting_dictionary[setting_name].get("settings")
+        tk_var = self.setting_dictionary[setting_name]["tk_var"]
+        str_value = tk_var.get()
 
-            decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
-            for n in range(len(targetINIs)):
-                ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(ini_location, targetINIs[n])
+        targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
+        theSettings = self.setting_dictionary[setting_name].get("settings", [])
 
-                if decimal_places_str and str_value:
-                    decimal_places = int(decimal_places_str)
-                    float_value = round(float(str_value), decimal_places)
-                    str_value = str(int(str_value)) if decimal_places == 0 else str(float_value)
+        decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
+        for n in range(len(targetINIs)):
+            ini_location = self.getINILocation(targetINIs[n])
+            the_target_ini = open_ini(ini_location, targetINIs[n])
 
-                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], str_value)
-                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={str_value}")
+            if decimal_places_str and str_value:
+                decimal_places = int(decimal_places_str)
+                float_value = round(float(str_value), decimal_places)
+                str_value = str(int(str_value)) if decimal_places == 0 else str(float_value)
+
+            the_target_ini.assign_setting_value(targetSections[n], theSettings[n], str_value)
+            self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={str_value}")
 
     def entry_assign_value(self, setting_name: str) -> None:
         targetINIs = self.setting_dictionary[setting_name].get("targetINIs")
@@ -1770,98 +1778,106 @@ class bethini_app(ttk.Window):
                 else:
                     return
 
-        if targetINIs:
-            tk_var = self.setting_dictionary[setting_name]["tk_var"]
-            this_value = tk_var.get()
+        if not targetINIs:
+            return
 
-            targetSections = self.setting_dictionary[setting_name].get("targetSections")
-            theSettings = self.setting_dictionary[setting_name].get("settings")
+        tk_var = self.setting_dictionary[setting_name]["tk_var"]
+        this_value = tk_var.get()
 
-            formula = self.setting_dictionary[setting_name].get("formula")
+        targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
+        theSettings = self.setting_dictionary[setting_name].get("settings", [])
 
-            for n in range(len(targetINIs)):
-                ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(ini_location, targetINIs[n])
+        formula = self.setting_dictionary[setting_name].get("formula")
 
-                if formula:
-                    formulaValue = formula.format(this_value)
-                    try:
-                        this_value = str(round(simple_eval(formulaValue), 8))
-                    except:
-                        self.sme(f"Failed to evaluate formula value for {this_value}.")
+        for n in range(len(targetINIs)):
+            ini_location = self.getINILocation(targetINIs[n])
+            the_target_ini = open_ini(ini_location, targetINIs[n])
 
-                if partial:
-                    this_value = theValueStr.format(this_value)
-                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
+            if formula:
+                formulaValue = formula.format(this_value)
+                try:
+                    this_value = str(round(simple_eval(formulaValue), 8))
+                except:
+                    self.sme(f"Failed to evaluate formula value for {this_value}.")
+
+            if partial:
+                this_value = theValueStr.format(this_value)
+            the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
+            self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def slider_assign_value(self, setting_name: str) -> None:
         setting: BethiniSetting = self.setting_dictionary[setting_name]
         targetINIs = setting.get("targetINIs")
 
-        if targetINIs:
-            this_value = setting["tk_var"].get()
+        if not targetINIs:
+            return
 
-            targetSections = setting.get("targetSections")
-            theSettings = setting.get("settings")
+        this_value = setting["tk_var"].get()
 
-            for n in range(len(targetINIs)):
-                ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(ini_location, targetINIs[n])
+        targetSections = setting.get("targetSections", [])
+        theSettings = setting.get("settings", [])
 
-                try:
-                    the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                    self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
-                except AttributeError as e:
-                    self.sme(
-                        f"Failed to set {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value} because the {targetINIs[n]} has an issue.",
-                        exception=e,
-                    )
+        for n in range(len(targetINIs)):
+            ini_location = self.getINILocation(targetINIs[n])
+            the_target_ini = open_ini(ini_location, targetINIs[n])
+
+            try:
+                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
+                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
+            except AttributeError as e:
+                self.sme(
+                    f"Failed to set {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value} because the {targetINIs[n]} has an issue.",
+                    exception=e,
+                )
 
     def spinbox_assign_value(self, setting_name: str) -> None:
         targetINIs = self.setting_dictionary[setting_name].get("targetINIs")
 
-        if targetINIs:
-            tk_var = self.setting_dictionary[setting_name]["tk_var"]
-            this_value = tk_var.get()
+        if not targetINIs:
+            return
 
-            targetSections = self.setting_dictionary[setting_name].get("targetSections")
-            theSettings = self.setting_dictionary[setting_name].get("settings")
+        tk_var = self.setting_dictionary[setting_name]["tk_var"]
+        this_value = tk_var.get()
 
-            for n in range(len(targetINIs)):
-                ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(ini_location, targetINIs[n])
+        targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
+        theSettings = self.setting_dictionary[setting_name].get("settings", [])
 
-                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
+        for n in range(len(targetINIs)):
+            ini_location = self.getINILocation(targetINIs[n])
+            the_target_ini = open_ini(ini_location, targetINIs[n])
+
+            the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
+            self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def color_assign_value(self, setting_name: str) -> None:
         targetINIs = self.setting_dictionary[setting_name].get("targetINIs")
 
-        if targetINIs:
-            tk_var = self.setting_dictionary[setting_name]["tk_var"]
-            this_value = tk_var.get()
+        if not targetINIs:
+            return
 
-            targetSections = self.setting_dictionary[setting_name].get("targetSections")
-            theSettings = self.setting_dictionary[setting_name].get("settings")
+        tk_var = self.setting_dictionary[setting_name]["tk_var"]
+        this_value = tk_var.get()
 
-            color_value_type = self.setting_dictionary[setting_name].get("colorValueType")
-            for n in range(len(targetINIs)):
-                ini_location = self.getINILocation(targetINIs[n])
-                the_target_ini = open_ini(ini_location, targetINIs[n])
+        targetSections = self.setting_dictionary[setting_name].get("targetSections", [])
+        theSettings = self.setting_dictionary[setting_name].get("settings", [])
 
-                if color_value_type in {"hex", "decimal"}:
+        color_value_type = self.setting_dictionary[setting_name].get("colorValueType")
+        for n in range(len(targetINIs)):
+            ini_location = self.getINILocation(targetINIs[n])
+            the_target_ini = open_ini(ini_location, targetINIs[n])
+
+            if color_value_type in {"hex", "decimal"}:
+                the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
+                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
+            elif color_value_type in {"rgb", "rgb 1", "rgba"}:
+                if len(theSettings) > 1:
+                    theValue = str(ast.literal_eval(this_value)[n])
+                    the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
+                    self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
+                else:
+                    this_value = this_value.lstrip("(").rstrip(")")
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                     self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
-                elif color_value_type in {"rgb", "rgb 1", "rgba"}:
-                    if len(theSettings) > 1:
-                        theValue = str(ast.literal_eval(this_value)[n])
-                        the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
-                        self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
-                    else:
-                        this_value = this_value.lstrip("(").rstrip(")")
-                        the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                        self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def createTabs(self, *, from_choose_game_window: bool = False) -> None:
         # Preview Window
@@ -2050,6 +2066,7 @@ class bethini_app(ttk.Window):
                     )
                     value = defaultValue
                 settingValues.append(value)
+
         if settingValues:
             # Check to see if the settings correspond with specified setting_name choices.
             if setting_choices:
