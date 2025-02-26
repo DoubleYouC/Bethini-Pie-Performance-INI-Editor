@@ -7,6 +7,7 @@
 
 import ctypes.wintypes
 import logging
+import os
 import shutil
 import sys
 import winreg
@@ -235,4 +236,4 @@ class CustomFunctions:
             with file_path.open() as _fp:
                 pass
 
-        return [str(game_documents_path), "Browse..."]
+        return [f"{game_documents_path}{os.sep}", "Browse..."]
