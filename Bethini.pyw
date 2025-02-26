@@ -103,7 +103,6 @@ class bethini_app(ttk.Window):
         CustomFunctions.screenheight = self.winfo_screenheight()
 
         # Variables
-        self.setup_dictionary = {}
         self.tab_dictionary: dict[TabId, DisplayTab] = {}
         self.setting_dictionary: dict[str, BethiniSetting] = {}
         self.dependent_settings_dictionary: dict[str, dict[str, DependentSetting]] = {}
@@ -492,7 +491,6 @@ class bethini_app(ttk.Window):
         for tab_number, tab in enumerate(APP.bethini["displayTabs"], start=1):
             self.tab_dictionary[f"Page{tab_number}"] = {"Name": tab}
 
-        self.setup_dictionary = {}
         self.setting_dictionary = {}
         self.dependent_settings_dictionary = {}
         self.settings_that_settings_depend_on = {}
