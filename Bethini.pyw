@@ -1205,7 +1205,7 @@ class bethini_app(ttk.Window):
             orient=tk.HORIZONTAL,
             length=length,
             decimal_places=decimal_places,
-            variable=setting["tk_var"],
+            variable=setting["tk_var"],  # type: ignore[reportArgumentType]
         )
 
         reversed_ = setting.get("reversed")
