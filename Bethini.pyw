@@ -422,9 +422,6 @@ class bethini_app(ttk.Window):
         # sAppName is already set in the Bethini.ini file.
         try:
             choose_game_var = app_config.get_value("General", "sAppName")
-            if choose_game_var is None:
-                raise TypeError
-
             if forced:
                 self.sme("Force choose game/application.")
                 raise NameError
@@ -450,21 +447,15 @@ class bethini_app(ttk.Window):
             self.quit()
             sys.exit(1)
 
-    def choose_game_done(self, game: str, *, from_choose_game_window: bool = False) -> None:
+    def choose_game_done(self, game: str | None, *, from_choose_game_window: bool = False) -> None:
         if not game:
             return
 
         self.choose_game_window.withdraw()
 
         # Once the app/game is selected, this loads it.
-        app_name = app_config.get_value("General", "sAppName")
-        if app_name is None:
-            raise TypeError
-        self.choose_game_var = app_name
-        if self.choose_game_var != game:
-            self.sme(
-                f"App/Game specified in {my_app_config} differs from the game chosen, so it will be changed to the one you chose.",
-            )
+        if game != app_config.get_value("General", "sAppName"):
+            self.sme(f"App/Game specified in {my_app_config} differs from the game chosen, so it will be changed to the one you chose.")
             app_config.assign_setting_value("General", "sAppName", game)
             from_choose_game_window = True
 
@@ -1205,7 +1196,7 @@ class bethini_app(ttk.Window):
         length = int(setting["length"])
         validate = setting["validate"]
 
-        setting["tk_var"] = tk.DoubleVar(self)
+        setting["tk_var"] = tk.StringVar(self)
 
         setting[widget_id] = Scalar(
             setting["TkFinalSettingFrame"],
