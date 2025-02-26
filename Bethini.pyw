@@ -425,7 +425,11 @@ class bethini_app(ttk.Window):
                 self.sme("Force choose game/application.")
                 raise NameError
 
-            if app_config.get_value("General", "bAlwaysSelectGame", "1") != "0":
+            always_select_game = app_config.get_value("General", "bAlwaysSelectGame")
+            if always_select_game is None:
+                app_config.assign_setting_value("General", "bAlwaysSelectGame", "1")
+
+            if always_select_game != "0":
                 self.sme("Force choose game/application at startup.")
                 # By calling the global variable GAME_NAME before it has been created,
                 # we raise an exception to force the app/game to be chosen only at startup.
