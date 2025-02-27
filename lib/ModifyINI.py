@@ -9,11 +9,13 @@ import configparser
 import logging
 import sys
 from pathlib import Path
+from typing import ClassVar
 
 if __name__ == "__main__":
     sys.exit(1)
 
 from lib.customConfigParser import customConfigParser
+from lib.type_helpers import *
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +28,40 @@ class ModifyINI:
     apply to every instance of modifying the INI files.
     """
 
-    def __init__(self, ini_path: str | Path, *, preserve_case: bool = True) -> None:
-        self.ini_path = Path(ini_path) if isinstance(ini_path, str) else ini_path
+    app_config_name: ClassVar[ININame] = "Bethini.ini"
+    open_inis: ClassVar[dict[ININame, dict[Path, "ModifyINI"]]] = {}
+    _open_app_config: ClassVar["ModifyINI | None"] = None
+
+    @staticmethod
+    def app_config() -> "ModifyINI":
+        """Access Bethini's config INI."""
+
+        if not ModifyINI._open_app_config:
+            ModifyINI._open_app_config = ModifyINI.open(ModifyINI.app_config_name, Path.cwd())
+        return ModifyINI._open_app_config
+
+    @staticmethod
+    def open(name: ININame, location: Path, *, preserve_case: bool = True) -> "ModifyINI":
+        """Open an INI file.
+
+        If the file is already open, the existing ModifyINI instance will be returned.
+        """
+
+        existing_object = ModifyINI.open_inis.setdefault(name, {}).get(location)
+        if existing_object:
+            if preserve_case != existing_object.preserve_case:
+                msg = f"{location.name} opened twice with different settings."
+                raise NotImplementedError(msg)
+            return existing_object
+
+        new_object = ModifyINI(name, location, preserve_case=preserve_case)
+        ModifyINI.open_inis.setdefault(name, {})[location] = new_object
+        return new_object
+
+    def __init__(self, name: ININame, location: Path, *, preserve_case: bool = True) -> None:
+        self.ini_path = Path(location, name)
+        self.preserve_case = preserve_case
+
         self.config = customConfigParser()
         if preserve_case:
             self.config.optionxform = lambda optionstr: optionstr
@@ -107,7 +141,8 @@ class ModifyINI:
         # Preserves existing case for setting
         setting = self.get_existing_setting(section, setting)
 
-        if self.get_value(section, setting) != value:
+        current_value = self.get_value(section, setting)
+        if current_value != value:
             self.config[section][setting] = value
             self.case_insensitive_config[section][setting] = value
             self.has_been_modified = True

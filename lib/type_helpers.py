@@ -10,12 +10,26 @@ from typing import TYPE_CHECKING, Any, Literal, NotRequired, TypeAlias, TypedDic
 
 import ttkbootstrap as ttk
 
-from lib.ModifyINI import ModifyINI
-
 if TYPE_CHECKING:
     from collections.abc import Callable
 
     from lib.scalar import Scalar
+
+ININame: TypeAlias = Literal[
+    "Bethini.ini",
+    "Fallout4.ini",
+    "Fallout4Prefs.ini",
+    # "Fallout4Custom.ini",
+    "Fallout.ini",
+    "FalloutPrefs.ini",
+    # "FalloutCustom.ini",
+    "Skyrim.ini",
+    "SkyrimPrefs.ini",
+    # "SkyrimCustom.ini",
+    "StarfieldCustom.ini",
+    "StarfieldPrefs.ini",
+    "Ultra.ini",
+]
 
 IntStr: TypeAlias = str
 """A string representing an integer."""
@@ -50,7 +64,6 @@ TkAnchor: TypeAlias = Literal["nw", "n", "ne", "w", "center", "e", "sw", "s", "s
 TkFill: TypeAlias = Literal["none", "x", "y", "both"]
 TkSide: TypeAlias = Literal["left", "right", "top", "bottom"]
 
-
 SettingType: TypeAlias = Literal[
     "Checkbutton",
     "Color",
@@ -77,9 +90,15 @@ WidgetId: TypeAlias = Literal[
 ]
 
 
-class GameSetting(TypedDict, total=False):
+class GameSetting(TypedDict):
+    ini: ININame | None
+    section: str
+    value: str
+
+
+class GameSettingInfo(TypedDict, total=False):
     alwaysPrint: bool
-    ini: str
+    ini: ININame | None
     name: str
     section: str
     type: ValueType
@@ -141,9 +160,9 @@ class BethiniSetting(
     settingChoices: dict[str, list[str]] | None
     settings: list[str]
     tab_id: TabId
-    targetINIs: list[str]
+    targetINIs: list[ININame]
     targetSections: list[str]
-    tk_var: tk.StringVar | tk.DoubleVar
+    tk_var: tk.StringVar
     tk_widget: "ttk.Checkbutton | tk.Button | ttk.Button | ttk.Combobox | ttk.Entry | ttk.OptionMenu | ttk.Radiobutton | Scalar | ttk.Spinbox"
     TkCheckbutton: ttk.Checkbutton
     TkColor: tk.Button
@@ -206,13 +225,14 @@ class DisplayTab(TypedDict, total=False):
     TkPhotoImageForTab: tk.PhotoImage
     LabelFrames: dict[LabelFrameId, SettingsLabelFrame]
     PreferencesWindow: ttk.Toplevel
+    NoLabelFrame: SettingsLabelFrame
 
 
 class AppBethiniJSON(TypedDict):
     customFunctions: dict[str, str]
     Default: Literal[""]
     displayTabs: dict[str, DisplayTab]
-    INIs: dict[str, str]
+    INIs: dict[ININame, str]
     presetsIgnoreTheseSettings: list[str]
     valueTypes: list[
         Literal[
@@ -235,24 +255,5 @@ class AppSettingsJSON(TypedDict):
     gameId: str
     gameName: str
     iniPaths: list[str]
-    iniValues: list[GameSetting]
+    iniValues: list[GameSettingInfo]
     presetPaths: list[str]
-
-
-class Located(TypedDict):
-    at: str
-    object: ModifyINI
-
-
-class OpenINI(TypedDict):
-    located: dict[str, Located]
-
-
-class SettingInfo(TypedDict):
-    ini: str
-    section: str
-    value: str
-
-
-GameSettingInfo: TypeAlias = dict[str, SettingInfo]
-"""A dict containing settings and their default or preset values."""

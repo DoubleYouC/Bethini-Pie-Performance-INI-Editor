@@ -163,16 +163,17 @@ class CustomFunctions:
 
         logger.info(f"Restoring backup from {choice}.")
         app = AppName(game_name)
-        Bethini_key = ModifyINI("Bethini.ini")
 
-        for ini in app.what_ini_files_are_used():
-            ini_location = Bethini_key.get_value("Directories", app.inis(ini))
-            if ini_location is None:
-                msg = "Invalid INI path"
-                raise TypeError(msg)
+        for ini_name in app.what_ini_files_are_used():
+            ini_setting_name = app.get_ini_setting_name(ini_name)
+            if not ini_setting_name:
+                msg = f"Unknown INI: {ini_name}"
+                raise NotImplementedError(msg)
+            ini_location = ModifyINI.app_config().get_value("Directories", ini_setting_name) or ""
+
             ini_path = Path(ini_location)
-            initial_file = ini_path / ini
-            new_file = ini_path / "Bethini Pie backups" / choice / ini
+            initial_file = ini_path / ini_name
+            new_file = ini_path / "Bethini Pie backups" / choice / ini_name
             try:
                 shutil.copyfile(new_file, initial_file)
             except FileNotFoundError:
@@ -184,7 +185,7 @@ class CustomFunctions:
     def getBackups(game_name: str) -> list[str]:
         gameDocumentsName = Info.game_documents_name(game_name)
         defaultINILocation = str(Info.get_documents_path() / "My Games" / gameDocumentsName) if gameDocumentsName else ""
-        INIPath = cast("str", ModifyINI("Bethini.ini").get_value("Directories", f"s{game_name}INIPath", defaultINILocation))
+        INIPath = cast("str", ModifyINI.app_config().get_value("Directories", f"s{game_name}INIPath", defaultINILocation))
         backup_directory = Path(INIPath) / "Bethini Pie backups"
         try:
             backups = [b.name for b in backup_directory.iterdir()]
@@ -200,7 +201,7 @@ class CustomFunctions:
 
     @staticmethod
     def getBethesdaGameFolder(game_name: str) -> str:
-        game_folder = ModifyINI("Bethini.ini").get_value("Directories", f"s{game_name}Path")
+        game_folder = ModifyINI.app_config().get_value("Directories", f"s{game_name}Path")
         if game_folder is not None:
             return game_folder
 
@@ -220,7 +221,7 @@ class CustomFunctions:
 
     @staticmethod
     def getGamePath(game_name: str) -> str | None:
-        return ModifyINI("Bethini.ini").get_value("Directories", f"s{game_name}Path")
+        return ModifyINI.app_config().get_value("Directories", f"s{game_name}Path")
 
     @staticmethod
     def getINILocations(gameName: str) -> list[str]:
