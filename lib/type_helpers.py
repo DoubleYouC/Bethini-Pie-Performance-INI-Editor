@@ -89,6 +89,21 @@ WidgetId: TypeAlias = Literal[
     "TkSpinbox",
 ]
 
+PresetName: TypeAlias = Literal[
+    "default",
+    "recommended",
+    "fixedDefault",
+    "Vanilla Low",
+    "Vanilla Medium",
+    "Vanilla High",
+    "Vanilla Ultra",
+    "Bethini Poor",
+    "Bethini Low",
+    "Bethini Medium",
+    "Bethini High",
+    "Bethini Ultra",
+] | str
+
 
 class GameSetting(TypedDict):
     ini: ININame | None
@@ -102,7 +117,7 @@ class GameSettingInfo(TypedDict, total=False):
     name: str
     section: str
     type: ValueType
-    value: dict[Literal["default", "recommended"] | str, int | float | str]
+    value: dict[PresetName | str, int | float | str]
 
 
 class DependentSetting(TypedDict, total=False):
@@ -234,21 +249,7 @@ class AppBethiniJSON(TypedDict):
     displayTabs: dict[str, DisplayTab]
     INIs: dict[ININame, str]
     presetsIgnoreTheseSettings: list[str]
-    valueTypes: list[
-        Literal[
-            "default",
-            "fixedDefault",
-            "Vanilla Low",
-            "Vanilla Medium",
-            "Vanilla High",
-            "Vanilla Ultra",
-            "Bethini Poor",
-            "Bethini Low",
-            "Bethini Medium",
-            "Bethini High",
-            "Bethini Ultra",
-        ]
-    ]
+    valueTypes: list[PresetName]
 
 
 class AppSettingsJSON(TypedDict):

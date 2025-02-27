@@ -77,7 +77,7 @@ class AppName:
 
         return setting.lower() in self.ini_section_setting_dict[ini].get(section.lower(), ())
 
-    def preset_values(self, preset: str) -> dict[str, GameSetting]:
+    def preset_values(self, preset: PresetName) -> dict[str, GameSetting]:
         """Returns a dictionary listing all the settings and values
         for a given preset specified in settings.json.
         """

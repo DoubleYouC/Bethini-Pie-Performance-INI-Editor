@@ -13,6 +13,7 @@ import os
 import sys
 import tkinter as tk
 import webbrowser
+from collections.abc import Sequence
 from datetime import datetime
 from operator import eq, ge, gt, le, lt, ne
 from pathlib import Path
@@ -713,56 +714,54 @@ class bethini_app(ttk.Window):
                                 self.sme(f"{section} was removed because it was empty.")
 
     def apply_ini_dict(self, ini_dict: dict[str, GameSetting], *, only_if_missing: bool = False) -> None:
-        for setting_name in ini_dict:
+        for setting_and_section in ini_dict:
             # Settings are in the format `setting:section`
             # e.g. sAntiAliasing:Display
 
-            if not only_if_missing:
+            target_setting = setting_and_section.split(":")[0]
+            if not only_if_missing and target_setting in APP.bethini["presetsIgnoreTheseSettings"]:
                 continue
 
-            target_setting = setting_name.split(":")[0]
-            if target_setting in APP.bethini["presetsIgnoreTheseSettings"]:
-                continue
-
-            target_ini = ini_dict[setting_name]["ini"]
-            target_section = ini_dict[setting_name]["section"]
-            this_value = ini_dict[setting_name]["value"]
+            target_ini = ini_dict[setting_and_section]["ini"]
+            target_section = ini_dict[setting_and_section]["section"]
+            this_value = str(ini_dict[setting_and_section]["value"])
 
             if target_ini is None:
-                msg = f"{setting_name} has no INI set."
+                msg = f"{setting_and_section} has no INI set."
                 raise TypeError(msg)
 
             ini_location = bethini_app.getINILocation(target_ini)
-            the_target_ini = ModifyINI.open(target_ini, Path(ini_location))
+            target_ini_object = ModifyINI.open(target_ini, Path(ini_location))
 
             # Check if we are only supposed to add the value if the value is missing
-            if only_if_missing and (the_target_ini.get_value(target_section, target_setting) is not None):
+            if only_if_missing and (target_ini_object.get_value(target_section, target_setting) is not None):
                 continue
-            the_target_ini.assign_setting_value(target_section, target_setting, this_value)
+
+            target_ini_object.assign_setting_value(target_section, target_setting, this_value)
             self.sme(f"{target_ini} [{target_section}] {target_setting}={this_value}")
 
     def remove_ini_dict(self, ini_dict: dict[str, GameSetting]) -> None:
-        for setting_name in ini_dict:
-            target_setting = setting_name.split(":")[0]
-            target_ini = ini_dict[setting_name]["ini"]
-            target_section = ini_dict[setting_name]["section"]
-            this_value = str(ini_dict[setting_name]["value"])
+        for setting_and_section in ini_dict:
+            target_setting = setting_and_section.split(":")[0]
+            target_ini = ini_dict[setting_and_section]["ini"]
+            target_section = ini_dict[setting_and_section]["section"]
+            this_value = str(ini_dict[setting_and_section]["value"])
 
             if target_ini is None:
-                msg = f"{setting_name} has no INI set."
+                msg = f"{setting_and_section} has no INI set."
                 raise TypeError(msg)
 
             ini_location = bethini_app.getINILocation(target_ini)
-            the_target_ini = ModifyINI.open(target_ini, Path(ini_location))
-            current_value = cast("str", the_target_ini.get_value(target_section, target_setting, this_value))
+            target_ini_object = ModifyINI.open(target_ini, Path(ini_location))
+            current_value = cast("str", target_ini_object.get_value(target_section, target_setting, this_value))
 
             if current_value == this_value:
-                if the_target_ini.remove_setting(target_section, target_setting):
+                if target_ini_object.remove_setting(target_section, target_setting):
                     self.sme(
                         f"{target_ini} [{target_section}] {target_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed",
                     )
                 else:
-                    self.sme(f"No section {target_section} exists for {target_setting} in {the_target_ini}.")
+                    self.sme(f"No section {target_section} exists for {target_setting} in {target_ini_object}.")
 
     def create_tab_image(self, tab_id: TabId) -> None:
         icon_path = Path.cwd() / f"icons/{self.tab_dictionary[tab_id]['Name']}.png"
@@ -1350,7 +1349,7 @@ class bethini_app(ttk.Window):
             self.setting_dictionary[setting_name].get("settings", []),
         )
 
-        if setting_value and all(setting_value):
+        if setting_value and None not in setting_value:
             tk_var = self.setting_dictionary[setting_name]["tk_var"]
             on_value = self.setting_dictionary[setting_name]["Onvalue"]
             off_value = self.setting_dictionary[setting_name]["Offvalue"]
@@ -1372,6 +1371,7 @@ class bethini_app(ttk.Window):
                 return this_value
         return None
 
+
     def dropdown_value(self, setting_name: str) -> int | float | str | tuple[str, str] | None:
         setting_value = self.get_setting_values(
             self.setting_dictionary[setting_name].get("targetINIs", []),
@@ -1381,7 +1381,8 @@ class bethini_app(ttk.Window):
             self.setting_dictionary[setting_name].get("delimiter"),
         )
 
-        if setting_value and all(setting_value):
+        if setting_value and None not in setting_value:
+            setting_value = cast("list[str]", setting_value)
             decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
             if decimal_places_str:
                 decimal_places = int(decimal_places_str)
@@ -1419,7 +1420,9 @@ class bethini_app(ttk.Window):
             self.setting_dictionary[setting_name].get("targetSections", []),
             self.setting_dictionary[setting_name].get("settings", []),
         )
-        if setting_value and all(setting_value):
+        if setting_value and None not in setting_value:
+            setting_value = cast("list[str]", setting_value)
+
             str_value = setting_value[0]
 
             decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
@@ -1440,7 +1443,9 @@ class bethini_app(ttk.Window):
             self.setting_dictionary[setting_name].get("targetSections", []),
             self.setting_dictionary[setting_name].get("settings", []),
         )
-        if setting_value and all(setting_value):
+        if setting_value and None not in setting_value:
+            setting_value = cast("list[str]", setting_value)
+
             formula = self.setting_dictionary[setting_name].get("formula")
             file_format = self.setting_dictionary[setting_name].get("fileFormat")
             this_value: float | str
@@ -1474,9 +1479,10 @@ class bethini_app(ttk.Window):
             self.setting_dictionary[setting_name].get("settings", []),
         )
 
-        if setting_value and all(setting_value):
-            str_value = setting_value[0]
+        if setting_value and None not in setting_value:
+            setting_value = cast("list[str]", setting_value)
 
+            str_value = setting_value[0]
             decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
             if decimal_places_str:
                 decimal_places = int(decimal_places_str)
@@ -1499,7 +1505,9 @@ class bethini_app(ttk.Window):
             self.setting_dictionary[setting_name].get("targetSections", []),
             self.setting_dictionary[setting_name].get("settings", []),
         )
-        if setting_value and all(setting_value):
+        if setting_value and None not in setting_value:
+            setting_value = cast("list[str]", setting_value)
+
             this_value = setting_value[0]
             try:
                 self.setting_dictionary[setting_name]["tk_var"].set(this_value)  # type: ignore[reportArgumentType]
@@ -1518,9 +1526,11 @@ class bethini_app(ttk.Window):
             self.setting_dictionary[setting_name].get("settings", []),
         )
 
-        this_value = None
-        new_color = None
-        if setting_value and all(setting_value):
+        if setting_value and None not in setting_value:
+            setting_value = cast("list[str]", setting_value)
+
+            this_value = None
+            new_color = None
             color_value_type = self.setting_dictionary[setting_name].get("colorValueType")
             if color_value_type == "hex":
                 this_value = setting_value[0]
@@ -1568,7 +1578,8 @@ class bethini_app(ttk.Window):
                 tk_widget.configure(bg=new_color, activebackground=new_color, fg=the_text_color)
                 logger.debug(f"{setting_name} = {this_value}")
                 self.setting_dictionary[setting_name]["valueSet"] = True
-        return this_value
+                return this_value
+        return None
 
     def check_dependents(self, setting_name: str) -> None:
         for dependent_setting_name in self.settings_that_settings_depend_on[setting_name]:
@@ -1640,6 +1651,7 @@ class bethini_app(ttk.Window):
 
             if this_value not in (on_value, off_value):
                 continue
+            setting_value = cast("list[str]", setting_value)
 
             if isinstance(this_value[n], list):  # type: ignore[reportUnnecessaryIsInstance]
                 if setting_value[n] in this_value[n]:
@@ -2015,56 +2027,52 @@ class bethini_app(ttk.Window):
 
     def get_setting_values(
         self,
-        targetINIs: list[ININame],
-        targetSections: list[str],
-        theSettings: list[str],
+        target_inis: list[ININame],
+        target_sections: list[str],
+        target_settings: list[str],
         setting_choices: dict[str, list[str]] | None = None,
         delimiter: Literal["x"] | None = None,
-    ) -> list[str]:
+    ) -> Sequence[str | None]:
         """Return the current values of a setting from the given INIs."""
 
-        settingValues: list[str] = []
-        if not targetINIs:
-            return settingValues
+        setting_values: list[str | None] = []
+        if not all((target_inis, target_sections, target_settings)):
+            return setting_values
 
-        for ININumber, INI in enumerate(targetINIs):
-            ini_location = self.getINILocation(INI)
+        for i, ini_name in enumerate(target_inis):
+            ini_location = self.getINILocation(ini_name)
             if ini_location:
-                currentSetting = theSettings[ININumber]
-                currentSection = targetSections[ININumber]
+                current_section = target_sections[i]
+                current_setting = target_settings[i]
 
                 # This looks for a default value in the settings.json
-                defaultValue = None if ModifyINI.app_config_name == INI else APP.setting_values[currentSetting]["default"]
+                default_value = None if ModifyINI.app_config_name == ini_name else APP.setting_values[current_setting].get("default")
 
-                target_ini = ModifyINI.open(INI, Path(ini_location))
+                target_ini_object = ModifyINI.open(ini_name, Path(ini_location))
                 try:
-                    value = str(target_ini.get_value(currentSection, currentSetting, defaultValue))  # type: ignore[reportArgumentType]
+                    value = str(target_ini_object.get_value(current_section, current_setting, default_value))  # type: ignore[reportArgumentType]
                 except AttributeError as e:
                     self.sme(
-                        f"There was a problem with the existing {target_ini} [{currentSection}] {currentSetting}, so {defaultValue} will be used.",
+                        f"There was a problem with the existing {target_ini_object} [{current_section}] {current_setting}, so {default_value} will be used.",
                         exception=e,
                     )
-                    value = str(defaultValue)
-                settingValues.append(value)
+                    value = str(default_value)
+                setting_values.append(value)
 
-        if settingValues:
-            # Check to see if the settings correspond with specified setting_name choices.
-            if setting_choices:
-                for choice in setting_choices:
-                    if setting_choices[choice] == settingValues:
-                        settingValues = [choice]
+        if not setting_values:
+            return setting_values
 
-            # Check to see if there are multiple values separated by a delimiter
-            if delimiter:
-                delimitedValue = ""
-                for n in range(len(settingValues)):
-                    if n != len(settingValues) - 1:
-                        delimitedValue += settingValues[n] + delimiter
-                    else:
-                        delimitedValue += settingValues[n]
-                settingValues = [delimitedValue]
+        # Check to see if the settings correspond with specified setting_name choices.
+        if setting_choices:
+            for choice in setting_choices:
+                if setting_choices[choice] == setting_values:
+                    setting_values = [choice]
 
-        return settingValues
+        # Check to see if there are multiple values separated by a delimiter
+        if delimiter and None not in setting_values:
+            setting_values = [delimiter.join(cast("list[str]", setting_values))]
+
+        return setting_values
 
 
 def on_closing(root: bethini_app) -> None:
