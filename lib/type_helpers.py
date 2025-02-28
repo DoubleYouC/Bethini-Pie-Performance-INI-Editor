@@ -39,7 +39,7 @@ FloatStr: TypeAlias = str
 
 ValidationType: TypeAlias = Literal["integer", "whole", "counting", "float"]
 
-Browse: TypeAlias = tuple[Literal["directory"], Literal["directory"] | str, Literal["directory", "file"]]
+BrowseSettings: TypeAlias = tuple[Literal["directory"], Literal["directory"] | str, Literal["directory", "file"]]
 
 ColorType: TypeAlias = Literal["rgb", "rgb 1", "rgba", "decimal", "hex"]
 ColorValue: TypeAlias = str | tuple[int, ...]
@@ -149,8 +149,8 @@ class BethiniSetting(
     setting: Setting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][frame_id][setting_id]
     """
 
-    browse: Browse
-    choices: str | list[Literal["Browse...", "Manual..."] | str]
+    browse: BrowseSettings
+    choices: str | list[Literal["Browse...", "Manual...", "Choose...", "None found"] | str]
     colorValueType: ColorType
     custom_function: str
     customWidth: IntStr

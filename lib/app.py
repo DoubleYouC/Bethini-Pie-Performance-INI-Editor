@@ -9,7 +9,7 @@ import json
 import sys
 import tkinter as tk
 from pathlib import Path
-from typing import cast
+from typing import ClassVar, cast
 
 if __name__ == "__main__":
     sys.exit(1)
@@ -20,7 +20,12 @@ from lib.type_helpers import *
 class AppName:
     """This class handles the different apps/games supported, which are placed in the apps folder."""
 
-    def __init__(self, appname: str) -> None:
+    app_instance: "ClassVar[AppName | None]" = None
+
+    def __init__(self, bethini_instance: object, appname: str) -> None:
+        AppName.app_instance = self
+        self.bethini_instance = bethini_instance
+
         with (Path.cwd() / "apps" / appname / "settings.json").open(encoding="utf-8") as app_json:
             self.data: AppSettingsJSON = json.load(app_json)
         with (Path.cwd() / "apps" / appname / "Bethini.json").open(encoding="utf-8") as bethini:

@@ -56,7 +56,7 @@ def decimal_to_rgb(decimal_string: str) -> tuple[int, int, int]:
     return (red, green, blue)
 
 
-def browse_to_location(choice: str, browse: Browse, function: str, game_name: str) -> str | None:
+def browse_to_location(choice: str, browse: BrowseSettings) -> str | None:
     if choice == "Browse...":
         if browse[2] == "directory":
             response = filedialog.askdirectory()
@@ -87,15 +87,9 @@ def browse_to_location(choice: str, browse: Browse, function: str, game_name: st
 
     if choice == "Manual...":
         response = simpledialog.askstring("Manual Entry", "Custom Value:") or ""
-        if response:
-            logger.debug(f"Manually entered a value of '{response}'")
+        logger.debug(f"Manually entered a value of '{response}'")
         return response or None
-
-    if function:
-        return_value_of_custom_function = getattr(CustomFunctions, function)(game_name, choice)
-        logger.debug(f"Return value of {function}: {return_value_of_custom_function}")
-
-    return choice
+    return None
 
 
 class Info:
@@ -157,12 +151,15 @@ class CustomFunctions:
     screenheight = 0
 
     @staticmethod
-    def restore_backup(game_name: str, choice: str) -> None:
+    def restore_backup(_game_name: str, choice: str, _new_value: str) -> None:
         if choice in {"Choose...", "None found"}:
             return
 
         logger.info(f"Restoring backup from {choice}.")
-        app = AppName(game_name)
+
+        if not AppName.app_instance:
+            return
+        app = AppName.app_instance
 
         for ini_name in app.what_ini_files_are_used():
             ini_setting_name = app.get_ini_setting_name(ini_name)
@@ -182,13 +179,26 @@ class CustomFunctions:
                 logger.debug(f"{initial_file} was replaced with backup from {new_file}.")
 
     @staticmethod
-    def getBackups(game_name: str) -> list[str]:
+    def refresh_backups(game_name: str, _choice: str, new_value: str | None) -> None:
+        # _choice is unused as it will be "Browse..."
+        if not AppName.app_instance:
+            return
+
+        tab_dictionary = cast("dict[TabId, DisplayTab]", AppName.app_instance.bethini_instance.tab_dictionary)  # type: ignore[reportAttributeAccessIssue]
+        setting_frame = tab_dictionary["Page1"]["LabelFrames"]["LabelFrame1"]["SettingFrames"]["SettingFrame0"]
+        option_menu = setting_frame["Setting3"]["TkOptionMenu"]
+        backups = CustomFunctions.getBackups(game_name, new_value)
+        option_menu.set_menu(backups[0], *backups)
+
+    @staticmethod
+    def getBackups(game_name: str, location: str | None = None) -> list[str]:
         gameDocumentsName = Info.game_documents_name(game_name)
-        defaultINILocation = str(Info.get_documents_path() / "My Games" / gameDocumentsName) if gameDocumentsName else ""
-        INIPath = cast("str", ModifyINI.app_config().get_value("Directories", f"s{game_name}INIPath", defaultINILocation))
-        backup_directory = Path(INIPath) / "Bethini Pie backups"
+        if location is None:
+            defaultINILocation = str(Info.get_documents_path() / "My Games" / gameDocumentsName) if gameDocumentsName else ""
+            location = cast("str", ModifyINI.app_config().get_value("Directories", f"s{game_name}INIPath", defaultINILocation))
+        backup_directory = Path(location, "Bethini Pie backups")
         try:
-            backups = [b.name for b in backup_directory.iterdir()]
+            backups = [b.name for b in sorted(backup_directory.iterdir(), key=os.path.getctime, reverse=True)]
         except OSError:
             backups = ["None found"]
         return ["Choose...", *backups]
@@ -228,7 +238,9 @@ class CustomFunctions:
         documents_path = Info.get_documents_path()
         game_documents_path = documents_path / "My Games" / Info.game_documents_name(gameName)
         game_documents_path.mkdir(parents=True, exist_ok=True)
-        app = AppName(gameName)
+        if not AppName.app_instance:
+            return []
+        app = AppName.app_instance
         ini_files = app.what_ini_files_are_used()
         for file in ini_files:
             if file == "Ultra.ini":
