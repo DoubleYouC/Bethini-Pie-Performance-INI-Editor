@@ -26,6 +26,7 @@ from simpleeval import simple_eval  # type: ignore[reportUnknownVariableType]
 from ttkbootstrap.constants import *
 from ttkbootstrap.icons import Icon
 from ttkbootstrap.themes import standard as standThemes
+from ttkbootstrap.scrolled import ScrolledText
 
 from lib.app import AppName
 from lib.AutoScrollbar import AutoScrollbar
@@ -92,6 +93,41 @@ def set_theme(style_object: ttk.Style, theme_name: str) -> None:
     style_object.configure("choose_game_button.TButton", font=("Segoe UI", 14))
     ModifyINI.app_config().assign_setting_value("General", "sTheme", theme_name)
 
+class log_list_handler(logging.Handler):
+    def __init__(self, log_list):
+        super().__init__()
+        self.log_list = log_list
+
+    def emit(self, record):
+        msg = self.format(record)
+        self.log_list.append(msg)
+
+class observable_list(list):
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.observers = []
+
+    def append(self, item):
+        super().append(item)
+        self.notify_observers()
+
+    def extend(self, iterable):
+        super().extend(iterable)
+        self.notify_observers()
+
+    def insert(self, index, item):
+        super().insert(index, item)
+        self.notify_observers()
+
+    def notify_observers(self):
+        for observer in self.observers:
+            observer()
+
+    def add_observer(self, observer):
+        self.observers.append(observer)
+
+    def remove_observer(self, observer):
+        self.observers.remove(observer)
 
 class bethini_app(ttk.Window):
     """This is the main app, the glue that creates the GUI."""
@@ -490,6 +526,14 @@ class bethini_app(ttk.Window):
                 tk_frame = self.tab_dictionary[tab].get("TkFrameForTab")
                 if tk_frame:
                     tk_frame.destroy()
+        
+        try:
+            log_list.remove_observer(self.update_log_text)
+            self.log_tab.destroy()
+        except AttributeError:
+            self.sme("No log tab found. It will be created.")
+        except ValueError:
+            self.sme("Log List observer not created yet.")
 
         self.tab_dictionary = {}
         for tab_number, tab in enumerate(APP.bethini["displayTabs"], start=1):
@@ -1925,6 +1969,16 @@ class bethini_app(ttk.Window):
 
             self.label_frames_for_tab(tab_id)
 
+        self.log_tab = ttk.Frame(self.sub_container)
+        self.sub_container.add(
+            self.log_tab,
+            text="Log",
+            compound=tk.LEFT,
+        )
+        self.log_text = ScrolledText(self.log_tab, padding=5)
+        self.log_text.pack(fill=tk.BOTH, expand=YES)
+        log_list.add_observer(self.update_log_text)
+
         self.stop_progress()
         if not from_choose_game_window:
             self.updateValues()
@@ -1945,6 +1999,14 @@ class bethini_app(ttk.Window):
                 )
             if self.setting_dictionary[setting_name].get("forceSelect"):
                 self.assign_value(setting_name)
+
+    def update_log_text(self) -> None:
+        try:
+            self.log_text.delete(1.0, tk.END)
+            self.log_text.insert(tk.END, "\n".join(log_list) + '\n')
+            self.log_text.see(tk.END)
+        except tk.TclError:
+            self.sme("Log tab currently unavailable.")
 
     def updateValues(self) -> None:
         self.start_progress()
@@ -2141,6 +2203,11 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
 
 
 if __name__ == "__main__":
+    log_list = observable_list()
+    app_log_list_handler = log_list_handler(log_list)
+    app_log_list_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(app_log_list_handler)
+
     iMaxLogs = cast("str", ModifyINI.app_config().get_value("General", "iMaxLogs", "5"))
     ModifyINI.app_config().assign_setting_value("General", "iMaxLogs", iMaxLogs)
     ModifyINI.app_config().assign_setting_value(
