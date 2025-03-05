@@ -809,7 +809,7 @@ class bethini_app(ttk.Window):
                     self.sme(f"No section {target_section} exists for {target_setting} in {target_ini_object}.")
 
     def create_tab_image(self, tab_id: TabId) -> None:
-        icon_path = Path.cwd() / f"icons/{self.tab_dictionary[tab_id]['Name']}.png"
+        icon_path = Path.cwd() / "icons" / f"{self.tab_dictionary[tab_id]['Name']}.png"
         try:
             if not icon_path.is_file():
                 icon_path = icon_path.with_name("Blank.png")
@@ -1970,9 +1970,13 @@ class bethini_app(ttk.Window):
             self.label_frames_for_tab(tab_id)
 
         self.log_tab = ttk.Frame(self.sub_container)
+        icon_path = Path.cwd() / "icons" / "Log.png"
+        self.log_tab_image = tk.PhotoImage(file=icon_path, height=16, width=16)
+
         self.sub_container.add(
             self.log_tab,
             text="Log",
+            image=self.log_tab_image,
             compound=tk.LEFT,
         )
         self.log_text = ScrolledText(self.log_tab, padding=5)
