@@ -27,6 +27,7 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.icons import Icon
 from ttkbootstrap.themes import standard as standThemes
 from ttkbootstrap.scrolled import ScrolledText
+from ttkbootstrap.tableview import Tableview
 
 from lib.app import AppName
 from lib.AutoScrollbar import AutoScrollbar
@@ -144,6 +145,7 @@ class bethini_app(ttk.Window):
         self.dependent_settings_dictionary: dict[str, dict[str, DependentSetting]] = {}
         self.settings_that_settings_depend_on: dict[str, dict[str, DependentSetting]] = {}
         self.tab = []
+        self.previous_tab = None
 
         self.widget_type_function = {
             "Checkbutton": self.checkbox,
@@ -530,6 +532,7 @@ class bethini_app(ttk.Window):
         try:
             log_list.remove_observer(self.update_log_text)
             self.log_tab.destroy()
+            self.advanced_tab.destroy()
         except AttributeError:
             self.sme("No log tab found. It will be created.")
         except ValueError:
@@ -1969,6 +1972,33 @@ class bethini_app(ttk.Window):
 
             self.label_frames_for_tab(tab_id)
 
+        self.advanced_tab = ttk.Frame(self.sub_container)
+        icon_path = Path.cwd() / "icons" / "Advanced.png"
+        self.advanced_tab_image = tk.PhotoImage(file=icon_path, height=16, width=16)
+        self.sub_container.add(
+            self.advanced_tab,
+            text="Advanced",
+            image=self.advanced_tab_image,
+            compound=tk.LEFT,
+        )
+
+        # Add Tableview to Advanced tab
+        self.advanced_coldata = [
+                "INI File",
+                "Section",
+                "Setting",
+                "Default Value",
+                "Current Value",
+            ]
+        self.advanced_table = Tableview(
+            self.advanced_tab,
+            coldata=self.advanced_coldata,
+            rowdata=[],
+            searchable=True,
+            autoalign=False,
+        )
+        self.advanced_table.pack(fill=tk.BOTH, expand=YES)
+
         self.log_tab = ttk.Frame(self.sub_container)
         icon_path = Path.cwd() / "icons" / "Log.png"
         self.log_tab_image = tk.PhotoImage(file=icon_path, height=16, width=16)
@@ -1992,6 +2022,50 @@ class bethini_app(ttk.Window):
         self.sub_container.pack(fill=tk.BOTH, expand=True)
         self.stop_progress()
         self.sme("Loading complete.")
+
+        # Bind the <<NotebookTabChanged>> event to refresh the advanced table
+        self.sub_container.bind("<<NotebookTabChanged>>", self.on_tab_changed)
+
+    def on_tab_changed(self, event: tk.Event) -> None:
+        selected_tab = event.widget.select()
+        selected_tab_text = event.widget.tab(selected_tab, "text")
+        
+        if self.previous_tab == "Advanced" and selected_tab_text != "Advanced":
+            self.updateValues()
+        
+        if selected_tab_text == "Advanced":
+            self.refresh_advanced_table()
+        
+        self.previous_tab = selected_tab_text  # Update the previously selected tab
+
+
+    def refresh_advanced_table(self) -> None:
+        """Refresh the advanced tableview with INI files and their sections/settings."""
+        rowdata = self.populate_advanced_table()
+        self.advanced_table.build_table_data(coldata=self.advanced_coldata, rowdata=rowdata)
+        self.advanced_table.align_column_left(cid=4)
+        self.advanced_table.align_heading_left(cid=4)
+
+    def populate_advanced_table(self):
+        """Populate the advanced tableview with INI files and their sections/settings."""
+        rowdata = []
+
+        ini_section_setting_dict = APP.preset_values("default")
+
+        for setting_and_section in ini_section_setting_dict:
+
+            target_setting = setting_and_section.split(":")[0]
+            target_ini = ini_section_setting_dict[setting_and_section]["ini"]
+            target_section = ini_section_setting_dict[setting_and_section]["section"]
+            default_value = ini_section_setting_dict[setting_and_section]["value"]
+
+            ini_location = self.getINILocation(target_ini)
+            the_target_ini = ModifyINI.open(target_ini, Path(ini_location))
+            current_value = the_target_ini.get_value(target_section, target_setting, default_value)
+
+            rowdata.append((target_ini, target_section, target_setting, default_value, current_value))
+
+        return rowdata
 
     def bindTkVars(self) -> None:
         for setting_name in self.setting_dictionary:
