@@ -35,10 +35,14 @@ from lib.customFunctions import (
     CustomFunctions,
     browse_to_location,
     decimal_to_rgb,
+    decimal_to_rgba,
+    decimal_to_abgr,
     hex_to_decimal,
     hex_to_rgb,
     rgb_to_hex,
     rgba_to_hex,
+    rgba_to_decimal,
+    abgr_to_decimal,
 )
 from lib.ModifyINI import ModifyINI
 from lib.scalar import Scalar
@@ -350,6 +354,48 @@ class bethini_app(ttk.Window):
             except:
                 new_alpha = alpha
 
+        elif color_value_type == "rgba decimal":
+            # "4278190208"  Red with 50% opacity
+            old_color_rgba = decimal_to_rgba(old_color)
+            # (255, 0, 0, 128) rgba
+            old_color_hex = rgba_to_hex(old_color_rgba)
+            old_color = old_color_hex[0:7]
+            alpha = old_color_rgba[3]
+
+            try:
+                new_alpha = simpledialog.askinteger(
+                    "Alpha",
+                    "Alpha transparency (0 - 255):",
+                    initialvalue=alpha,
+                    minvalue=0,
+                    maxvalue=255,
+                )
+                logger.debug(f"New alpha: {new_alpha}")
+            except:
+                new_alpha = alpha
+
+        elif color_value_type == "abgr decimal":
+            logger.debug("Old color: " + old_color)
+            old_color_abgr = decimal_to_abgr(old_color)
+            logger.debug("Old color abgr: " + str(old_color_abgr))
+            old_color_hex = rgba_to_hex(old_color_abgr[::-1])
+            logger.debug("Old color hex: " + old_color_hex)
+            old_color = old_color_hex[0:7]
+            alpha = old_color_abgr[0]
+
+            try:
+                new_alpha = simpledialog.askinteger(
+                    "Alpha",
+                    "Alpha transparency (0 - 255):",
+                    initialvalue=alpha,
+                    minvalue=0,
+                    maxvalue=255,
+                )
+                logger.debug(f"New alpha: {new_alpha}")
+            except:
+                new_alpha = alpha
+
+
         elif color_value_type == "rgb 1":
             # "(1.0000, 1.0000, 1.0000)"
             # (255, 255, 255)
@@ -377,6 +423,23 @@ class bethini_app(ttk.Window):
                 new_color_list.append(new_alpha)
             new_color_tuple = tuple(new_color_list)
             button_to_modify.var.set(str(new_color_tuple).replace(" ", ""))  # type: ignore[reportAttributeAccessIssue]
+
+        elif color_value_type == "rgba decimal":
+            new_color_tuple = hex_to_rgb(new_color)
+            new_color_list = list(new_color_tuple)
+            if new_alpha is not None:
+                new_color_list.append(new_alpha)
+            new_color_tuple = tuple(new_color_list)
+            button_to_modify.var.set(rgba_to_decimal(new_color_tuple))
+
+        elif color_value_type == "abgr decimal":
+            new_color_tuple = hex_to_rgb(new_color)
+            logger.debug("New color tuple: " + str(new_color_tuple))
+            new_color_list = list(new_color_tuple)
+            if new_alpha is not None:
+                new_color_list.append(new_alpha)
+            new_color_tuple = tuple(new_color_list)
+            button_to_modify.var.set(abgr_to_decimal(new_color_tuple[::-1]))
 
         elif color_value_type == "rgb 1":
             # (255, 255, 255)
@@ -1367,6 +1430,8 @@ class bethini_app(ttk.Window):
             setting["tk_var"].set("(255, 255, 255)")
         elif color_value_type == "rgba":
             setting["tk_var"].set("(255, 255, 255, 255)")
+        elif color_value_type == "rgba decimal" or color_value_type == "abgr decimal":
+            setting["tk_var"].set("4294967295")
         elif color_value_type == "rgb 1":
             setting["tk_var"].set("(1.0000, 1.0000, 1.0000)")
         elif color_value_type == "decimal":
@@ -1613,6 +1678,18 @@ class bethini_app(ttk.Window):
                         this_value += setting_value[n]
                     this_value += ")"
                     new_color = rgb_to_hex(ast.literal_eval(this_value)[0:3])
+            elif color_value_type == "rgba decimal":
+                this_value = setting_value[0]
+                new_color_rgba = decimal_to_rgba(this_value)
+                new_color_rgb = (new_color_rgba[0:2])
+                new_color = rgb_to_hex(new_color_rgb)
+            elif color_value_type == "abgr decimal":
+                this_value = setting_value[0]
+                new_color_abgr = decimal_to_abgr(this_value)
+                logger.debug("Color abgr: " + str(new_color_abgr))
+                new_color_rgb = (new_color_abgr[3], new_color_abgr[2], new_color_abgr[1])
+                logger.debug("Color rgb: " + str(new_color_rgb))
+                new_color = rgb_to_hex(new_color_rgb)
             elif color_value_type == "rgb 1":
                 rgb_type = self.setting_dictionary[setting_name].get("rgbType")
                 if rgb_type == "multiple settings":
@@ -1906,7 +1983,7 @@ class bethini_app(ttk.Window):
             ini_location = self.getINILocation(targetINIs[n])
             the_target_ini = ModifyINI.open(targetINIs[n], Path(ini_location))
 
-            if color_value_type in {"hex", "decimal"}:
+            if color_value_type in {"hex", "decimal", "rgba decimal", "abgr decimal"}:
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
                 self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
             elif color_value_type in {"rgb", "rgb 1", "rgba"}:
