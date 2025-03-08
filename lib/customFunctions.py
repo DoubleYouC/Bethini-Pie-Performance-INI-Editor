@@ -26,14 +26,21 @@ logger = logging.getLogger(__name__)
 
 
 def rgb_to_hex(rgb: tuple[int, int, int]) -> str:
+    """Convert an RGB color value to a hex representation."""
     return "#{:02x}{:02x}{:02x}".format(*rgb)
 
-
 def rgba_to_hex(rgba: tuple[int, int, int, int]) -> str:
+    """Convert an RGBA color value to a hex representation."""
     return "#{:02x}{:02x}{:02x}{:02x}".format(*rgba)
 
+def rgba_to_decimal(rgba: tuple[int, int, int, int]) -> str:
+    """Convert an RGBA color value to a decimal representation."""
+    red, green, blue, alpha = rgba
+    decimal_value = (red << 24) + (green << 16) + (blue << 8) + alpha
+    return str(decimal_value)
 
 def hex_to_rgb(value: str) -> tuple[int, int, int] | tuple[int, ...]:
+    """Convert a hex color value to an RGB color value."""
     value = value.lstrip("#")
     lv = len(value)
     if lv == 1:
@@ -43,17 +50,26 @@ def hex_to_rgb(value: str) -> tuple[int, int, int] | tuple[int, ...]:
         return tuple(int(value[i : i + 1], 16) * 17 for i in range(3))
     return tuple(int(value[i : i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
-
 def hex_to_decimal(hex_: str) -> str:
+    """Convert a hex color value to a decimal representation."""
     return str(int(hex_.lstrip("#"), 16))
 
-
 def decimal_to_rgb(decimal_string: str) -> tuple[int, int, int]:
+    """Convert a decimal representation to an RGB color value."""
     decimal = int(decimal_string)
     blue = decimal & 255
     green = (decimal >> 8) & 255
     red = (decimal >> 16) & 255
     return (red, green, blue)
+
+def decimal_to_rgba(decimal_string: str) -> tuple[int, int, int, int]:
+    """Convert a decimal representation to an RGBA color value."""
+    decimal = int(decimal_string)
+    alpha = decimal & 255
+    blue = (decimal >> 8) & 255
+    green = (decimal >> 16) & 255
+    red = (decimal >> 24) & 255
+    return (red, green, blue, alpha)
 
 
 def browse_to_location(choice: str, browse: BrowseSettings) -> str | None:
