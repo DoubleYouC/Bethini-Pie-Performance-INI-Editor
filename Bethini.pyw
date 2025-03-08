@@ -18,7 +18,7 @@ from datetime import datetime
 from operator import eq, ge, gt, le, lt, ne
 from pathlib import Path
 from shutil import copyfile
-from tkinter import colorchooser, messagebox, simpledialog
+from tkinter import messagebox, simpledialog
 from typing import TYPE_CHECKING, Literal, cast
 
 import ttkbootstrap as ttk
@@ -30,6 +30,7 @@ from ttkbootstrap.scrolled import ScrolledText
 from ttkbootstrap.tableview import Tableview
 
 from lib.app import AppName
+from lib.alphaColorPicker import AlphaColorPicker
 from lib.AutoScrollbar import AutoScrollbar
 from lib.customFunctions import (
     CustomFunctions,
@@ -327,6 +328,7 @@ class bethini_app(ttk.Window):
 
         # Window modify a button
         new_alpha: int | None = None
+        alpha: int | None = None
         old_color: ColorValue = cast("tk.StringVar", button_to_modify.var).get()  # type: ignore[reportAttributeAccessIssue]
         # old_color is in format (255, 255, 255)
 
@@ -355,24 +357,10 @@ class bethini_app(ttk.Window):
                 new_alpha = alpha
 
         elif color_value_type == "rgba decimal":
-            # "4278190208"  Red with 50% opacity
             old_color_rgba = decimal_to_rgba(old_color)
-            # (255, 0, 0, 128) rgba
             old_color_hex = rgba_to_hex(old_color_rgba)
             old_color = old_color_hex[0:7]
             alpha = old_color_rgba[3]
-
-            try:
-                new_alpha = simpledialog.askinteger(
-                    "Alpha",
-                    "Alpha transparency (0 - 255):",
-                    initialvalue=alpha,
-                    minvalue=0,
-                    maxvalue=255,
-                )
-                logger.debug(f"New alpha: {new_alpha}")
-            except:
-                new_alpha = alpha
 
         elif color_value_type == "abgr decimal":
             logger.debug("Old color: " + old_color)
@@ -383,18 +371,6 @@ class bethini_app(ttk.Window):
             old_color = old_color_hex[0:7]
             alpha = old_color_abgr[0]
 
-            try:
-                new_alpha = simpledialog.askinteger(
-                    "Alpha",
-                    "Alpha transparency (0 - 255):",
-                    initialvalue=alpha,
-                    minvalue=0,
-                    maxvalue=255,
-                )
-                logger.debug(f"New alpha: {new_alpha}")
-            except:
-                new_alpha = alpha
-
 
         elif color_value_type == "rgb 1":
             # "(1.0000, 1.0000, 1.0000)"
@@ -404,10 +380,19 @@ class bethini_app(ttk.Window):
         elif color_value_type == "decimal":
             old_color = rgb_to_hex(decimal_to_rgb(old_color))
 
-        response = colorchooser.askcolor(color=old_color)
-        new_color = response[1].upper() if response[1] else old_color
+        response = AlphaColorPicker.get_color(initialcolor=old_color, initialalpha=alpha)
+        if response is None:
+            rgb = hex_to_rgb(old_color)
+            new_color = old_color
+            if alpha is not None:
+                new_alpha = alpha
+        else:
+            rgb = response[0]
+            new_color = response[2]
+            if alpha is not None:
+                new_alpha = response[3]
+                logging.debug(f"New alpha: {new_alpha}")
 
-        rgb = hex_to_rgb(new_color)
         luminance = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
         the_text_color = "#FFFFFF" if luminance < 128 else "#000000"
         button_to_modify.configure(bg=new_color, activebackground=new_color, fg=the_text_color)
