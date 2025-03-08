@@ -39,6 +39,12 @@ def rgba_to_decimal(rgba: tuple[int, int, int, int]) -> str:
     decimal_value = (red << 24) + (green << 16) + (blue << 8) + alpha
     return str(decimal_value)
 
+def abgr_to_decimal(abgr: tuple[int, int, int, int]) -> str:
+    """Convert an ABGR color value to a decimal representation."""
+    alpha, blue, green, red = abgr
+    decimal_value = (alpha << 24) + (blue << 16) + (green << 8) + red
+    return str(decimal_value)
+
 def hex_to_rgb(value: str) -> tuple[int, int, int] | tuple[int, ...]:
     """Convert a hex color value to an RGB color value."""
     value = value.lstrip("#")
@@ -70,6 +76,15 @@ def decimal_to_rgba(decimal_string: str) -> tuple[int, int, int, int]:
     green = (decimal >> 16) & 255
     red = (decimal >> 24) & 255
     return (red, green, blue, alpha)
+
+def decimal_to_abgr(decimal_string: str) -> tuple[int, int, int, int]:
+    """Convert a decimal representation to an ABGR color value."""
+    decimal = int(decimal_string)
+    red = decimal & 255
+    green = (decimal >> 8) & 255
+    blue = (decimal >> 16) & 255
+    alpha = (decimal >> 24) & 255
+    return (alpha, blue, green, red)
 
 
 def browse_to_location(choice: str, browse: BrowseSettings) -> str | None:
