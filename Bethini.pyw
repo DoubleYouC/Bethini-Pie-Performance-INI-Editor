@@ -27,9 +27,9 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.icons import Icon
 from ttkbootstrap.themes import standard as standThemes
 from ttkbootstrap.scrolled import ScrolledText
-from ttkbootstrap.tableview import Tableview
 
 from lib.app import AppName
+from lib.tableview_scrollable import TableviewScrollable
 from lib.alphaColorPicker import AlphaColorPicker
 from lib.AutoScrollbar import AutoScrollbar
 from lib.customFunctions import (
@@ -2052,12 +2052,13 @@ class bethini_app(ttk.Window):
                 "Default Value",
                 "Current Value",
             ]
-        self.advanced_table = Tableview(
+        self.advanced_table = TableviewScrollable(
             self.advanced_tab,
             coldata=self.advanced_coldata,
             rowdata=[],
             searchable=True,
             autoalign=False,
+            yscrollbar=True,
         )
         self.advanced_table.pack(fill=tk.BOTH, expand=YES)
 
