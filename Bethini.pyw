@@ -2165,6 +2165,7 @@ class bethini_app(ttk.Window):
         rowdata = []
 
         ini_section_setting_dict = APP.preset_values("default")
+        fixed_default_dict = APP.preset_values("fixedDefault")
 
         for setting_and_section in ini_section_setting_dict:
 
@@ -2172,6 +2173,9 @@ class bethini_app(ttk.Window):
             target_ini = ini_section_setting_dict[setting_and_section]["ini"]
             target_section = ini_section_setting_dict[setting_and_section]["section"]
             default_value = ini_section_setting_dict[setting_and_section]["value"]
+
+            # Look up the fixedDefault value; fall back to default_value if not provided.
+            default_value = fixed_default_dict.get(setting_and_section, {}).get("value", default_value)
 
             ini_location = self.getINILocation(target_ini)
             the_target_ini = ModifyINI.open(target_ini, Path(ini_location))
