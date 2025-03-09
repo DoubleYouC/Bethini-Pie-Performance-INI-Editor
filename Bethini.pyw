@@ -30,6 +30,7 @@ from ttkbootstrap.scrolled import ScrolledText
 
 from lib.app import AppName
 from lib.tableview_scrollable import TableviewScrollable
+from lib.advanced_edit_menu import AdvancedEditMenuPopup
 from lib.alphaColorPicker import AlphaColorPicker
 from lib.AutoScrollbar import AutoScrollbar
 from lib.customFunctions import (
@@ -72,7 +73,6 @@ _log_stdout = logging.StreamHandler(sys.stdout)  # to console
 _log_stdout.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
 logger.addHandler(_log_stdout)
 logger.info(f"Logging to '{APP_LOG_FILE}'")
-
 
 # This dictionary maps the operator modules to specific text.
 operator_dictionary = {
@@ -2061,6 +2061,9 @@ class bethini_app(ttk.Window):
             yscrollbar=True,
         )
         self.advanced_table.pack(fill=tk.BOTH, expand=YES)
+        self.advanced_table._rightclickmenu_cell.add_separator()
+        self.advanced_table._rightclickmenu_cell.add_command(label="Edit", command=self.edit_advanced_table)
+        self.advanced_table.view.bind("<Double-1>", self.edit_advanced_table_event)
 
         self.log_tab = ttk.Frame(self.sub_container)
         icon_path = Path.cwd() / "icons" / "Log.png"
@@ -2101,6 +2104,41 @@ class bethini_app(ttk.Window):
         
         self.previous_tab = selected_tab_text  # Update the previously selected tab
 
+    def edit_advanced_table_event(self, event):
+        # Check if the double-click event occurred on a row
+        region = self.advanced_table.view.identify("region", event.x, event.y)
+        if region == "cell":
+            self.edit_advanced_table()
+        else:
+            # Call the existing function to autofit columns
+            self.advanced_table.autofit_columns()
+
+    def edit_advanced_table(self) -> None:
+        # Get the item id (row identifier) that is currently focused.
+        item_id = self.advanced_table._rightclickmenu_cell.view.focus()
+        if not item_id:
+            logger.info("No row selected")
+            return
+
+        # Get the row data stored in the "values" attribute.
+        row_data = self.advanced_table._rightclickmenu_cell.view.item(item_id, "values")
+        logger.info("Row data:" + str(row_data))
+
+        self.advanced_edit_menu = AdvancedEditMenuPopup(self, row_data, self.advanced_coldata)
+        self.wait_window(self.advanced_edit_menu)
+        result = self.advanced_edit_menu.result
+        if result is not None:
+            #Fallout4.ini [LightingShader] fDecalLODFadeStart=0.901
+            self.sme(f"{row_data[0]} [{row_data[1]}] {row_data[2]} " + str(result))
+            ini_location = self.getINILocation(row_data[0])
+            the_target_ini = ModifyINI.open(row_data[0], Path(ini_location))
+            the_target_ini.assign_setting_value(
+                section=row_data[1],
+                setting=row_data[2],
+                value=result)
+            new_row = list(row_data)
+            new_row[4] = result  # Update the current value column.
+            self.advanced_table._rightclickmenu_cell.view.item(item_id, values=new_row)
 
     def refresh_advanced_table(self) -> None:
         """Refresh the advanced tableview with INI files and their sections/settings."""
