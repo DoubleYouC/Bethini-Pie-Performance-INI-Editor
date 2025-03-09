@@ -11,6 +11,7 @@ import os
 import shutil
 import sys
 import winreg
+import re
 from pathlib import Path
 from tkinter import filedialog, simpledialog
 from typing import cast
@@ -23,6 +24,37 @@ from lib.ModifyINI import ModifyINI
 from lib.type_helpers import *
 
 logger = logging.getLogger(__name__)
+
+
+def sanitize_and_convert_float(value: str) -> str:
+    """
+    Sanitize a string to ensure it can be converted to a valid float and handle exponential notation.
+
+    This function takes a string input, removes any invalid characters, and converts exponential notation
+    to its decimal equivalent. If the input contains invalid characters, the function shortens the string
+    to the valid part before the invalid characters start. If the conversion to float fails, the function
+    defaults the value to "0".
+
+    Args:
+        value (str): The input string to be sanitized and converted.
+
+    Returns:
+        str: A sanitized string that can be safely converted to a float.
+    """
+    # New code to handle invalid characters and exponentials
+    match = re.match(r"^[\d.eE+-]+", value)
+    if match:
+        value = match.group(0)
+        try:
+            # Convert exponential notation to decimal
+            value = str(float(value))
+        except ValueError:
+            # If conversion fails, default to 0
+            value = "0"
+    else:
+        value = "0"  # Default to 0 if no valid part is found
+    return value
+
 
 def trim_trailing_zeros(value: float) -> str:
     # Format as a fixed-point number first

@@ -46,6 +46,7 @@ from lib.customFunctions import (
     rgba_to_decimal,
     abgr_to_decimal,
     trim_trailing_zeros,
+    sanitize_and_convert_float,
 )
 from lib.ModifyINI import ModifyINI
 from lib.scalar import Scalar
@@ -1488,7 +1489,7 @@ class bethini_app(ttk.Window):
             decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
             if decimal_places_str:
                 decimal_places = int(decimal_places_str)
-                this_value = round(float(setting_value[0]), decimal_places)
+                this_value = round(float(sanitize_and_convert_float(setting_value[0])), decimal_places)
                 if decimal_places == 0:
                     this_value = int(this_value)
                 self.setting_dictionary[setting_name]["tk_var"].set(this_value)  # type: ignore[reportArgumentType]
@@ -1530,6 +1531,7 @@ class bethini_app(ttk.Window):
             decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
             if decimal_places_str:
                 decimal_places = int(decimal_places_str)
+                str_value = sanitize_and_convert_float(str_value)
                 float_value = round(float(str_value), decimal_places)
                 str_value = str(int(float_value)) if decimal_places == 0 else str(float_value)
 
@@ -1588,6 +1590,7 @@ class bethini_app(ttk.Window):
             decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
             if decimal_places_str:
                 decimal_places = int(decimal_places_str)
+                str_value = sanitize_and_convert_float(str_value)
                 float_value = round(float(str_value), decimal_places)
                 str_value = str(int(float_value)) if decimal_places == 0 else str(float_value)
 
@@ -1679,8 +1682,8 @@ class bethini_app(ttk.Window):
             elif color_value_type == "rgb 1":
                 rgb_type = self.setting_dictionary[setting_name].get("rgbType")
                 if rgb_type == "multiple settings":
-                    this_value_as_tuple = tuple(round(float(i), 4) for i in setting_value)
-                    new_color = rgb_to_hex(cast("tuple[int, int, int]", tuple(int(float(i) * 255) for i in setting_value)))
+                    this_value_as_tuple = tuple(round(float(sanitize_and_convert_float(i)), 4) for i in setting_value)
+                    new_color = rgb_to_hex(cast("tuple[int, int, int]", tuple(int(float(sanitize_and_convert_float(i)) * 255) for i in setting_value)))
                     this_value = str(this_value_as_tuple)
 
             if this_value is not None and new_color is not None:
@@ -1867,6 +1870,7 @@ class bethini_app(ttk.Window):
 
             if decimal_places_str and str_value:
                 decimal_places = int(decimal_places_str)
+                str_value = sanitize_and_convert_float(str_value)
                 float_value = round(float(str_value), decimal_places)
                 str_value = str(int(str_value)) if decimal_places == 0 else str(float_value)
 
@@ -2201,7 +2205,7 @@ class bethini_app(ttk.Window):
             current_value = the_target_ini.get_value(target_section, target_setting, default_value)
             if ini_setting_type == "float":
                 default_value = trim_trailing_zeros(float(default_value))
-                current_value = trim_trailing_zeros(float(current_value))
+                current_value = trim_trailing_zeros(float(sanitize_and_convert_float(current_value)))
 
             # If current_value differs from default_value, set tag "changed"
             tag = "changed" if str(current_value) != str(default_value) else ""
