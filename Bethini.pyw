@@ -2063,6 +2063,24 @@ class bethini_app(ttk.Window):
         self.advanced_table.pack(fill=tk.BOTH, expand=YES)
         self.advanced_table._rightclickmenu_cell.add_separator()
         self.advanced_table._rightclickmenu_cell.add_command(label="Edit", command=self.edit_advanced_table)
+        # Create a submenu for filtering
+        filter_submenu = tk.Menu(self.advanced_table._rightclickmenu_cell, tearoff=False)
+        filter_submenu.add_command(
+            label="Clear Filters",
+            command=self.advanced_table._rightclickmenu_cell.master.reset_row_filters
+        )
+        filter_submenu.add_command(
+            label="Show Changed",
+            command=lambda: self.filter_advanced_table_by_tag("changed")
+        )
+        filter_submenu.add_command(
+            label="Show Edited",
+            command=lambda: self.filter_advanced_table_by_tag("edited")
+        )
+
+        # Add the cascade to the right-click menu
+        self.advanced_table._rightclickmenu_cell.add_cascade(label="Filters", menu=filter_submenu)
+
         style=ttk.Style()
         self.advanced_table._rightclickmenu_cell.view.tag_configure("edited",
                                                                     foreground=style.colors.dark,
@@ -2186,6 +2204,15 @@ class bethini_app(ttk.Window):
             rowdata.append((target_ini, target_section, target_setting, default_value, current_value, tag))
 
         return rowdata
+
+    def filter_advanced_table_by_tag(self, tag: str) -> None:
+        """Filter table view to show only rows with the specified tag."""
+        for item in self.advanced_table.view.get_children():
+            item_tags = self.advanced_table.view.item(item, "tags")
+            if tag in item_tags:
+                self.advanced_table.view.reattach(item, '', 'end')
+            else:
+                self.advanced_table.view.detach(item)
 
     def bindTkVars(self) -> None:
         for setting_name in self.setting_dictionary:
