@@ -697,7 +697,7 @@ class bethini_app(ttk.Window):
     def save_ini_files(self, _event: "tk.Event[tk.Misc] | None" = None) -> None:
         self.remove_invalid_settings()
         try:
-            self.apply_ini_dict(APP.preset_values("fixedDefault"), only_if_missing=True)
+            self.apply_ini_dict(APP.preset_values_fixedDefault, only_if_missing=True)
         except NameError as e:
             self.sme(f"NameError: {e}", exception=e)
             return
@@ -766,12 +766,12 @@ class bethini_app(ttk.Window):
     def set_preset(self, preset_id: str) -> None:
         self.start_progress()
         if preset_id == "Default":
-            self.apply_ini_dict(APP.preset_values("default"))
-            self.remove_ini_dict(APP.can_remove())
-            self.apply_ini_dict(APP.preset_values("fixedDefault"))
+            self.apply_ini_dict(APP.preset_values_default)
+            self.remove_ini_dict(APP.can_remove_dict)
+            self.apply_ini_dict(APP.preset_values_fixedDefault)
             preset_var = ""
         elif preset_id == "recommended":
-            preset_dict = APP.preset_values(preset_id)
+            preset_dict = APP.preset_values_recommended
             self.apply_ini_dict(preset_dict)
             preset_var = ""
         else:
@@ -827,7 +827,7 @@ class bethini_app(ttk.Window):
                 msg = f"{setting_and_section} has no INI set."
                 raise TypeError(msg)
 
-            ini_location = bethini_app.getINILocation(target_ini)
+            ini_location = self.getINILocation(target_ini)
             target_ini_object = ModifyINI.open(target_ini, Path(ini_location))
 
             # Check if we are only supposed to add the value if the value is missing
@@ -848,7 +848,7 @@ class bethini_app(ttk.Window):
                 msg = f"{setting_and_section} has no INI set."
                 raise TypeError(msg)
 
-            ini_location = bethini_app.getINILocation(target_ini)
+            ini_location = self.getINILocation(target_ini)
             target_ini_object = ModifyINI.open(target_ini, Path(ini_location))
             current_value = cast("str", target_ini_object.get_value(target_section, target_setting, this_value))
 
@@ -2181,8 +2181,8 @@ class bethini_app(ttk.Window):
         rowdata = []
         tagdata = []
 
-        ini_section_setting_dict = APP.preset_values("default")
-        fixed_default_dict = APP.preset_values("fixedDefault")
+        ini_section_setting_dict = APP.preset_values_default
+        fixed_default_dict = APP.preset_values_fixedDefault
 
         for setting_and_section in ini_section_setting_dict:
 
@@ -2194,8 +2194,7 @@ class bethini_app(ttk.Window):
             # Look up the fixedDefault value; fall back to default_value if not provided.
             default_value = fixed_default_dict.get(setting_and_section, {}).get("value", default_value)
 
-            ini_setting_type = APP.get_setting_type(target_setting)
-            print(ini_setting_type)
+            ini_setting_type = APP.get_setting_type(target_setting, target_section)
             
             ini_location = self.getINILocation(target_ini)
             the_target_ini = ModifyINI.open(target_ini, Path(ini_location))

@@ -34,6 +34,11 @@ class AppName:
         self.default_ini: ININame = list(self.bethini["INIs"])[1]
         self.setting_values = self.get_setting_values()
         self.ini_section_setting_dict = self.get_ini_section_setting_dict()
+        self.setting_type_dict = self.get_setting_type_dict()
+        self.can_remove_dict = self.can_remove()
+        self.preset_values_default = self.preset_values("default")
+        self.preset_values_fixedDefault = self.preset_values("fixedDefault")
+        self.preset_values_recommended = self.preset_values("recommended")
 
     def what_ini_files_are_used(self) -> list[ININame]:
         """Returns a list of INI files used, with Bethini.ini removed from the list."""
@@ -61,11 +66,19 @@ class AppName:
                     continue
         return setting_values
 
-    def get_setting_type(self, setting: str) -> str:
+    def get_setting_type(self, setting: str, section: str) -> str:
         """Returns the setting type for the given setting."""
+        return self.setting_type_dict.get(f"{setting.lower()}:{section.lower()}", "string")
+            
+    def get_setting_type_dict(self) -> dict[str, str]:
+        """Returns a dictionary listing all the settings and their types as specified in settings.json."""
+        setting_type_dict: dict[str, str] = {}
         for ini_setting in self.data["iniValues"]:
-            if ini_setting["name"] == setting:
-                return ini_setting.get("type", "string")
+            section = ini_setting["section"].lower()
+            setting = ini_setting["name"].lower()
+            setting_type_dict.setdefault(
+                f"{setting}:{section}", ini_setting.get("type", "string"))
+        return setting_type_dict
 
     def get_ini_section_setting_dict(self) -> dict[ININame, dict[str, list[str]]]:
         """Returns a dictionary listing all the INI files with their
