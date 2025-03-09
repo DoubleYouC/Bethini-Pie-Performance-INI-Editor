@@ -61,6 +61,12 @@ class AppName:
                     continue
         return setting_values
 
+    def get_setting_type(self, setting: str) -> str:
+        """Returns the setting type for the given setting."""
+        for ini_setting in self.data["iniValues"]:
+            if ini_setting["name"] == setting:
+                return ini_setting.get("type", "string")
+
     def get_ini_section_setting_dict(self) -> dict[ININame, dict[str, list[str]]]:
         """Returns a dictionary listing all the INI files with their
         sections and settings as specified in settings.json

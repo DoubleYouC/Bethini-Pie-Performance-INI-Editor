@@ -24,6 +24,13 @@ from lib.type_helpers import *
 
 logger = logging.getLogger(__name__)
 
+def trim_trailing_zeros(value: float) -> str:
+    # Format as a fixed-point number first
+    formatted = f"{value:f}"
+    # If there is a decimal point, strip trailing zeros and the trailing decimal point if needed.
+    if '.' in formatted:
+        formatted = formatted.rstrip('0').rstrip('.')
+    return formatted
 
 def rgb_to_hex(rgb: tuple[int, int, int]) -> str:
     """Convert an RGB color value to a hex representation."""

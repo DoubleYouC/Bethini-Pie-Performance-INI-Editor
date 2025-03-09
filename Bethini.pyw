@@ -45,6 +45,7 @@ from lib.customFunctions import (
     rgba_to_hex,
     rgba_to_decimal,
     abgr_to_decimal,
+    trim_trailing_zeros,
 )
 from lib.ModifyINI import ModifyINI
 from lib.scalar import Scalar
@@ -2070,11 +2071,11 @@ class bethini_app(ttk.Window):
             command=self.advanced_table._rightclickmenu_cell.master.reset_row_filters
         )
         filter_submenu.add_command(
-            label="Show Changed",
+            label="Show Different from Default",
             command=lambda: self.filter_advanced_table_by_tag("changed")
         )
         filter_submenu.add_command(
-            label="Show Edited",
+            label="Show Manually Edited",
             command=lambda: self.filter_advanced_table_by_tag("edited")
         )
 
@@ -2168,19 +2169,17 @@ class bethini_app(ttk.Window):
 
     def refresh_advanced_table(self) -> None:
         """Refresh the advanced tableview with INI files and their sections/settings."""
-        rowdata = self.populate_advanced_table()
+        rowdata, tag = self.populate_advanced_table()
         self.advanced_table.build_table_data(coldata=self.advanced_coldata, rowdata=rowdata)
-        # self.advanced_table.align_column_left(cid=4)
-        # self.advanced_table.align_heading_left(cid=4)
-        for row_id in self.advanced_table.view.get_children():
-            row_values = self.advanced_table.view.item(row_id, "values")
-            # Assuming the tag was appended as the sixth element
-            if len(row_values) >= 6 and row_values[5] == "changed":
-                self.advanced_table.view.item(row_id, tags=("changed",))
+        for i, row_id in enumerate(self.advanced_table.view.get_children()):
+            # Apply tag if tagdata exists and is non-empty
+            if i < len(tag) and tag[i]:
+                self.advanced_table.view.item(row_id, tags=(tag[i],))
 
-    def populate_advanced_table(self):
+    def populate_advanced_table(self) -> tuple[list[tuple[str, str, str, str, str]], list[str]]:
         """Populate the advanced tableview with INI files and their sections/settings."""
         rowdata = []
+        tagdata = []
 
         ini_section_setting_dict = APP.preset_values("default")
         fixed_default_dict = APP.preset_values("fixedDefault")
@@ -2195,15 +2194,22 @@ class bethini_app(ttk.Window):
             # Look up the fixedDefault value; fall back to default_value if not provided.
             default_value = fixed_default_dict.get(setting_and_section, {}).get("value", default_value)
 
+            ini_setting_type = APP.get_setting_type(target_setting)
+            print(ini_setting_type)
+            
             ini_location = self.getINILocation(target_ini)
             the_target_ini = ModifyINI.open(target_ini, Path(ini_location))
             current_value = the_target_ini.get_value(target_section, target_setting, default_value)
+            if ini_setting_type == "float":
+                default_value = trim_trailing_zeros(float(default_value))
+                current_value = trim_trailing_zeros(float(current_value))
 
             # If current_value differs from default_value, set tag "changed"
             tag = "changed" if str(current_value) != str(default_value) else ""
-            rowdata.append((target_ini, target_section, target_setting, default_value, current_value, tag))
+            tagdata.append(tag)
+            rowdata.append((target_ini, target_section, target_setting, default_value, current_value))
 
-        return rowdata
+        return rowdata, tagdata
 
     def filter_advanced_table_by_tag(self, tag: str) -> None:
         """Filter table view to show only rows with the specified tag."""
