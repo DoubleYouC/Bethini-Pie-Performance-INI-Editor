@@ -41,6 +41,7 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
         ini_file_entry.pack(fill=tk.X, expand=YES, anchor=W)
         ini_file_entry.bind(
             "<FocusOut>", lambda e: self.on_focus_out(e, row_data[0]))
+        ini_file_entry.configure(style="secondary.TEntry")
 
         section_frame = ttk.Frame(self.info_frame)
         section_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
@@ -51,6 +52,7 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
         section_entry.pack(fill=tk.X, expand=YES, anchor=W)
         section_entry.bind(
             "<FocusOut>", lambda e: self.on_focus_out(e, row_data[1]))
+        section_entry.configure(style="secondary.TEntry")
 
         setting_frame = ttk.Frame(self.info_frame)
         setting_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
@@ -61,6 +63,7 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
         setting_entry.pack(fill=tk.X, expand=YES, anchor=W)
         setting_entry.bind(
             "<FocusOut>", lambda e: self.on_focus_out(e, row_data[2]))
+        setting_entry.configure(style="secondary.TEntry")
 
         default_value_frame = ttk.Frame(self.info_frame)
         default_value_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
@@ -72,6 +75,7 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
         default_value_entry.pack(fill=tk.X, expand=YES, anchor=W)
         default_value_entry.bind(
             "<FocusOut>", lambda e: self.on_focus_out(e, row_data[3]))
+        default_value_entry.configure(style="secondary.TEntry")
 
         ttk.Separator(self.info_frame).pack(fill=tk.X, expand=YES, pady=5)
 
@@ -83,6 +87,7 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
         self.current_value_entry = ttk.Entry(current_value_frame)
         self.current_value_entry.insert(0, row_data[4])
         self.current_value_entry.pack(fill=tk.X, expand=YES, anchor=W)
+        self.current_value_entry.configure(style="primary.TEntry")
 
         self.save_button = ttk.Button(
             self.info_frame, text="Save", style="success.TButton")

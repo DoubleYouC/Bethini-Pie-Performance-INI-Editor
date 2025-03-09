@@ -2063,6 +2063,13 @@ class bethini_app(ttk.Window):
         self.advanced_table.pack(fill=tk.BOTH, expand=YES)
         self.advanced_table._rightclickmenu_cell.add_separator()
         self.advanced_table._rightclickmenu_cell.add_command(label="Edit", command=self.edit_advanced_table)
+        style=ttk.Style()
+        self.advanced_table._rightclickmenu_cell.view.tag_configure("edited",
+                                                                    foreground=style.colors.dark,
+                                                                    background=style.colors.warning)
+        self.advanced_table._rightclickmenu_cell.view.tag_configure("changed",
+                                                                    foreground=style.colors.selectfg,
+                                                                    background=style.colors.selectbg)
         self.advanced_table.view.bind("<Double-1>", self.edit_advanced_table_event)
 
         self.log_tab = ttk.Frame(self.sub_container)
@@ -2138,14 +2145,20 @@ class bethini_app(ttk.Window):
                 value=result)
             new_row = list(row_data)
             new_row[4] = result  # Update the current value column.
-            self.advanced_table._rightclickmenu_cell.view.item(item_id, values=new_row)
+            # Update the row with new values and apply the "success" tag.
+            self.advanced_table._rightclickmenu_cell.view.item(item_id, values=new_row, tags=("edited",))
 
     def refresh_advanced_table(self) -> None:
         """Refresh the advanced tableview with INI files and their sections/settings."""
         rowdata = self.populate_advanced_table()
         self.advanced_table.build_table_data(coldata=self.advanced_coldata, rowdata=rowdata)
-        self.advanced_table.align_column_left(cid=4)
-        self.advanced_table.align_heading_left(cid=4)
+        # self.advanced_table.align_column_left(cid=4)
+        # self.advanced_table.align_heading_left(cid=4)
+        for row_id in self.advanced_table.view.get_children():
+            row_values = self.advanced_table.view.item(row_id, "values")
+            # Assuming the tag was appended as the sixth element
+            if len(row_values) >= 6 and row_values[5] == "changed":
+                self.advanced_table.view.item(row_id, tags=("changed",))
 
     def populate_advanced_table(self):
         """Populate the advanced tableview with INI files and their sections/settings."""
@@ -2164,7 +2177,9 @@ class bethini_app(ttk.Window):
             the_target_ini = ModifyINI.open(target_ini, Path(ini_location))
             current_value = the_target_ini.get_value(target_section, target_setting, default_value)
 
-            rowdata.append((target_ini, target_section, target_setting, default_value, current_value))
+            # If current_value differs from default_value, set tag "changed"
+            tag = "changed" if str(current_value) != str(default_value) else ""
+            rowdata.append((target_ini, target_section, target_setting, default_value, current_value, tag))
 
         return rowdata
 
