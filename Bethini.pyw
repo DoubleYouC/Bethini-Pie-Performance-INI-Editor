@@ -30,6 +30,7 @@ from ttkbootstrap.scrolled import ScrolledText
 
 from lib.app import AppName
 from lib.tableview_scrollable import TableviewScrollable
+from lib.save_changes_dialog import SaveChangesDialog
 from lib.advanced_edit_menu import AdvancedEditMenuPopup
 from lib.alphaColorPicker import AlphaColorPicker
 from lib.AutoScrollbar import AutoScrollbar
@@ -730,10 +731,10 @@ class bethini_app(ttk.Window):
         for ini_location, inis in inis_by_location_modified.items():
             backups_path = ini_location / f"{my_app_name} backups"
             for ini_object in inis:
-                if messagebox.askyesno(
-                    f"Save {ini_object.ini_path.name}?",
-                    f"Do you want to save this ini?\n{ini_object.ini_path}?",
-                ):
+                dialog = SaveChangesDialog(self, ini_object)
+                self.wait_window(dialog)
+
+                if dialog.result:
                     remove_excess_directory_files(
                         backups_path,
                         int(cast("str", ModifyINI.app_config().get_value("General", "iMaxBackups", "-1"))),
@@ -1872,7 +1873,7 @@ class bethini_app(ttk.Window):
                 decimal_places = int(decimal_places_str)
                 str_value = sanitize_and_convert_float(str_value)
                 float_value = round(float(str_value), decimal_places)
-                str_value = str(int(str_value)) if decimal_places == 0 else str(float_value)
+                str_value = str(int(float_value)) if decimal_places == 0 else str(float_value)
 
             the_target_ini.assign_setting_value(targetSections[n], theSettings[n], str_value)
             self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={str_value}")
@@ -2154,7 +2155,7 @@ class bethini_app(ttk.Window):
         row_data = self.advanced_table._rightclickmenu_cell.view.item(item_id, "values")
         logger.info("Row data:" + str(row_data))
 
-        self.advanced_edit_menu = AdvancedEditMenuPopup(self, row_data, self.advanced_coldata)
+        self.advanced_edit_menu = AdvancedEditMenuPopup(self, row_data)
         self.wait_window(self.advanced_edit_menu)
         result = self.advanced_edit_menu.result
         if result is not None:
