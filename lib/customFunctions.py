@@ -10,11 +10,13 @@ import logging
 import os
 import shutil
 import sys
-import winreg
 import re
 from pathlib import Path
-from tkinter import filedialog, simpledialog
+from tkinter import filedialog, simpledialog, messagebox
 from typing import cast
+
+if os.name == "nt":
+    import winreg
 
 if __name__ == "__main__":
     sys.exit(1)
@@ -164,17 +166,39 @@ def browse_to_location(choice: str, browse: BrowseSettings) -> str | None:
 
 class Info:
     @staticmethod
-    def get_documents_path() -> Path:
-        CSIDL_PERSONAL = 5  # My Documents
-        SHGFP_TYPE_CURRENT = 0  # Get current, not default value
+    def get_game_config_directory(game_name: str) -> Path:
+        game_config_directory = ModifyINI.app_config().get_value("Directories", f"s{game_name}INIPath")
 
-        buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-        ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
+        if game_config_directory is not None:
+            return Path(game_config_directory)
 
-        documents_directory = Path(buf.value)
-        logger.debug(f"User documents location: {documents_directory}")
+        if os.name == "nt":
+            CSIDL_PERSONAL = 5  # My Documents
+            SHGFP_TYPE_CURRENT = 0  # Get current, not default value
 
-        return documents_directory
+            buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+            ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
+
+            documents_directory = Path(buf.value)
+            logger.debug(f"User documents location: {documents_directory}")
+
+            game_config_directory = (
+                documents_directory / "My Games" / Info.game_documents_name(game_name)
+            )
+
+        elif (
+            messagebox.showwarning(
+                message=f"The config directory for {game_name} was not found automatically, do you want to specify it manually?\nChoosing no will close program",
+                type=messagebox.YESNO,
+            )
+            == messagebox.YES
+        ):
+            game_config_path = browse_to_location("Browse...", ("", "", "directory"))
+
+        if game_config_directory is not None:
+            return Path(game_config_directory)
+        else:
+            raise NotImplementedError
 
     @staticmethod
     def game_documents_name(game_name: str) -> str:
@@ -264,7 +288,7 @@ class CustomFunctions:
     def getBackups(game_name: str, location: str | None = None) -> list[str]:
         gameDocumentsName = Info.game_documents_name(game_name)
         if location is None:
-            defaultINILocation = str(Info.get_documents_path() / "My Games" / gameDocumentsName) if gameDocumentsName else ""
+            defaultINILocation = (str(Info.get_game_config_directory(game_name))if gameDocumentsName else "")
             location = cast("str", ModifyINI.app_config().get_value("Directories", f"s{game_name}INIPath", defaultINILocation))
         backup_directory = Path(location, "Bethini Pie backups")
         try:
@@ -285,18 +309,34 @@ class CustomFunctions:
         if game_folder is not None:
             return game_folder
 
-        key_name = Info.game_reg(game_name)
+        if "winreg" in globals():
+            key_name = Info.game_reg(game_name)
+            try:
+                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, Rf"SOFTWARE\WOW6432Node\Bethesda Softworks\{key_name}") as reg_handle:
+                    value, value_type = winreg.QueryValueEx(reg_handle, "Installed Path")
 
-        try:
-            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, Rf"SOFTWARE\WOW6432Node\Bethesda Softworks\{key_name}") as reg_handle:
-                value, value_type = winreg.QueryValueEx(reg_handle, "Installed Path")
+                if value and value_type == winreg.REG_SZ and isinstance(value, str):
+                    return value
 
-            if value and value_type == winreg.REG_SZ and isinstance(value, str):
-                return value
+            except OSError:
+                logger.exception("Game path not found in the registry. Run the game launcher to set it.")
+                # TODO: Handle what happens next
 
-        except OSError:
-            logger.exception("Game path not found in the registry. Run the game launcher to set it.")
-            # TODO: Handle what happens next
+        if (
+            messagebox.showwarning(
+                message=f"The path to {game_name} was not found automatically, do you want to specify it manually?\nChoosing no will close program",
+                type=messagebox.YESNO,
+            )
+            == messagebox.YES
+        ):
+            try:
+
+                value = browse_to_location("Browse...", ("", "", "directory"))
+                if isinstance(value, str) and value is not None:
+                    return value
+            except:
+                logger.exception("Manual path failed")
+
         raise NotImplementedError
 
     @staticmethod
@@ -305,8 +345,7 @@ class CustomFunctions:
 
     @staticmethod
     def getINILocations(gameName: str) -> list[str]:
-        documents_path = Info.get_documents_path()
-        game_documents_path = documents_path / "My Games" / Info.game_documents_name(gameName)
+        game_documents_path = Info.get_game_config_directory(gameName)
         game_documents_path.mkdir(parents=True, exist_ok=True)
         if not AppName.app_instance:
             return []
