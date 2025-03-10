@@ -11,7 +11,7 @@ if __name__ == "__main__":
 logger = logging.getLogger(__name__)
 
 class AdvancedEditMenuPopup(ttk.Toplevel):
-    def __init__(self, master, row_data: tuple, headers: list[str], **kwargs):
+    def __init__(self, master, row_data: tuple, **kwargs):
         super().__init__(master, **kwargs)
         self.title("Advanced Edit Menu")
         self.grab_set()
