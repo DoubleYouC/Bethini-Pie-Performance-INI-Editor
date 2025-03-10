@@ -70,7 +70,11 @@ class ModifyINI:
         self.case_insensitive_config = customConfigParser()
         logger.info(f"Successfully read {self.case_insensitive_config.read(self.ini_path)} (case insensitive)")
 
+        self.original_config = customConfigParser()
+        logger.info(f"Successfully read {self.original_config.read(self.ini_path)} (read-only)")
+
         self.has_been_modified = False
+        self.modifications: dict[str, dict[str, str]] = {}
 
     def get_existing_section(self, section: str) -> str:
         """Searches for and returns an existing case version of the given section."""
@@ -86,6 +90,14 @@ class ModifyINI:
                 section = existing_section
                 break
         return section
+
+    def get_original_value(self, section: str, setting: str) -> str | None:
+        """Retrieves the original value of a given setting, if it exists."""
+        section = self.get_existing_section(section)
+        # Even though we are checking the case_insensitive_config, sections ARE case sensitive.
+        if self.original_config.has_section(section):
+            return self.original_config.get(section, setting, fallback=None)
+        return None
 
     def get_existing_setting(self, section: str, setting: str) -> str:
         """Searches for and returns an existing case version of the given setting."""
@@ -145,7 +157,17 @@ class ModifyINI:
         if current_value != value:
             self.config[section][setting] = value
             self.case_insensitive_config[section][setting] = value
-            self.has_been_modified = True
+            original_value = self.get_original_value(section, setting)
+            if original_value != value:
+                self.has_been_modified = True
+                if section not in self.modifications:
+                    self.modifications[section] = {}
+                self.modifications[section][setting] = f"Changed from {original_value} to {value}"
+            else:
+                if self.modifications.get(section):
+                    self.modifications[section].pop(setting, None)
+                if not self.modifications.get(section):
+                    self.modifications.pop(section, None)
             return True
         return False
 
@@ -160,7 +182,19 @@ class ModifyINI:
         try:
             self.config.remove_option(existing_section, existing_setting)
             self.case_insensitive_config.remove_option(existing_section, existing_setting)
-            self.has_been_modified = True
+            if self.original_config.has_option(existing_section, existing_setting):
+                self.has_been_modified = True
+                if existing_section not in self.modifications:
+                    self.modifications[existing_section] = {}
+                self.modifications[existing_section][existing_setting] = f"Removed setting"
+            else:
+                if self.modifications.get(existing_section):
+                    existing_setting_value = self.modifications[existing_section].get(setting)
+                    if existing_setting_value and "Changed from None to " in existing_setting_value:
+                        self.modifications[existing_section].pop(
+                            existing_setting, None)
+                if not self.modifications.get(existing_section):
+                    self.modifications.pop(existing_section, None)
         except configparser.NoSectionError:
             return False
         return True
@@ -171,7 +205,9 @@ class ModifyINI:
         existing_section = self.get_existing_section(section)
         self.config.remove_section(existing_section)
         self.case_insensitive_config.remove_section(existing_section)
-        self.has_been_modified = True
+        if self.original_config.has_section(existing_section):
+            self.has_been_modified = True
+            self.modifications[existing_section][existing_section] = f"Removed section"
 
     def sort(self) -> None:
         """Sorts all sections and settings."""
