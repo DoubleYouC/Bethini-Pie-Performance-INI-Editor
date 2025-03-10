@@ -168,6 +168,8 @@ class ModifyINI:
                     self.modifications[section].pop(setting, None)
                 if not self.modifications.get(section):
                     self.modifications.pop(section, None)
+                if self.modifications == {}:
+                    self.has_been_modified = False
             return True
         return False
 
@@ -195,6 +197,8 @@ class ModifyINI:
                             existing_setting, None)
                 if not self.modifications.get(existing_section):
                     self.modifications.pop(existing_section, None)
+                if self.modifications == {}:
+                    self.has_been_modified = False
         except configparser.NoSectionError:
             return False
         return True
