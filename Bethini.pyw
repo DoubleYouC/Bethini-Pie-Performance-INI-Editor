@@ -69,7 +69,6 @@ APP_LOG_FILE = APP_LOG_DIR / "log.log"
 
 fmt = "%(asctime)s  [%(levelname)s]  %(filename)s  %(funcName)s:%(lineno)s:  %(message)s"
 datefmt = "%Y-%m-%d %H:%M:%S"
-preferencesWindow: ttk.Toplevel
 logging.basicConfig(filename=APP_LOG_FILE, filemode="w", format=fmt, datefmt=datefmt, encoding="utf-8", level=logging.DEBUG)
 logger = logging.getLogger()
 _log_stdout = logging.StreamHandler(sys.stdout)  # to console
@@ -440,7 +439,6 @@ class bethini_app(ttk.Window):
 
         else:
             button_to_modify.var.set(new_color)  # type: ignore[reportAttributeAccessIssue]
-        preferencesWindow.lift()
 
         return new_color
 
@@ -627,7 +625,6 @@ class bethini_app(ttk.Window):
 
         # Edit
         editmenu = tk.Menu(menubar, tearoff=False)
-        editmenu.add_command(label="Preferences", command=preferencesWindow.deiconify)
         editmenu.add_command(label="Setup", command=self.show_setup)
 
         # Theme
@@ -2011,20 +2008,6 @@ class bethini_app(ttk.Window):
                 SETUP_WINDOW.protocol("WM_DELETE_WINDOW", self.withdraw_setup)
                 if not from_choose_game_window:
                     SETUP_WINDOW.withdraw()
-            elif self.tab_dictionary[tab_id]["Name"] == "Preferences":
-                global preferencesWindow
-                self.tab_dictionary[tab_id]["PreferencesWindow"] = ttk.Toplevel("Preferences")
-                preferencesWindow = self.tab_dictionary[tab_id]["PreferencesWindow"]
-                self.tab_dictionary[tab_id]["TkFrameForTab"] = ttk.Frame(preferencesWindow)
-                self.tab_dictionary[tab_id]["TkFrameForTab"].pack()
-
-                preferences_ok_button = ttk.Button(preferencesWindow, text="OK", command=preferencesWindow.withdraw)
-                preferences_ok_button.pack(anchor=tk.SE, padx=5, pady=5)
-                preferencesWindow.minsize(300, 100)
-
-                preferencesWindow.protocol("WM_DELETE_WINDOW", preferencesWindow.withdraw)
-                preferencesWindow.withdraw()
-
             else:
                 self.tab_dictionary[tab_id]["TkFrameForTab"] = ttk.Frame(self.sub_container)
                 self.sub_container.add(
