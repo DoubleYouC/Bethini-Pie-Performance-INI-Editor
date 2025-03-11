@@ -554,11 +554,11 @@ class bethini_app(ttk.Window):
         self.wm_title(f"{my_app_name} {version} - {game}")
 
         # #############
-        # App Globals
+        # App globals
         # #############
 
         global APP
-        APP = AppName(self, game)
+        APP = AppName(game)
         global GAME_NAME
         GAME_NAME = APP.data["gameName"]
         self.sme(f"Application/game is {GAME_NAME}")
@@ -673,7 +673,6 @@ class bethini_app(ttk.Window):
         about_label.pack(anchor=tk.CENTER, padx=10, pady=10)
 
     def show_setup(self) -> None:
-        CustomFunctions.refresh_backups(GAME_NAME, "", None)
         self.withdraw()
         SETUP_WINDOW.deiconify()
 
@@ -1140,27 +1139,23 @@ class bethini_app(ttk.Window):
                         choices[n] = option_string.format(value_to_insert)
 
         tk_var = setting["tk_var"] = tk.StringVar(self)
+
         browse = setting.get("browse", ("directory", "directory", "directory"))
-        func_name = setting.get("custom_function", "")
+        func = setting.get("custom_function", "")
 
         def browse_to_loc(
             choice: str,
             var: tk.StringVar = tk_var,
-            browse: BrowseSettings = browse,
-            func_name: str = func_name,
+            browse: Browse = browse,
+            function: str = func,
         ) -> None:
-            location = browse_to_location(choice, browse)
+            location = browse_to_location(choice, browse, function, GAME_NAME)
             if location:
                 var.set(location)
-            elif choices[0] not in {"Browse...", "Manual...", "Choose...", "None found"}:
+            elif choices[0] not in {"Browse...", "Manual..."}:
                 var.set(choices[0])
             else:
                 var.set("")
-
-            if func_name:
-                custom_function = cast("Callable[[str, str, str | None], str | None]", getattr(CustomFunctions, func_name))
-                second_return_value = custom_function(GAME_NAME, choice, location)
-                logger.debug(f"Return value of {func_name}: {second_return_value}")
 
         setting[widget_id] = ttk.OptionMenu(
             setting["TkFinalSettingFrame"],
@@ -1475,6 +1470,7 @@ class bethini_app(ttk.Window):
             else:
                 return this_value
         return None
+
 
     def dropdown_value(self, setting_name: str) -> int | float | str | tuple[str, str] | None:
         setting_value = self.get_setting_values(

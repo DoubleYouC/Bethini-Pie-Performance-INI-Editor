@@ -159,9 +159,15 @@ def browse_to_location(choice: str, browse: BrowseSettings) -> str | None:
 
     if choice == "Manual...":
         response = simpledialog.askstring("Manual Entry", "Custom Value:") or ""
-        logger.debug(f"Manually entered a value of '{response}'")
+        if response:
+            logger.debug(f"Manually entered a value of '{response}'")
         return response or None
-    return None
+
+    if function:
+        return_value_of_custom_function = getattr(CustomFunctions, function)(game_name, choice)
+        logger.debug(f"Return value of {function}: {return_value_of_custom_function}")
+
+    return choice
 
 
 class Info:
@@ -245,15 +251,12 @@ class CustomFunctions:
     screenheight = 0
 
     @staticmethod
-    def restore_backup(_game_name: str, choice: str, _new_value: str) -> None:
+    def restore_backup(game_name: str, choice: str) -> None:
         if choice in {"Choose...", "None found"}:
             return
 
         logger.info(f"Restoring backup from {choice}.")
-
-        if not AppName.app_instance:
-            return
-        app = AppName.app_instance
+        app = AppName(game_name)
 
         for ini_name in app.what_ini_files_are_used():
             ini_setting_name = app.get_ini_setting_name(ini_name)
@@ -273,26 +276,14 @@ class CustomFunctions:
                 logger.debug(f"{initial_file} was replaced with backup from {new_file}.")
 
     @staticmethod
-    def refresh_backups(game_name: str, _choice: str, new_value: str | None) -> None:
-        # _choice is unused as it will be "Browse..."
-        if not AppName.app_instance:
-            return
-
-        tab_dictionary = cast("dict[TabId, DisplayTab]", AppName.app_instance.bethini_instance.tab_dictionary)  # type: ignore[reportAttributeAccessIssue]
-        setting_frame = tab_dictionary["Page1"]["LabelFrames"]["LabelFrame1"]["SettingFrames"]["SettingFrame0"]
-        option_menu = setting_frame["Setting3"]["TkOptionMenu"]
-        backups = CustomFunctions.getBackups(game_name, new_value)
-        option_menu.set_menu(backups[0], *backups)
-
-    @staticmethod
-    def getBackups(game_name: str, location: str | None = None) -> list[str]:
+    def getBackups(game_name: str) -> list[str]:
         gameDocumentsName = Info.game_documents_name(game_name)
         if location is None:
             defaultINILocation = (str(Info.get_game_config_directory(game_name))if gameDocumentsName else "")
             location = cast("str", ModifyINI.app_config().get_value("Directories", f"s{game_name}INIPath", defaultINILocation))
         backup_directory = Path(location, "Bethini Pie backups")
         try:
-            backups = [b.name for b in sorted(backup_directory.iterdir(), key=os.path.getctime, reverse=True)]
+            backups = [b.name for b in backup_directory.iterdir()]
         except OSError:
             backups = ["None found"]
         return ["Choose...", *backups]
@@ -347,9 +338,7 @@ class CustomFunctions:
     def getINILocations(gameName: str) -> list[str]:
         game_documents_path = Info.get_game_config_directory(gameName)
         game_documents_path.mkdir(parents=True, exist_ok=True)
-        if not AppName.app_instance:
-            return []
-        app = AppName.app_instance
+        app = AppName(gameName)
         ini_files = app.what_ini_files_are_used()
         for file in ini_files:
             if file == "Ultra.ini":
