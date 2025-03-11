@@ -128,7 +128,7 @@ def decimal_to_abgr(decimal_string: str) -> tuple[int, int, int, int]:
     return (alpha, blue, green, red)
 
 
-def browse_to_location(choice: str, browse: BrowseSettings) -> str | None:
+def browse_to_location(choice: str, browse: Browse, function: str, game_name: str) -> str | None:
     if choice == "Browse...":
         if browse[2] == "directory":
             response = filedialog.askdirectory()
