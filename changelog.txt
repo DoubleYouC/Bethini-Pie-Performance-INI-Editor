@@ -1,3 +1,18 @@
+v4.13
+Bethini Pie update notes:
+-Added Advanced tab
+-Added Log tab
+-Added table of changes made to the Save dialog
+-Bugfix: Always Select Game preferences option was not working (thanks to wxMichael) (#12)
+-Logging improvements and under-the-hood changes courtesy of thraindk (#20)
+-Miscellaneous under-the-hood improvements and bug fixes courtesy of wxMichael (#1, #20)
+
+Fallout 4 plugin update notes:
+-Added Selection Color
+
+Skyrim Special Edition plugin update notes:
+-Added Disable Kill Cam (thanks to tamerxkilinc)
+
 v4.12
 Bethini Pie update notes:
 -Bugfix: Fix missing font for Linux users. (#8, #9, #10)
