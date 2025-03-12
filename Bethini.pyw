@@ -61,21 +61,6 @@ if TYPE_CHECKING:
 # This is for changing file read-only access via os.chmod(filename, S_IREAD,
 # S_IRGRP, #S_IROTH) Not currently used.
 
-# Configure Logging
-LOG_DIR_DATE: str = datetime.now().strftime("%Y %m-%b %d %a - %H.%M.%S")
-APP_LOG_DIR = Path.cwd() / "logs" / LOG_DIR_DATE
-APP_LOG_DIR.mkdir(parents=True, exist_ok=True)
-APP_LOG_FILE = APP_LOG_DIR / "log.log"
-
-fmt = "%(asctime)s  [%(levelname)s]  %(filename)s  %(funcName)s:%(lineno)s:  %(message)s"
-datefmt = "%Y-%m-%d %H:%M:%S"
-logging.basicConfig(filename=APP_LOG_FILE, filemode="w", format=fmt, datefmt=datefmt, encoding="utf-8", level=logging.DEBUG)
-logger = logging.getLogger()
-_log_stdout = logging.StreamHandler(sys.stdout)  # to console
-_log_stdout.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
-logger.addHandler(_log_stdout)
-logger.info(f"Logging to '{APP_LOG_FILE}'")
-
 # This dictionary maps the operator modules to specific text.
 operator_dictionary = {
     "greater-than": gt,
@@ -494,7 +479,7 @@ class bethini_app(ttk.Window):
             tooltip_text = tooltip_description
 
         setting_name = setting.get("Name")
-        photo_for_setting: Path | None = Path.cwd() / "apps" / GAME_NAME / "images" / f"{setting_name}.jpg"
+        photo_for_setting: Path | None = exedir / "apps" / GAME_NAME / "images" / f"{setting_name}.jpg"
         if not (photo_for_setting and photo_for_setting.is_file()):
             photo_for_setting = None
 
@@ -859,7 +844,7 @@ class bethini_app(ttk.Window):
                     self.sme(f"No section {target_section} exists for {target_setting} in {target_ini_object}.")
 
     def create_tab_image(self, tab_id: TabId) -> None:
-        icon_path = Path.cwd() / "icons" / f"{self.tab_dictionary[tab_id]['Name']}.png"
+        icon_path = exedir / "icons" / f"{self.tab_dictionary[tab_id]['Name']}.png"
         try:
             if not icon_path.is_file():
                 icon_path = icon_path.with_name("Blank.png")
@@ -2020,7 +2005,7 @@ class bethini_app(ttk.Window):
             self.label_frames_for_tab(tab_id)
 
         self.advanced_tab = ttk.Frame(self.sub_container)
-        icon_path = Path.cwd() / "icons" / "Advanced.png"
+        icon_path = exedir / "icons" / "Advanced.png"
         self.advanced_tab_image = tk.PhotoImage(file=icon_path, height=16, width=16)
         self.sub_container.add(
             self.advanced_tab,
@@ -2076,7 +2061,7 @@ class bethini_app(ttk.Window):
         self.advanced_table.view.bind("<Double-1>", self.edit_advanced_table_event)
 
         self.log_tab = ttk.Frame(self.sub_container)
-        icon_path = Path.cwd() / "icons" / "Log.png"
+        icon_path = exedir / "icons" / "Log.png"
         self.log_tab_image = tk.PhotoImage(file=icon_path, height=16, width=16)
 
         self.sub_container.add(
@@ -2298,7 +2283,7 @@ class bethini_app(ttk.Window):
     @staticmethod
     def getINILocation(ini_name: ININame) -> str | Literal[""]:
         if ini_name == ModifyINI.app_config_name:
-            return str(Path.cwd())
+            return str(exedir)
         ini_setting_name = APP.get_ini_setting_name(ini_name)
         if not ini_setting_name:
             msg = f"Unknown INI: {ini_name}"
@@ -2417,6 +2402,26 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
 
 
 if __name__ == "__main__":
+    if getattr(sys, 'frozen', False):
+        exedir = Path(sys.executable).parent
+    else:
+        exedir = Path(__file__).parent
+
+    # Configure Logging
+    LOG_DIR_DATE: str = datetime.now().strftime("%Y %m-%b %d %a - %H.%M.%S")
+    APP_LOG_DIR = exedir / "logs" / LOG_DIR_DATE
+    APP_LOG_DIR.mkdir(parents=True, exist_ok=True)
+    APP_LOG_FILE = APP_LOG_DIR / "log.log"
+
+    fmt = "%(asctime)s  [%(levelname)s]  %(filename)s  %(funcName)s:%(lineno)s:  %(message)s"
+    datefmt = "%Y-%m-%d %H:%M:%S"
+    logging.basicConfig(filename=APP_LOG_FILE, filemode="w", format=fmt, datefmt=datefmt, encoding="utf-8", level=logging.DEBUG)
+    logger = logging.getLogger()
+    _log_stdout = logging.StreamHandler(sys.stdout)  # to console
+    _log_stdout.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
+    logger.addHandler(_log_stdout)
+    logger.info(f"Logging to '{APP_LOG_FILE}'")
+
     log_list = observable_list()
     app_log_list_handler = log_list_handler(log_list)
     app_log_list_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
@@ -2437,7 +2442,7 @@ if __name__ == "__main__":
     ModifyINI.app_config().assign_setting_value("General", "sTheme", theme)
 
     # Remove excess log files.
-    remove_excess_directory_files(Path.cwd() / "logs", int(iMaxLogs), [APP_LOG_FILE.name])
+    remove_excess_directory_files(exedir / "logs", int(iMaxLogs), [APP_LOG_FILE.name])
 
     # Get version
     try:
