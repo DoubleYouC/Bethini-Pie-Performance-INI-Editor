@@ -8,10 +8,20 @@ Bethini Pie update notes:
 -Miscellaneous under-the-hood improvements and bug fixes courtesy of wxMichael (#1, #20)
 
 Fallout 4 plugin update notes:
--Added Selection Color
+-Bugfix: Console Screen Percentage arrow buttons did not increment the value.
+-Bugfix: Console Text Size arrow buttons did not increment the value.
+-Added Console Buffer Size
+-Added Console Selection Color
 
 Skyrim Special Edition plugin update notes:
+-Bugfix: Console Screen Percentage arrow buttons did not increment the value.
+-Bugfix: Console Text Size arrow buttons did not increment the value.
 -Added Disable Kill Cam (thanks to tamerxkilinc)
+-Added Console Buffer Size
+
+Starfield plugin update notes:
+-Bugfix: Console Screen Percentage arrow buttons did not increment the value.
+-Bugfix: Console Text Size arrow buttons did not increment the value.
 
 v4.12
 Bethini Pie update notes:
