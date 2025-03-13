@@ -29,6 +29,7 @@ from ttkbootstrap.themes import standard as standThemes
 from ttkbootstrap.scrolled import ScrolledText
 
 from lib.app import AppName
+from lib.restore_backup_window import RestoreBackupWindow
 from lib.preferences import preferences
 from lib.tableview_scrollable import TableviewScrollable
 from lib.save_changes_dialog import SaveChangesDialog
@@ -123,6 +124,7 @@ class observable_list(list):
     def remove_observer(self, observer):
         self.observers.remove(observer)
 
+
 class bethini_app(ttk.Window):
     """This is the main app, the glue that creates the GUI."""
 
@@ -142,6 +144,7 @@ class bethini_app(ttk.Window):
         self.settings_that_settings_depend_on: dict[str, dict[str, DependentSetting]] = {}
         self.tab = []
         self.previous_tab = None
+        self.app = None
 
         self.widget_type_function = {
             "Checkbutton": self.checkbox,
@@ -544,10 +547,9 @@ class bethini_app(ttk.Window):
         # App globals
         # #############
 
-        global APP
-        APP = AppName(game)
+        self.app = AppName(game)
         global GAME_NAME
-        GAME_NAME = APP.data["gameName"]
+        GAME_NAME = self.app.data["gameName"]
         self.sme(f"Application/game is {GAME_NAME}")
 
         # The self.tab_dictionary lists all the tabs, which
@@ -577,7 +579,7 @@ class bethini_app(ttk.Window):
             self.sme("Log List observer not created yet.")
 
         self.tab_dictionary = {}
-        for tab_number, tab in enumerate(APP.bethini["displayTabs"], start=1):
+        for tab_number, tab in enumerate(self.app.bethini["displayTabs"], start=1):
             self.tab_dictionary[f"Page{tab_number}"] = {"Name": tab}
 
         self.setting_dictionary = {}
@@ -608,13 +610,18 @@ class bethini_app(ttk.Window):
         filemenu = tk.Menu(menubar, tearoff=False)
         filemenu.add_command(label="Save", command=self.save_ini_files)
         filemenu.add_separator()
-        filemenu.add_command(label="Choose Game", command=lambda: self.choose_game(forced=True))
+        filemenu.add_command(label="Restore Backup",
+                             command=lambda: RestoreBackupWindow(self))
+        filemenu.add_separator()
+        filemenu.add_command(label="Choose Game",
+                             command=lambda: self.choose_game(forced=True))
         filemenu.add_separator()
         filemenu.add_command(label="Exit", command=lambda: on_closing(self))
 
         # Edit
         editmenu = tk.Menu(menubar, tearoff=False)
-        editmenu.add_command(label="Preferences", command=lambda: preferences(self))
+        editmenu.add_command(label="Preferences",
+                             command=lambda: preferences(self))
         editmenu.add_command(label="Setup", command=self.show_setup)
 
         # Theme
@@ -685,7 +692,7 @@ class bethini_app(ttk.Window):
     def save_ini_files(self, _event: "tk.Event[tk.Misc] | None" = None) -> None:
         self.remove_invalid_settings()
         try:
-            self.apply_ini_dict(APP.preset_values_fixedDefault, only_if_missing=True)
+            self.apply_ini_dict(self.app.preset_values_fixedDefault, only_if_missing=True)
         except NameError as e:
             self.sme(f"NameError: {e}", exception=e)
             return
@@ -754,17 +761,17 @@ class bethini_app(ttk.Window):
     def set_preset(self, preset_id: str) -> None:
         self.start_progress()
         if preset_id == "Default":
-            self.apply_ini_dict(APP.preset_values_default)
-            self.remove_ini_dict(APP.can_remove_dict)
-            self.apply_ini_dict(APP.preset_values_fixedDefault)
+            self.apply_ini_dict(self.app.preset_values_default)
+            self.remove_ini_dict(self.app.can_remove_dict)
+            self.apply_ini_dict(self.app.preset_values_fixedDefault)
             preset_var = ""
         elif preset_id == "recommended":
-            preset_dict = APP.preset_values_recommended
+            preset_dict = self.app.preset_values_recommended
             self.apply_ini_dict(preset_dict)
             preset_var = ""
         else:
             preset_var = self.preset_var.get()
-            preset_dict = APP.preset_values(f"{preset_var} {preset_id}")
+            preset_dict = self.app.preset_values(f"{preset_var} {preset_id}")
             self.apply_ini_dict(preset_dict)
         self.stop_progress()
         self.updateValues()
@@ -772,7 +779,7 @@ class bethini_app(ttk.Window):
 
     def remove_invalid_settings(self) -> None:
         for each_ini in ModifyINI.open_inis:
-            if each_ini == ModifyINI.app_config_name or not APP.get_ini_setting_name(each_ini):
+            if each_ini == ModifyINI.app_config_name or not self.app.get_ini_setting_name(each_ini):
                 continue
 
             for ini_object in ModifyINI.open_inis[each_ini].values():
@@ -789,7 +796,7 @@ class bethini_app(ttk.Window):
                         if ";" in setting_name or "#" in setting_name:
                             self.sme(f"{setting_name}:{section} will be preserved, as it is a comment.")
 
-                        elif not APP.does_setting_exist(each_ini, section, setting_name):
+                        elif not self.app.does_setting_exist(each_ini, section, setting_name):
                             # Removal of unknown settings (disabled)
                             # ini_object.remove_setting(section, setting_name)
 
@@ -804,7 +811,7 @@ class bethini_app(ttk.Window):
             # e.g. sAntiAliasing:Display
 
             target_setting = setting_and_section.split(":")[0]
-            if not only_if_missing and target_setting in APP.bethini["presetsIgnoreTheseSettings"]:
+            if not only_if_missing and target_setting in self.app.bethini["presetsIgnoreTheseSettings"]:
                 continue
 
             target_ini = ini_dict[setting_and_section]["ini"]
@@ -869,7 +876,7 @@ class bethini_app(ttk.Window):
     def label_frames_for_tab(self, tab_id: TabId) -> None:
         the_dict = self.tab_dictionary[tab_id]
         the_dict["LabelFrames"] = {}
-        for label_frame_number, frame_name in enumerate(APP.bethini["displayTabs"][the_dict["Name"]], start=1):
+        for label_frame_number, frame_name in enumerate(self.app.bethini["displayTabs"][the_dict["Name"]], start=1):
             label_frame_id = f"LabelFrame{label_frame_number}"
             the_dict["LabelFrames"][label_frame_id] = {"Name": frame_name}
             if frame_name != "NoLabelFrame":
@@ -881,7 +888,7 @@ class bethini_app(ttk.Window):
             else:
                 the_dict["LabelFrames"][label_frame_id]["TkLabelFrame"] = ttk.Frame(the_dict["TkFrameForTab"])
 
-            pack_settings = APP.pack_settings(self.tab_dictionary[tab_id]["Name"], frame_name)
+            pack_settings = self.app.pack_settings(self.tab_dictionary[tab_id]["Name"], frame_name)
 
             the_dict["LabelFrames"][label_frame_id]["TkLabelFrame"].pack(
                 anchor=pack_settings.get("Anchor", tk.NW),
@@ -897,13 +904,13 @@ class bethini_app(ttk.Window):
         setting_frames: dict[str, dict[str, BethiniSetting]] = {}
         self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"] = setting_frames
         number_of_vertically_stacked_settings = int(
-            APP.number_of_vertically_stacked_settings(self.tab_dictionary[tab_id]["Name"], label_frame_name),
+            self.app.number_of_vertically_stacked_settings(self.tab_dictionary[tab_id]["Name"], label_frame_name),
         )
 
         for setting_number, setting_name in enumerate(
             cast(
                 "dict[str, BethiniSetting]",
-                APP.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"],
+                self.app.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"],
             ),
             start=1,
         ):
@@ -926,7 +933,7 @@ class bethini_app(ttk.Window):
                 setting.update(
                     cast(
                         "BethiniSetting",
-                        APP.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"][setting_name],
+                        self.app.bethini["displayTabs"][self.tab_dictionary[tab_id]["Name"]][label_frame_name]["Settings"][setting_name],
                     ),
                 )
                 self.setting_label(tab_id, label_frame_name, label_frame_id, setting_frame_id, setting_name, setting_id)
@@ -1111,17 +1118,17 @@ class bethini_app(ttk.Window):
 
         if isinstance(choices, str):
             if "FUNC" in choices:
-                option_string = APP.bethini["customFunctions"][choices]
+                option_string = self.app.bethini["customFunctions"][choices]
                 if "{}" in option_string:
-                    custom_function_name = APP.bethini["customFunctions"][f"{choices}Format"]
+                    custom_function_name = self.app.bethini["customFunctions"][f"{choices}Format"]
                     custom_function = cast("Callable[[str], list[str]]", getattr(CustomFunctions, custom_function_name))
                     choices = custom_function(GAME_NAME)
         else:
             for n in range(len(choices)):
                 if "FUNC" in choices[n]:
-                    option_string = APP.bethini["customFunctions"][choices[n]]
+                    option_string = self.app.bethini["customFunctions"][choices[n]]
                     if "{}" in option_string:
-                        custom_function_name = APP.bethini["customFunctions"][f"{choices[n]}Format"]
+                        custom_function_name = self.app.bethini["customFunctions"][f"{choices[n]}Format"]
                         value_to_insert = getattr(CustomFunctions, custom_function_name)(GAME_NAME)
                         choices[n] = option_string.format(value_to_insert)
 
@@ -2155,8 +2162,8 @@ class bethini_app(ttk.Window):
         rowdata = []
         tagdata = []
 
-        ini_section_setting_dict = APP.preset_values_default
-        fixed_default_dict = APP.preset_values_fixedDefault
+        ini_section_setting_dict = self.app.preset_values_default
+        fixed_default_dict = self.app.preset_values_fixedDefault
 
         for setting_and_section in ini_section_setting_dict:
 
@@ -2168,7 +2175,7 @@ class bethini_app(ttk.Window):
             # Look up the fixedDefault value; fall back to default_value if not provided.
             default_value = fixed_default_dict.get(setting_and_section, {}).get("value", default_value)
 
-            ini_setting_type = APP.get_setting_type(target_setting, target_section)
+            ini_setting_type = self.app.get_setting_type(target_setting, target_section)
             
             ini_location = self.getINILocation(target_ini)
             the_target_ini = ModifyINI.open(target_ini, Path(ini_location))
@@ -2285,11 +2292,10 @@ class bethini_app(ttk.Window):
         self.sme(f"'{new_value}' is an invalid value for this option.")
         return False
 
-    @staticmethod
-    def getINILocation(ini_name: ININame) -> str | Literal[""]:
+    def getINILocation(self, ini_name: ININame) -> str | Literal[""]:
         if ini_name == ModifyINI.app_config_name:
             return str(exedir)
-        ini_setting_name = APP.get_ini_setting_name(ini_name)
+        ini_setting_name = self.app.get_ini_setting_name(ini_name)
         if not ini_setting_name:
             msg = f"Unknown INI: {ini_name}"
             raise NotImplementedError(msg)
@@ -2316,7 +2322,7 @@ class bethini_app(ttk.Window):
                 current_setting = target_settings[i]
 
                 # This looks for a default value in the settings.json
-                default_value = None if ModifyINI.app_config_name == ini_name else APP.setting_values[current_setting].get("default")
+                default_value = None if ModifyINI.app_config_name == ini_name else self.app.setting_values[current_setting].get("default")
 
                 target_ini_object = ModifyINI.open(ini_name, Path(ini_location))
                 try:
