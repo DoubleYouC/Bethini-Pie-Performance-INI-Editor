@@ -1,5 +1,4 @@
 import sys
-import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.tableview import Tableview, TableCellRightClickMenu, TableHeaderRightClickMenu

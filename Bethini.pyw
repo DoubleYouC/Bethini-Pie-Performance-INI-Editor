@@ -29,6 +29,7 @@ from ttkbootstrap.themes import standard as standThemes
 from ttkbootstrap.scrolled import ScrolledText
 
 from lib.app import AppName
+from lib.preferences import preferences
 from lib.tableview_scrollable import TableviewScrollable
 from lib.save_changes_dialog import SaveChangesDialog
 from lib.advanced_edit_menu import AdvancedEditMenuPopup
@@ -126,7 +127,10 @@ class bethini_app(ttk.Window):
     """This is the main app, the glue that creates the GUI."""
 
     def __init__(self, themename: str) -> None:
-        super().__init__(f"{my_app_name} {version}", themename, "Icons/Icon.png", minsize=(400, 200))
+        super().__init__(title=f"{my_app_name} {version}",
+                         themename=themename,
+                         iconphoto="Icons/Icon.png",
+                         minsize=(400, 200))
 
         CustomFunctions.screenwidth = self.winfo_screenwidth()
         CustomFunctions.screenheight = self.winfo_screenheight()
@@ -610,6 +614,7 @@ class bethini_app(ttk.Window):
 
         # Edit
         editmenu = tk.Menu(menubar, tearoff=False)
+        editmenu.add_command(label="Preferences", command=lambda: preferences(self))
         editmenu.add_command(label="Setup", command=self.show_setup)
 
         # Theme
@@ -718,7 +723,7 @@ class bethini_app(ttk.Window):
                 if dialog.result:
                     remove_excess_directory_files(
                         backups_path,
-                        int(cast("str", ModifyINI.app_config().get_value("General", "iMaxBackups", "-1"))),
+                        int(cast("str", ModifyINI.app_config().get_value("General", "iMaxBackups", "5"))),
                         files_to_remove,
                     )
                     if ini_location in locations_without_first_backup:
