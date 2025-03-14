@@ -232,7 +232,7 @@ class bethini_app(ttk.Window):
 
         self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=("Segoe UI", 15))
 
-        self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode=tk.BROWSE, show="tree", columns=("Name"))
+        self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode=BROWSE, show="tree", columns=("Name"))
         self.choose_game_tree.column("#0", width=0, stretch=tk.NO)
         self.choose_game_tree.column("Name", anchor=tk.W, width=300)
 
