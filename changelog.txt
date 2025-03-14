@@ -3,6 +3,8 @@ Bethini Pie update notes:
 -Added Advanced tab
 -Added Log tab
 -Added table of changes made to the Save dialog
+-Preferences are now hardcoded instead of being maintained inside the game plugins
+-Restore Backups function has been removed from the Setup window and moved to the File Menu. It now allows selecting and restoring backups per individual ini file.
 -Bugfix: Always Select Game preferences option was not working (thanks to wxMichael) (#12)
 -Logging improvements and under-the-hood changes courtesy of thraindk (#20)
 -Miscellaneous under-the-hood improvements and bug fixes courtesy of wxMichael (#1, #20)
