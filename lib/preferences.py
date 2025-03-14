@@ -72,7 +72,7 @@ class preferences(ttk.Toplevel):
         max_logs_sb.pack(padx=10)
 
         always_select_game_frame.pack(anchor=E, padx=10, pady=10)
-        always_select_game_cb.pack(side=LEFT)
+        always_select_game_cb.pack(side=LEFT, padx=10)
 
         self.save_button = ttk.Button(
             preferences_frame, text="Save", style="success.TButton")
