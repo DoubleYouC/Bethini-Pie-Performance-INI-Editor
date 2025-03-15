@@ -29,8 +29,8 @@ from ttkbootstrap.themes import standard as standThemes
 from ttkbootstrap.scrolled import ScrolledText
 
 from lib.app import AppName
-from lib.restore_backup_window import RestoreBackupWindow
-from lib.preferences import preferences
+
+from lib.menu_bar import MenuBar
 from lib.tableview_scrollable import TableviewScrollable
 from lib.save_changes_dialog import SaveChangesDialog
 from lib.advanced_edit_menu import AdvancedEditMenuPopup
@@ -50,6 +50,7 @@ from lib.customFunctions import (
     abgr_to_decimal,
     trim_trailing_zeros,
     sanitize_and_convert_float,
+    set_theme
 )
 from lib.ModifyINI import ModifyINI
 from lib.scalar import Scalar
@@ -80,13 +81,6 @@ types_packed_left = ["Dropdown", "Combobox", "Entry", "Spinbox", "Slider", "Colo
 my_app_name = "Bethini Pie"
 my_app_short_name = "Bethini"
 
-
-def set_theme(style_object: ttk.Style, theme_name: str) -> None:
-    """Set the application theme."""
-
-    style_object.theme_use(theme_name)
-    style_object.configure("choose_game_button.TButton", font=("Segoe UI", 14))
-    ModifyINI.app_config().assign_setting_value("General", "sTheme", theme_name)
 
 class log_list_handler(logging.Handler):
     def __init__(self, log_list):
@@ -202,6 +196,9 @@ class bethini_app(ttk.Window):
 
         self.statusbar_text = tk.StringVar(self)
         self.statusbar = ttk.Entry(self.hsbframeholder, textvariable=self.statusbar_text)
+        
+        menu_frame = MenuBar(self)
+        menu_frame.pack(anchor=NW, side=TOP, fill=X)
 
         self.pw = ttk.Label(self.hsbframeholder, text="Loading... Please Wait... ")
         self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode=ttk.INDETERMINATE)
@@ -600,54 +597,6 @@ class bethini_app(ttk.Window):
             )
             self.quit()
             sys.exit(1)
-
-        self.menu(self.style_override)
-
-    def menu(self, style_object: ttk.Style) -> None:
-        menubar = tk.Menu(self)
-
-        # File
-        filemenu = tk.Menu(menubar, tearoff=False)
-        filemenu.add_command(label="Save", command=self.save_ini_files)
-        filemenu.add_separator()
-        filemenu.add_command(label="Restore Backup",
-                             command=lambda: RestoreBackupWindow(self))
-        filemenu.add_separator()
-        filemenu.add_command(label="Choose Game",
-                             command=lambda: self.choose_game(forced=True))
-        filemenu.add_separator()
-        filemenu.add_command(label="Exit", command=lambda: on_closing(self))
-
-        # Edit
-        editmenu = tk.Menu(menubar, tearoff=False)
-        editmenu.add_command(label="Preferences",
-                             command=lambda: preferences(self))
-        editmenu.add_command(label="Setup", command=self.show_setup)
-
-        # Theme
-        theme_menu = tk.Menu(menubar, tearoff=False)
-        theme_names = list(standThemes.STANDARD_THEMES.keys())
-        for theme_name in theme_names:
-            theme_menu.add_command(label=theme_name, command=lambda t=theme_name: set_theme(style_object, t))
-
-        # Help
-        helpmenu = tk.Menu(menubar, tearoff=False)
-        helpmenu.add_command(
-            label="Visit Web Page",
-            command=lambda: webbrowser.open_new_tab("https://www.nexusmods.com/site/mods/631/"),
-        )
-        helpmenu.add_command(
-            label="Get Support",
-            command=lambda: webbrowser.open_new_tab("https://stepmodifications.org/forum/forum/200-Bethini-support/"),
-        )
-        helpmenu.add_command(label="About", command=self.about)
-
-        menubar.add_cascade(label="File", menu=filemenu)
-        menubar.add_cascade(label="Edit", menu=editmenu)
-        menubar.add_cascade(label="Theme", menu=theme_menu)
-        menubar.add_cascade(label="Help", menu=helpmenu)
-
-        ttk.Window.config(self, menu=menubar)
 
     @staticmethod
     def about() -> None:

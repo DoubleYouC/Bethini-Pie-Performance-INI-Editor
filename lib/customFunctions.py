@@ -26,6 +26,13 @@ from lib.type_helpers import *
 
 logger = logging.getLogger(__name__)
 
+def set_theme(style_object: ttk.Style, theme_name: str) -> None:
+    """Set the application theme."""
+
+    style_object.theme_use(theme_name)
+    style_object.configure("choose_game_button.TButton", font=("Segoe UI", 14))
+    ModifyINI.app_config().assign_setting_value("General", "sTheme", theme_name)
+
 
 def sanitize_and_convert_float(value: str) -> str:
     """
