@@ -1,13 +1,17 @@
 v4.13
 Bethini Pie update notes:
+-Bugfix: Fixed UnicodeDecodeError when reading some ini files
+-Bugfix: Always Select Game preferences option was not working (thanks to wxMichael) (#12, #25)
 -Added Advanced tab
 -Added Log tab
 -Added table of changes made to the Save dialog
 -Preferences are now hardcoded instead of being maintained inside the game plugins
 -Restore Backups function has been removed from the Setup window and moved to the File Menu. It now allows selecting and restoring backups per individual ini file.
--Bugfix: Always Select Game preferences option was not working (thanks to wxMichael) (#12)
--Logging improvements and under-the-hood changes courtesy of thraindk (#20)
--Miscellaneous under-the-hood improvements and bug fixes courtesy of wxMichael (#1, #20)
+-Menu bar was changed so it matches the theme
+-Closing the program now asks you if you are sure you want to quit to prevent accidental exit
+-Linux improvements courtesty of ddbb07 (#8, #28)
+-Logging improvements and under-the-hood changes courtesy of thraindk (#20, #24)
+-Miscellaneous under-the-hood improvements and bug fixes courtesy of wxMichael (#1, #20, #25)
 
 Fallout 4 plugin update notes:
 -Bugfix: Console Screen Percentage arrow buttons did not increment the value.
