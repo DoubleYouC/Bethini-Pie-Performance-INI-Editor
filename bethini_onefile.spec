@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['bethini.pyw'],
-             pathex=['S:\\Source\\Repos\\Bethini-Pie-Performance-INI-Editor'],
+             pathex=[],
              binaries=[],
              datas=[],
              hiddenimports=[],
