@@ -357,7 +357,12 @@ class bethini_app(ttk.Window):
         elif color_value_type == "rgb 1":
             # "(1.0000, 1.0000, 1.0000)"
             # (255, 255, 255)
-            old_color = rgb_to_hex(cast("tuple[int, int, int]", tuple(int(float(i) * 255) for i in ast.literal_eval(old_color))))
+            old_color_original_rgb1 = old_color
+            rgb_float = cast("tuple[float, float, float]", tuple(float(float(i) * 255) for i in ast.literal_eval(old_color)))
+            rgb_int = cast("tuple[int, int, int]", tuple(int(round(i, 0)) for i in rgb_float))
+            old_color = rgb_to_hex(rgb_int)
+            logging.debug(old_color)
+            
 
         elif color_value_type == "decimal":
             old_color = rgb_to_hex(decimal_to_rgb(old_color))
@@ -411,7 +416,12 @@ class bethini_app(ttk.Window):
         elif color_value_type == "rgb 1":
             # (255, 255, 255)
             # "(1.0000, 1.0000, 1.0000)"
-            the_rgb = str(tuple(round(i / 255, 4) for i in hex_to_rgb(new_color)))
+            if response is None:
+                the_rgb = old_color_original_rgb1
+            elif response[2] == old_color:
+                the_rgb = old_color_original_rgb1
+            else:
+                the_rgb = str(tuple(round(i / 255, 4) for i in hex_to_rgb(new_color)))
             button_to_modify.var.set(the_rgb)  # type: ignore[reportAttributeAccessIssue]
 
         elif color_value_type == "decimal":
