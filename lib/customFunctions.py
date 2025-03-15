@@ -164,7 +164,7 @@ def browse_to_location(choice: str, browse: Browse, function: str, game_name: st
                 location = location.parent
 
         logger.debug(f"Location set to '{location}'")
-        return str(location)
+        return str(location) + os.sep
 
     if choice == "Manual...":
         response = simpledialog.askstring(
