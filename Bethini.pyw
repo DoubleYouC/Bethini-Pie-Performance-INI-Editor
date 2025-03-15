@@ -13,6 +13,7 @@ import os
 import sys
 import tkinter as tk
 import webbrowser
+from ctypes import windll, byref, c_int, sizeof
 from collections.abc import Sequence
 from datetime import datetime
 from operator import eq, ge, gt, le, lt, ne
@@ -2363,6 +2364,22 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
         else:
             logger.debug(f"Old folder was deleted: {dir_path}")
 
+def set_titlebar_style(window: tk.Misc) -> None:
+    winsys = window.style.tk.call("tk", "windowingsystem")
+    if winsys == "win32" and sys.getwindowsversion().build >= 22000:
+
+        window.update()
+        hwnd = windll.user32.GetParent(window.winfo_id())
+        DWMWA_USE_IMMERSIVE_DARK_MODE = 20
+        DWMWA_MICA_EFFECT = 1029
+
+        # Enable dark mode for the title bar
+        dark_mode = c_int(1)
+        windll.dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, byref(dark_mode), sizeof(dark_mode))
+
+        # Enable Mica effect for the title bar
+        mica_effect = c_int(1)
+        windll.dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, byref(mica_effect), sizeof(mica_effect))
 
 if __name__ == "__main__":
     if getattr(sys, 'frozen', False):
@@ -2416,6 +2433,7 @@ if __name__ == "__main__":
 
     window = bethini_app(themename=theme)
     window.choose_game()
+    set_titlebar_style(window)
 
     window.protocol("WM_DELETE_WINDOW", lambda: on_closing(window))
     window.mainloop()
