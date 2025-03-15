@@ -32,5 +32,34 @@ jobs:
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.6.1
       with:
-        name: Bethini
+        name: Bethini-linux
+        path: dist/Bethini
+        
+  pyinstaller-build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4.2.2
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5.4.0
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Install PyInstaller
+      run: pip install pyinstaller
+    
+    - name: Build with PyInstaller
+      run: pyinstaller bethini_onefile.spec
+    
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4.6.1
+      with:
+        name: Bethini-windows
         path: dist/Bethini
