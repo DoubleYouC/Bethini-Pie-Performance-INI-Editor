@@ -71,8 +71,8 @@ class MenuBar(ttk.Frame):
         self.help_menu.post(self.winfo_rootx() + 150, self.winfo_rooty() + self.winfo_height())
 
     def exit_app(self):
-        response = Messagebox.yesno(parent=self, title="Quit?",
-                                    message="Do you want to quit?")
+        response = Messagebox.show_question(
+            parent=self, title="Quit?", message="Do you want to quit?", buttons=["No:secondary", "Yes:primary"])
         if response == "Yes":
             if ModifyINI.app_config().has_been_modified:
                 ModifyINI.app_config().save_ini_file(sort=True)

@@ -3,7 +3,6 @@ import logging
 import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-import tkinter.font as tkFont
 
 if __name__ == "__main__":
     sys.exit(1)

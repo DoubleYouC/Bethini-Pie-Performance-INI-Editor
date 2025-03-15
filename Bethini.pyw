@@ -18,7 +18,6 @@ from datetime import datetime
 from operator import eq, ge, gt, le, lt, ne
 from pathlib import Path
 from shutil import copyfile
-from tkinter import messagebox
 from typing import TYPE_CHECKING, Literal, cast
 from simpleeval import simple_eval  # type: ignore[reportUnknownVariableType]
 
@@ -27,6 +26,7 @@ from ttkbootstrap.constants import *
 from ttkbootstrap.icons import Icon
 from ttkbootstrap.themes import standard as standThemes
 from ttkbootstrap.scrolled import ScrolledText
+from ttkbootstrap.dialogs import Messagebox
 
 from lib.app import AppName
 
@@ -481,7 +481,7 @@ class bethini_app(ttk.Window):
         anchor_widget = setting[widget_id]
         if anchor_widget is not None:
             Hovertip(widget=anchor_widget, text=tooltip_text, preview_window=PREVIEW_WINDOW,
-                     preview_frame=PREVIEW_FRAME, photo_for_setting=photo_for_setting, wraplength=tooltip_wrap_length)
+                     preview_frame=PREVIEW_FRAME, photo_for_setting=photo_for_setting, wraplength=tooltip_wrap_length, bootstyle=INVERSE)
 
     def choose_game(self, *, forced: bool = False) -> None:
         self.withdraw()
@@ -511,9 +511,10 @@ class bethini_app(ttk.Window):
 
         except Exception as e:
             self.sme("An unhandled exception occurred.", exception=e)
-            messagebox.showerror(
-                title="Unhandled exception",
+            Messagebox.show_error(
                 message=f"An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified.",
+                title="Unhandled exception",
+                parent=self
             )
             self.quit()
             sys.exit(1)
@@ -583,9 +584,10 @@ class bethini_app(ttk.Window):
 
         except Exception as e:
             self.sme("An unhandled exception occurred.", exception=e)
-            messagebox.showerror(
-                title="Unhandled exception",
+            Messagebox.show_error(
                 message=f"An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified.",
+                title="Unhandled exception",
+                parent=self
             )
             self.quit()
             sys.exit(1)
@@ -2303,7 +2305,9 @@ def on_closing(root: bethini_app) -> None:
     This is bound to the main app window closing.
     """
 
-    if messagebox.askyesno("Quit?", "Do you want to quit?"):
+    response = Messagebox.show_question(
+        message="Do you want to quit?", title="Quit?", parent=root, buttons=["No:secondary", "Yes:primary"])
+    if response == "Yes":
         if ModifyINI.app_config().has_been_modified:
             ModifyINI.app_config().save_ini_file(sort=True)
         root.save_ini_files()

@@ -68,7 +68,6 @@ class Hovertip(ToolTip):
             **kwargs,)
 
         self.text = text
-        #self.wrap_length = wrap_length
         self.preview_window = preview_window
         self.preview_frame = preview_frame
         self.photo_for_setting = photo_for_setting

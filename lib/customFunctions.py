@@ -8,7 +8,6 @@
 import ctypes.wintypes
 import logging
 import os
-import shutil
 import sys
 import re
 from pathlib import Path

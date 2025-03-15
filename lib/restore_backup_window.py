@@ -115,8 +115,8 @@ class RestoreBackupWindow(ttk.Toplevel):
         ini_file = self.tk_dict[f"Frame_{i}"]["ini_file"]
         backup_directory = Path(self.tk_dict[f"Frame_{i}"]["backup_directory"])
         backup_file = backup_directory / item / ini_file
-        response = Messagebox.yesno(parent=self, title="Restore Backup",
-                                    message=f"Are you sure you want to restore this backup?\n{backup_file}")
+        response = Messagebox.show_question(
+            parent=self, title="Restore Backup", message=f"Are you sure you want to restore this backup?\n{backup_file}", buttons=["No:secondary", "Yes:primary"])
         logger.debug(f"User clicked {response}")
         if response == "No":
             Messagebox.show_info(parent=self, title="Cancelled restore",
