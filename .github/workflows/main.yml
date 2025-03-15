@@ -27,7 +27,7 @@ jobs:
       run: pip install pyinstaller
     
     - name: Build with PyInstaller
-      run: pyinstaller bethini_onefile.spec
+      run: pyinstaller --onefile --name Bethini --icon Icon.ico Bethini.pyw
     
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.6.1
