@@ -140,6 +140,7 @@ class bethini_app(ttk.Window):
         self.tab = []
         self.previous_tab = None
         self.app = None
+        self.ignore_log_sme_updates = False
 
         self.widget_type_function = {
             "Checkbutton": self.checkbox,
@@ -308,12 +309,13 @@ class bethini_app(ttk.Window):
         self.p = ttk.Progressbar(self.hsbframeholder, orient=HORIZONTAL, mode=INDETERMINATE)
 
     def sme(self, message: str, *, exception: Exception | None = None) -> None:
-        if exception is not None:
-            logger.error(exception, exc_info=True)  # noqa: LOG014
-        else:
-            logger.debug(message)
-        self.statusbar_text.set(message)
-        self.update()
+        if not self.ignore_log_sme_updates:
+            if exception is not None:
+                logger.error(exception, exc_info=True)  # noqa: LOG014
+            else:
+                logger.info(message)
+            self.statusbar_text.set(message)
+            self.update()
 
     @staticmethod
     def choose_color(button_to_modify: tk.Button, color_value_type: ColorType = "hex") -> ColorValue:
@@ -500,7 +502,7 @@ class bethini_app(ttk.Window):
         try:
             choose_game_var = ModifyINI.app_config().get_value("General", "sAppName")
             if forced:
-                self.sme("Force choose game/application.")
+                logging.debug("Force choose game/application.")
                 raise NameError
 
             always_select_game = ModifyINI.app_config().get_value("General", "bAlwaysSelectGame")
@@ -508,7 +510,7 @@ class bethini_app(ttk.Window):
                 ModifyINI.app_config().assign_setting_value("General", "bAlwaysSelectGame", "1")
 
             if always_select_game != "0":
-                self.sme("Force choose game/application at startup.")
+                logging.debug("Force choose game/application at startup.")
                 # By calling the global variable GAME_NAME before it has been created,
                 # we raise an exception to force the app/game to be chosen only at startup.
                 GAME_NAME  # type: ignore[reportUnusedExpression] # noqa: B018
@@ -516,7 +518,7 @@ class bethini_app(ttk.Window):
             self.choose_game_done(choose_game_var)
 
         except NameError:
-            self.sme("Choose game/application.")
+            logging.debug("Choose game/application.")
             self.choose_game_window.deiconify()
 
         except Exception as e:
@@ -537,7 +539,7 @@ class bethini_app(ttk.Window):
 
         # Once the app/game is selected, this loads it.
         if game != ModifyINI.app_config().get_value("General", "sAppName"):
-            self.sme(f"App/Game specified in {ModifyINI.app_config_name} differs from the game chosen, so it will be changed to the one you chose.")
+            logging.debug(f"App/Game specified in {ModifyINI.app_config_name} differs from the game chosen, so it will be changed to the one you chose.")
             ModifyINI.app_config().assign_setting_value("General", "sAppName", game)
             from_choose_game_window = True
 
@@ -550,7 +552,7 @@ class bethini_app(ttk.Window):
         self.app = AppName(game)
         global GAME_NAME
         GAME_NAME = self.app.data["gameName"]
-        self.sme(f"Application/game is {GAME_NAME}")
+        logging.debug(f"Application/game is {GAME_NAME}")
 
         # The self.tab_dictionary lists all the tabs, which
         # is variable, based upon the tabs listed in the associated Bethini.json
@@ -574,9 +576,9 @@ class bethini_app(ttk.Window):
             self.log_tab.destroy()
             self.advanced_tab.destroy()
         except AttributeError:
-            self.sme("No log tab found. It will be created.")
+            logging.debug("No log tab found. It will be created.")
         except ValueError:
-            self.sme("Log List observer not created yet.")
+            logging.debug("Log List observer not created yet.")
 
         self.tab_dictionary = {}
         for tab_number, tab in enumerate(self.app.bethini["displayTabs"], start=1):
@@ -638,7 +640,7 @@ class bethini_app(ttk.Window):
             try:
                 copyfile(ini_file.ini_path, first_time_backup_path / ini_file.ini_path.name)
             except FileNotFoundError as e:
-                self.sme(
+                logging.debug(
                     f"{ini_file.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.",
                     exception=e,
                 )
@@ -649,10 +651,10 @@ class bethini_app(ttk.Window):
         try:
             self.apply_ini_dict(self.app.preset_values_fixedDefault, only_if_missing=True)
         except NameError as e:
-            self.sme(f"NameError: {e}", exception=e)
+            logging.debug(f"NameError: {e}")
             return
         except AttributeError as e:
-            self.sme(f"AttributeError: {e}", exception=e)
+            logging.debug(f"AttributeError: {e}")
             return
 
         files_to_remove = [*list(ModifyINI.open_inis)[1:], APP_LOG_FILE.name]
@@ -699,14 +701,13 @@ class bethini_app(ttk.Window):
                     current_backup_path.mkdir(parents=True, exist_ok=True)
                     current_backup_file_path = current_backup_path / ini_object.ini_path.name
                     if current_backup_file_path.exists():
-                        self.sme(f"{current_backup_file_path} already exists, so it will not be overwritten.")
+                        logging.debug(f"{current_backup_file_path} already exists, so it will not be overwritten.")
                     else:
                         try:
                             copyfile(ini_object.ini_path, current_backup_file_path)
                         except FileNotFoundError as e:
-                            self.sme(
-                                f"{ini_object.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.",
-                                exception=e,
+                            logging.debug(
+                                f"{ini_object.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly."
                             )
                     ini_object.save_ini_file(sort=True)
                     files_saved = True
@@ -747,21 +748,21 @@ class bethini_app(ttk.Window):
                     settings = ini_object.get_settings(section)
                     if not settings:
                         ini_object.remove_section(section)
-                        self.sme(f"{section} was removed because it was empty.")
+                        logging.debug(f"{section} was removed because it was empty.")
                         continue
 
                     for setting_name in settings:
                         if ";" in setting_name or "#" in setting_name:
-                            self.sme(f"{setting_name}:{section} will be preserved, as it is a comment.")
+                            logging.debug(f"{setting_name}:{section} will be preserved, as it is a comment.")
 
                         elif not self.app.does_setting_exist(each_ini, section, setting_name):
                             # Removal of unknown settings (disabled)
                             # ini_object.remove_setting(section, setting_name)
 
-                            self.sme(f"{setting_name}:{section} {each_ini} appears to be invalid.")
+                            logging.debug(f"{setting_name}:{section} {each_ini} appears to be invalid.")
                             if not ini_object.get_settings(section):
                                 ini_object.remove_section(section)
-                                self.sme(f"{section} was removed because it was empty.")
+                                logging.debug(f"{section} was removed because it was empty.")
 
     def apply_ini_dict(self, ini_dict: dict[str, GameSetting], *, only_if_missing: bool = False) -> None:
         for setting_and_section in ini_dict:
@@ -788,7 +789,7 @@ class bethini_app(ttk.Window):
                 continue
 
             target_ini_object.assign_setting_value(target_section, target_setting, this_value)
-            self.sme(f"{target_ini} [{target_section}] {target_setting}={this_value}")
+            # logging.debug(f"{target_ini} [{target_section}] {target_setting}={this_value}")
 
     def remove_ini_dict(self, ini_dict: dict[str, GameSetting]) -> None:
         for setting_and_section in ini_dict:
@@ -806,12 +807,13 @@ class bethini_app(ttk.Window):
             current_value = cast("str", target_ini_object.get_value(target_section, target_setting, this_value))
 
             if current_value == this_value:
-                if target_ini_object.remove_setting(target_section, target_setting):
-                    self.sme(
-                        f"{target_ini} [{target_section}] {target_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed",
-                    )
-                else:
-                    self.sme(f"No section {target_section} exists for {target_setting} in {target_ini_object}.")
+                section_exists = target_ini_object.remove_setting(target_section, target_setting)
+                # if section_exists:
+                #    logging.info(
+                #        f"{target_ini} [{target_section}] {target_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed")
+                # else:
+                #    logging.info(
+                #        f"No section {target_section} exists for {target_setting} in {target_ini_object}.")
 
     def create_tab_image(self, tab_id: TabId) -> None:
         icon_path = exedir / "icons" / f"{self.tab_dictionary[tab_id]['Name']}.png"
@@ -819,14 +821,14 @@ class bethini_app(ttk.Window):
             if not icon_path.is_file():
                 icon_path = icon_path.with_name("Blank.png")
                 if not icon_path.is_file():
-                    self.sme(f"No icon for tab '{tab_id}'")
+                    logging.debug(f"No icon for tab '{tab_id}'")
                     tab_icon = tk.PhotoImage(data=Icon.warning)
                     return
 
             tab_icon = tk.PhotoImage(file=icon_path, height=16, width=16)
 
         except tk.TclError as e:
-            self.sme(f"Failed to load icon for tab '{tab_id}':\n{icon_path}", exception=e)
+            logging.debug(f"Failed to load icon for tab '{tab_id}':\n{icon_path}")
             tab_icon = tk.PhotoImage(data=Icon.warning)
 
         self.tab_dictionary[tab_id]["TkPhotoImageForTab"] = tab_icon
@@ -1764,10 +1766,10 @@ class bethini_app(ttk.Window):
                         if partial_setting["valueSet"]:
                             theValueStr += partial_setting["tk_var"].get()
                         else:
-                            self.sme(f"{each_partial_setting} is not set yet.")
+                            logging.info(f"{each_partial_setting} is not set yet.")
                             return
                     except KeyError:
-                        self.sme(f"{each_partial_setting} is not set yet.")
+                        logging.info(f"{each_partial_setting} is not set yet.")
                         return
 
         if not targetINIs:
@@ -1858,7 +1860,7 @@ class bethini_app(ttk.Window):
                 try:
                     this_value = str(round(cast("float", simple_eval(formulaValue)), 8))
                 except:
-                    self.sme(f"Failed to evaluate formula value for {this_value}.")
+                    logging.debug(f"Failed to evaluate formula value for {this_value}.")
 
             if partial:
                 this_value = theValueStr.format(this_value)
@@ -2175,15 +2177,19 @@ class bethini_app(ttk.Window):
             self.log_text.insert(tk.END, "\n".join(log_list) + '\n')
             self.log_text.see(tk.END)
         except tk.TclError:
-            self.sme("Log tab currently unavailable.")
+            logging.debug("Log tab currently unavailable.")
 
     def updateValues(self) -> None:
         self.start_progress()
         self.sme("Updating INI values.")
+        self.ignore_log_sme_updates = True
         for setting_name in self.setting_dictionary:
             self.widget_type_switcher(setting_name)
+        self.ignore_log_sme_updates = False
         self.sme("Checking for dependent settings.")
+        self.ignore_log_sme_updates = True
         self.dependents()
+        self.ignore_log_sme_updates = False
         self.sme("Update values complete.")
         self.stop_progress()
 
@@ -2386,7 +2392,7 @@ if __name__ == "__main__":
 
     fmt = "%(asctime)s  [%(levelname)s]  %(filename)s  %(funcName)s:%(lineno)s:  %(message)s"
     datefmt = "%Y-%m-%d %H:%M:%S"
-    logging.basicConfig(filename=APP_LOG_FILE, filemode="w", format=fmt, datefmt=datefmt, encoding="utf-8", level=logging.DEBUG)
+    logging.basicConfig(filename=APP_LOG_FILE, filemode="w", format=fmt, datefmt=datefmt, encoding="utf-8", level=logging.INFO)
     logger = logging.getLogger()
     _log_stdout = logging.StreamHandler(sys.stdout)  # to console
     _log_stdout.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
