@@ -19,7 +19,7 @@ from datetime import datetime
 from operator import eq, ge, gt, le, lt, ne
 from pathlib import Path
 from shutil import copyfile
-from tkinter import messagebox, simpledialog
+from tkinter import messagebox
 from typing import TYPE_CHECKING, Literal, cast
 
 import ttkbootstrap as ttk
@@ -336,17 +336,6 @@ class bethini_app(ttk.Window):
             # ffffff
             alpha = old_color_original[3]
             # 170
-            try:
-                new_alpha = simpledialog.askinteger(
-                    "Alpha",
-                    "Alpha transparency (0 - 255):",
-                    initialvalue=alpha,
-                    minvalue=0,
-                    maxvalue=255,
-                )
-                logger.debug(f"New alpha: {new_alpha}")
-            except:
-                new_alpha = alpha
 
         elif color_value_type == "rgba decimal":
             old_color_rgba = decimal_to_rgba(old_color)
