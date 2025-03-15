@@ -3,14 +3,15 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
-from lib.restore_backup_window import RestoreBackupWindow
-from lib.ModifyINI import ModifyINI
-from lib.preferences import preferences
-from lib.customFunctions import set_theme
 from webbrowser import open_new_tab
 
 if __name__ == "__main__":
     sys.exit(1)
+
+from lib.restore_backup_window import RestoreBackupWindow
+from lib.ModifyINI import ModifyINI
+from lib.preferences import preferences
+from lib.customFunctions import set_theme
 
 class MenuBar(ttk.Frame):
     def __init__(self, master, *args, **kwargs):
