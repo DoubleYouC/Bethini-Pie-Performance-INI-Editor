@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v4.2.2
     
-    - name: Set up Python
-      uses: actions/setup-python@v2
+    - name: Setup Python
+      uses: actions/setup-python@v5.4.0
       with:
         python-version: '3.11'
     
@@ -29,8 +29,8 @@ jobs:
     - name: Build with PyInstaller
       run: pyinstaller bethini_onefile.spec
     
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4.6.1
       with:
         name: Bethini
         path: dist/Bethini
