@@ -9,6 +9,8 @@ from pathlib import Path
 if __name__ == "__main__":
     sys.exit(1)
 
+from lib.customFunctions import set_titlebar_style
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,6 +20,7 @@ class RestoreBackupWindow(ttk.Toplevel):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.title("Restore Backup")
+        set_titlebar_style(self)
         self.grab_set()
         self.focus_set()
         self.result = False

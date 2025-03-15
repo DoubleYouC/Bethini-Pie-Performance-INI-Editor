@@ -13,7 +13,6 @@ import os
 import sys
 import tkinter as tk
 import webbrowser
-from ctypes import windll, byref, c_int, sizeof
 from collections.abc import Sequence
 from datetime import datetime
 from operator import eq, ge, gt, le, lt, ne
@@ -51,7 +50,8 @@ from lib.customFunctions import (
     abgr_to_decimal,
     trim_trailing_zeros,
     sanitize_and_convert_float,
-    set_theme
+    set_theme,
+    set_titlebar_style
 )
 from lib.ModifyINI import ModifyINI
 from lib.scalar import Scalar
@@ -207,6 +207,7 @@ class bethini_app(ttk.Window):
         self.statusbar.pack(anchor=tk.W, side=tk.BOTTOM, fill=tk.X)
 
         self.choose_game_window = ttk.Toplevel(f"Bethini Pie {version}")
+        set_titlebar_style(self.choose_game_window)
 
         self.choose_game_frame = ttk.Frame(self.choose_game_window)
 
@@ -591,6 +592,7 @@ class bethini_app(ttk.Window):
     @staticmethod
     def about() -> None:
         about_window = ttk.Toplevel("About")
+        set_titlebar_style(about_window)
 
         about_frame = ttk.Frame(about_window)
         about_frame_real = ttk.Frame(about_frame)
@@ -1922,6 +1924,7 @@ class bethini_app(ttk.Window):
     def createTabs(self, *, from_choose_game_window: bool = False) -> None:
         global PREVIEW_WINDOW
         PREVIEW_WINDOW = ttk.Toplevel("Preview")
+        set_titlebar_style(PREVIEW_WINDOW)
         global PREVIEW_FRAME
         PREVIEW_FRAME = ttk.Frame(PREVIEW_WINDOW)
         PREVIEW_FRAME.pack(padx=5, pady=5)
@@ -1937,6 +1940,7 @@ class bethini_app(ttk.Window):
             if self.tab_dictionary[tab_id]["Name"] == "Setup":
                 global SETUP_WINDOW
                 SETUP_WINDOW = ttk.Toplevel("Setup")
+                set_titlebar_style(SETUP_WINDOW)
                 self.tab_dictionary[tab_id]["SetupWindow"] = SETUP_WINDOW
                 self.tab_dictionary[tab_id]["TkFrameForTab"] = ttk.Frame(SETUP_WINDOW)
                 self.tab_dictionary[tab_id]["TkFrameForTab"].pack()
@@ -2353,22 +2357,6 @@ def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_re
         else:
             logger.debug(f"Old folder was deleted: {dir_path}")
 
-def set_titlebar_style(window: tk.Misc) -> None:
-    winsys = window.style.tk.call("tk", "windowingsystem")
-    if winsys == "win32" and sys.getwindowsversion().build >= 22000:
-
-        window.update()
-        hwnd = windll.user32.GetParent(window.winfo_id())
-        DWMWA_USE_IMMERSIVE_DARK_MODE = 20
-        DWMWA_MICA_EFFECT = 1029
-
-        # Enable dark mode for the title bar
-        dark_mode = c_int(1)
-        windll.dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, byref(dark_mode), sizeof(dark_mode))
-
-        # Enable Mica effect for the title bar
-        mica_effect = c_int(1)
-        windll.dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, byref(mica_effect), sizeof(mica_effect))
 
 if __name__ == "__main__":
     if getattr(sys, 'frozen', False):

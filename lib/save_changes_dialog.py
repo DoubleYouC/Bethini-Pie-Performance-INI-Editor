@@ -1,16 +1,19 @@
 import sys
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from lib.tableview_scrollable import TableviewScrollable
-from lib.ModifyINI import ModifyINI
 
 if __name__ == "__main__":
     sys.exit(1)
+
+from lib.tableview_scrollable import TableviewScrollable
+from lib.ModifyINI import ModifyINI
+from lib.customFunctions import set_titlebar_style
 
 
 class SaveChangesDialog(ttk.Toplevel):
     def __init__(self, parent, ini_object: ModifyINI, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
+        set_titlebar_style(self)
 
         self.ini_object = ini_object
         ini_name = ini_object.ini_path.name

@@ -8,12 +8,15 @@ import tkinter.font as tkFont
 if __name__ == "__main__":
     sys.exit(1)
 
+from lib.customFunctions import set_titlebar_style
+
 logger = logging.getLogger(__name__)
 
 class AdvancedEditMenuPopup(ttk.Toplevel):
     def __init__(self, master, row_data: tuple, **kwargs):
         super().__init__(master, **kwargs)
         self.title("Advanced Edit Menu")
+        set_titlebar_style(self)
         self.grab_set()
         self.focus_set()
         self.result = None  # Will store the result from current_value_entry

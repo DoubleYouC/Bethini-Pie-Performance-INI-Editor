@@ -2,10 +2,12 @@ import sys
 import logging
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
-from lib.ModifyINI import ModifyINI
 
 if __name__ == "__main__":
     sys.exit(1)
+
+from lib.ModifyINI import ModifyINI
+from lib.customFunctions import set_titlebar_style
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +16,7 @@ class preferences(ttk.Toplevel):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.title("Preferences")
+        set_titlebar_style(self)
         self.grab_set()
         self.focus_set()
         self.result = None
