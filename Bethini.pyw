@@ -20,9 +20,9 @@ from pathlib import Path
 from shutil import copyfile
 from tkinter import messagebox
 from typing import TYPE_CHECKING, Literal, cast
+from simpleeval import simple_eval  # type: ignore[reportUnknownVariableType]
 
 import ttkbootstrap as ttk
-from simpleeval import simple_eval  # type: ignore[reportUnknownVariableType]
 from ttkbootstrap.constants import *
 from ttkbootstrap.icons import Icon
 from ttkbootstrap.themes import standard as standThemes
@@ -179,17 +179,17 @@ class bethini_app(ttk.Window):
         self.the_canvas = ttk.Canvas(self)
         self.hsbframeholder = ttk.Frame(self)
 
-        self.vsb = AutoScrollbar(self, orient=tk.VERTICAL, command=self.the_canvas.yview)  # type: ignore[reportUnknownArgumentType]
-        self.hsb = AutoScrollbar(self.hsbframeholder, orient=tk.HORIZONTAL, command=self.the_canvas.xview)  # type: ignore[reportUnknownArgumentType]
+        self.vsb = AutoScrollbar(self, orient=VERTICAL, command=self.the_canvas.yview)  # type: ignore[reportUnknownArgumentType]
+        self.hsb = ttk.Scrollbar(self.hsbframeholder, orient=HORIZONTAL, command=self.the_canvas.xview)  # type: ignore[reportUnknownArgumentType]
         self.the_canvas.configure(yscrollcommand=self.vsb.set, xscrollcommand=self.hsb.set)
 
         self.container = ttk.Frame(self.the_canvas)
         self.container.bind_all("<Control-s>", self.save_ini_files)
 
-        self.hsbframeholder.pack(side=tk.BOTTOM, fill=tk.X)
-        self.vsb.pack(side=tk.RIGHT, fill=tk.Y)
-        self.hsb.pack(side=tk.BOTTOM, fill=tk.X)
-        self.the_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.hsbframeholder.pack(anchor=SW, side=BOTTOM, fill=X)
+        self.vsb.pack(side=RIGHT, fill=Y)
+        self.hsb.pack(side=BOTTOM, fill=X, expand=True)
+        self.the_canvas.pack(side=LEFT, fill=BOTH, expand=True)
         self.canvas_frame = self.the_canvas.create_window((4, 4), window=self.container, tags="self.container")
         self.container.bind("<Configure>", self.on_frame_configure)
         self.sub_container = ttk.Notebook(self.container)
@@ -204,7 +204,7 @@ class bethini_app(ttk.Window):
         self.pw = ttk.Label(self.hsbframeholder, text="Loading... Please Wait... ")
         self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode=ttk.INDETERMINATE)
         self.start_progress()
-        self.statusbar.pack(anchor=tk.W, side=tk.BOTTOM, fill=tk.X)
+        self.statusbar.pack(anchor=NW, side=TOP, fill=X)
 
         self.choose_game_window = ttk.Toplevel(f"Bethini Pie {version}")
         set_titlebar_style(self.choose_game_window)
@@ -291,13 +291,13 @@ class bethini_app(ttk.Window):
         self.the_canvas.configure(scrollregion=self.the_canvas.bbox("all"))
 
     def sub_container_configure(self, event: "tk.Event[ttk.Notebook]") -> None:
-        the_width = event.width + 40
-        the_height = event.height + 65
+        the_width = event.width
+        the_height = event.height + 70
         self.geometry(f"{the_width}x{the_height}")
 
     def start_progress(self) -> None:
-        self.pw.pack(side=tk.LEFT, anchor=tk.S)
-        self.p.pack(expand=True, fill=tk.X, anchor=tk.S)
+        self.pw.pack(side=LEFT, anchor=S)
+        self.p.pack(expand=True, fill=X, anchor=S)
         self.p.start()
 
     def stop_progress(self) -> None:
@@ -305,7 +305,7 @@ class bethini_app(ttk.Window):
         self.p.stop()
         self.p.destroy()
         self.pw = ttk.Label(self.hsbframeholder, text="Loading... Please Wait... ")
-        self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode=ttk.INDETERMINATE)
+        self.p = ttk.Progressbar(self.hsbframeholder, orient=HORIZONTAL, mode=INDETERMINATE)
 
     def sme(self, message: str, *, exception: Exception | None = None) -> None:
         if exception is not None:
@@ -480,7 +480,8 @@ class bethini_app(ttk.Window):
 
         anchor_widget = setting[widget_id]
         if anchor_widget is not None:
-            Hovertip(anchor_widget, tooltip_text, PREVIEW_WINDOW, PREVIEW_FRAME, photo_for_setting, tooltip_wrap_length)
+            Hovertip(widget=anchor_widget, text=tooltip_text, preview_window=PREVIEW_WINDOW,
+                     preview_frame=PREVIEW_FRAME, photo_for_setting=photo_for_setting, wraplength=tooltip_wrap_length)
 
     def choose_game(self, *, forced: bool = False) -> None:
         self.withdraw()
@@ -609,6 +610,7 @@ class bethini_app(ttk.Window):
 
     def show_setup(self) -> None:
         self.withdraw()
+        set_titlebar_style(SETUP_WINDOW)
         SETUP_WINDOW.deiconify()
 
     def withdraw_setup(self) -> None:
@@ -1924,7 +1926,6 @@ class bethini_app(ttk.Window):
     def createTabs(self, *, from_choose_game_window: bool = False) -> None:
         global PREVIEW_WINDOW
         PREVIEW_WINDOW = ttk.Toplevel("Preview")
-        set_titlebar_style(PREVIEW_WINDOW)
         global PREVIEW_FRAME
         PREVIEW_FRAME = ttk.Frame(PREVIEW_WINDOW)
         PREVIEW_FRAME.pack(padx=5, pady=5)
@@ -1940,7 +1941,6 @@ class bethini_app(ttk.Window):
             if self.tab_dictionary[tab_id]["Name"] == "Setup":
                 global SETUP_WINDOW
                 SETUP_WINDOW = ttk.Toplevel("Setup")
-                set_titlebar_style(SETUP_WINDOW)
                 self.tab_dictionary[tab_id]["SetupWindow"] = SETUP_WINDOW
                 self.tab_dictionary[tab_id]["TkFrameForTab"] = ttk.Frame(SETUP_WINDOW)
                 self.tab_dictionary[tab_id]["TkFrameForTab"].pack()
