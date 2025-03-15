@@ -3,17 +3,17 @@
 import sys
 import ttkbootstrap as ttk
 from collections import namedtuple
-from types import NoneType
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Querybox
 from ttkbootstrap.dialogs.colorchooser import (
     ColorChooser,
     ColorChooserDialog,
 )
-from lib.scalar import Scalar
 
 if __name__ == "__main__":
     sys.exit(1)
+
+from lib.scalar import Scalar
 
 ColorChoice = namedtuple("ColorChoice", "rgb hsl hex alpha")
 
