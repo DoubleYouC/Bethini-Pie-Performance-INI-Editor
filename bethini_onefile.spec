@@ -3,7 +3,7 @@
 block_cipher = None
 
 
-a = Analysis(['bethini.pyw'],
+a = Analysis(['Bethini.pyw'],
              pathex=[],
              binaries=[],
              datas=[],
