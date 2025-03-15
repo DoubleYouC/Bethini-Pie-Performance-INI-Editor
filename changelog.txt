@@ -9,7 +9,7 @@ Bethini Pie update notes:
 -Restore Backups function has been removed from the Setup window and moved to the File Menu. It now allows selecting and restoring backups per individual ini file.
 -Menu bar was changed so it matches the theme
 -Closing the program now asks you if you are sure you want to quit to prevent accidental exit
--Linux improvements courtesty of ddbb07 (#8, #28)
+-Linux improvements courtesy of ddbb07 (#8, #28)
 -Logging improvements and under-the-hood changes courtesy of thraindk (#20, #24)
 -Miscellaneous under-the-hood improvements and bug fixes courtesy of wxMichael (#1, #20, #25)
 
