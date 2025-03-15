@@ -16,7 +16,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v5.4.0
       with:
-        python-version: '3.11'
+        python-version: '3.11.11'
     
     - name: Install dependencies
       run: |
@@ -27,13 +27,13 @@ jobs:
       run: pip install pyinstaller
     
     - name: Build with PyInstaller
-      run: pyinstaller --onefile --name Bethini --icon Icon.ico Bethini.pyw
+      run: pyinstaller bethini_onefile.spec
     
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.6.1
       with:
         name: Bethini-linux
-        path: dist/Bethini
+        path: dist
         
   pyinstaller-build-windows:
     runs-on: windows-latest
@@ -45,7 +45,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v5.4.0
       with:
-        python-version: '3.11'
+        python-version: '3.11.11'
     
     - name: Install dependencies
       run: |
