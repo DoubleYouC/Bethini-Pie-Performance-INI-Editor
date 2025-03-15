@@ -264,7 +264,7 @@ class bethini_app(ttk.Window):
             self.theme_name,
             ModifyINI.app_config().get_value("General", "sTheme", "superhero"),
             *theme_names,
-            command=lambda t: set_theme(self.style_override, t.get()),
+            command=lambda t=self.theme_name.get(): set_theme(self.style_override, t),
         )
         self.theme_dropdown.var = self.theme_name  # type: ignore[reportAttributeAccessIssue]
 
@@ -695,6 +695,9 @@ class bethini_app(ttk.Window):
             self.apply_ini_dict(self.app.preset_values_fixedDefault, only_if_missing=True)
         except NameError as e:
             self.sme(f"NameError: {e}", exception=e)
+            return
+        except AttributeError as e:
+            self.sme(f"AttributeError: {e}", exception=e)
             return
 
         files_to_remove = [*list(ModifyINI.open_inis)[1:], APP_LOG_FILE.name]
