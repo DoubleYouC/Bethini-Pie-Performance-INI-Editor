@@ -141,6 +141,8 @@ class bethini_app(ttk.Window):
         self.previous_tab = None
         self.app = None
         self.ignore_log_sme_updates = False
+        self.preset_var = tk.StringVar(self, "Bethini")
+        self.style_override = ttk.Style()
 
         self.widget_type_function = {
             "Checkbutton": self.checkbox,
@@ -175,23 +177,21 @@ class bethini_app(ttk.Window):
             "TkSlider": self.slider_assign_value,
         }
 
-        self.style_override = ttk.Style()
-
         self.the_canvas = ttk.Canvas(self)
         self.hsbframeholder = ttk.Frame(self)
 
-        self.vsb = AutoScrollbar(self, orient=VERTICAL, command=self.the_canvas.yview)  # type: ignore[reportUnknownArgumentType]
-        self.hsb = ttk.Scrollbar(self.hsbframeholder, orient=HORIZONTAL, command=self.the_canvas.xview)  # type: ignore[reportUnknownArgumentType]
-        self.the_canvas.configure(yscrollcommand=self.vsb.set, xscrollcommand=self.hsb.set)
+        vsb = AutoScrollbar(self, orient=VERTICAL, command=self.the_canvas.yview)  # type: ignore[reportUnknownArgumentType]
+        hsb = ttk.Scrollbar(self.hsbframeholder, orient=HORIZONTAL, command=self.the_canvas.xview)  # type: ignore[reportUnknownArgumentType]
+        self.the_canvas.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
 
         self.container = ttk.Frame(self.the_canvas)
         self.container.bind_all("<Control-s>", self.save_ini_files)
 
         self.hsbframeholder.pack(anchor=SW, side=BOTTOM, fill=X)
-        self.vsb.pack(side=RIGHT, fill=Y)
-        self.hsb.pack(side=BOTTOM, fill=X, expand=True)
+        vsb.pack(side=RIGHT, fill=Y)
+        hsb.pack(side=BOTTOM, fill=X, expand=True)
         self.the_canvas.pack(side=LEFT, fill=BOTH, expand=True)
-        self.canvas_frame = self.the_canvas.create_window((4, 4), window=self.container, tags="self.container")
+        self.canvas_frame = self.the_canvas.create_window((4, 4), window=self.container, tags="container")
         self.container.bind("<Configure>", self.on_frame_configure)
         self.sub_container = ttk.Notebook(self.container)
         self.sub_container.bind("<Configure>", self.sub_container_configure)
@@ -203,9 +203,12 @@ class bethini_app(ttk.Window):
         menu_frame.pack(anchor=NW, side=TOP, fill=X)
 
         self.pw = ttk.Label(self.hsbframeholder, text="Loading... Please Wait... ")
-        self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode=ttk.INDETERMINATE)
+        self.p = ttk.Progressbar(self.hsbframeholder, orient=HORIZONTAL, mode=INDETERMINATE)
         self.start_progress()
         self.statusbar.pack(anchor=NW, side=TOP, fill=X)
+
+
+
 
         self.choose_game_window = ttk.Toplevel(f"Bethini Pie {version}")
         set_titlebar_style(self.choose_game_window)
@@ -219,22 +222,22 @@ class bethini_app(ttk.Window):
             self.choose_game_frame_2,
             text="Performance INI Editor\nby DoubleYou",
             font=("Segoe UI", 15),
-            justify=tk.CENTER,
-            style=ttk.WARNING,
+            justify=CENTER,
+            style=WARNING,
         )
         self.label_link = ttk.Label(
             self.choose_game_frame_2,
             text="www.nexusmods.com/site/mods/631",
             font=("Segoe UI", 10),
             cursor="hand2",
-            style=ttk.INFO,
+            style=INFO,
         )
 
         self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=("Segoe UI", 15))
 
         self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode=BROWSE, show="tree", columns=("Name"))
-        self.choose_game_tree.column("#0", width=0, stretch=tk.NO)
-        self.choose_game_tree.column("Name", anchor=tk.W, width=300)
+        self.choose_game_tree.column("#0", width=0, stretch=NO)
+        self.choose_game_tree.column("Name", anchor=W, width=300)
 
         self.style_override.configure("choose_game_button.TButton", font=("Segoe UI", 14))
         self.choose_game_button = ttk.Button(
@@ -248,11 +251,11 @@ class bethini_app(ttk.Window):
             self.choose_game_frame_2,
             text="Tip: You can change the game at any time\nby going to File > Choose Game.",
             font=("Segoe UI", 12),
-            justify=tk.CENTER,
+            justify=CENTER,
             style="success",
         )
-        for option in Path("apps").iterdir():
-            self.choose_game_tree.insert("", tk.END, id=option.name, text=option.name, values=[option.name])
+        for option in Path(exedir / "apps").iterdir():
+            self.choose_game_tree.insert("", index=END, id=option.name, text=option.name, values=[option.name])
 
         self.preferences_frame = ttk.Frame(self.choose_game_frame_2)
 
@@ -268,8 +271,8 @@ class bethini_app(ttk.Window):
         )
         self.theme_dropdown.var = self.theme_name  # type: ignore[reportAttributeAccessIssue]
 
-        self.choose_game_frame.pack(fill=tk.BOTH, expand=True)
-        self.choose_game_frame_2.pack(anchor=tk.CENTER, expand=True)
+        self.choose_game_frame.pack(fill=BOTH, expand=True)
+        self.choose_game_frame_2.pack(anchor=CENTER, expand=True)
 
         self.label_Bethini.pack(padx=5, pady=5)
         self.label_Pie.pack(padx=5, pady=15)
@@ -277,16 +280,14 @@ class bethini_app(ttk.Window):
         self.label_link.bind("<Button-1>", lambda _event: webbrowser.open_new_tab("https://www.nexusmods.com/site/mods/631"))
 
         self.preferences_frame.pack()
-        self.theme_label.pack(side=tk.LEFT)
+        self.theme_label.pack(side=LEFT)
         self.theme_dropdown.pack(padx=5, pady=15)
         self.choose_game_label.pack(padx=5, pady=2)
         self.choose_game_tree.pack(padx=10)
         self.choose_game_button.pack(pady=15)
         self.choose_game_tip.pack(pady=10)
-        self.choose_game_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(self))
+        self.choose_game_window.protocol("WM_DELETE_WINDOW", self.quit)
         self.choose_game_window.minsize(300, 35)
-
-        self.preset_var = tk.StringVar(self, "Bethini")
 
     def on_frame_configure(self, _event: "tk.Event[ttk.Frame]") -> None:
         self.the_canvas.configure(scrollregion=self.the_canvas.bbox("all"))
@@ -507,7 +508,7 @@ class bethini_app(ttk.Window):
 
             always_select_game = ModifyINI.app_config().get_value("General", "bAlwaysSelectGame")
             if always_select_game is None:
-                ModifyINI.app_config().assign_setting_value("General", "bAlwaysSelectGame", "1")
+                ModifyINI.app_config().assign_setting_value("General", "bAlwaysSelectGame", "0")
 
             if always_select_game != "0":
                 logging.debug("Force choose game/application at startup.")
