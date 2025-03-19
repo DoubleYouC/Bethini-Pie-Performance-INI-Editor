@@ -2394,7 +2394,18 @@ if __name__ == "__main__":
 
     fmt = "%(asctime)s  [%(levelname)s]  %(filename)s  %(funcName)s:%(lineno)s:  %(message)s"
     datefmt = "%Y-%m-%d %H:%M:%S"
-    logging.basicConfig(filename=APP_LOG_FILE, filemode="w", format=fmt, datefmt=datefmt, encoding="utf-8", level=logging.INFO)
+
+    log_level = ModifyINI.app_config().get_value("General", "sLogLevel", "Info")
+
+    log_level_dict = {
+        "Critical": logging.CRITICAL,
+        "Error": logging.ERROR,
+        "Warning": logging.WARNING,
+        "Info": logging.INFO,
+        "Debug": logging.DEBUG
+    }
+
+    logging.basicConfig(filename=APP_LOG_FILE, filemode="w", format=fmt, datefmt=datefmt, encoding="utf-8", level=log_level_dict.get(log_level))
     logger = logging.getLogger()
     _log_stdout = logging.StreamHandler(sys.stdout)  # to console
     _log_stdout.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))

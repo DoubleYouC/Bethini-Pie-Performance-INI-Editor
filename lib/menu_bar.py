@@ -51,7 +51,7 @@ class MenuBar(ttk.Frame):
         self.theme_menu = tk.Menu(self, tearoff=False)
         theme_names = list(ttk.Style().theme_names())
         for theme_name in theme_names:
-            self.theme_menu.add_command(label=theme_name, command=lambda t=theme_name: set_theme(master.style_override, t))
+            self.theme_menu.add_radiobutton(label=theme_name, command=lambda t=theme_name: set_theme(master.style_override, t))
 
         self.help_menu = tk.Menu(self, tearoff=False)
         self.help_menu.add_command(label="Visit Web Page", command=lambda: open_new_tab("https://www.nexusmods.com/site/mods/631/"))
