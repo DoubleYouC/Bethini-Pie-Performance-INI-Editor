@@ -180,18 +180,13 @@ class bethini_app(ttk.Window):
         self.the_canvas = ttk.Canvas(self)
         self.hsbframeholder = ttk.Frame(self)
 
-        vsb = AutoScrollbar(self, orient=VERTICAL, command=self.the_canvas.yview)  # type: ignore[reportUnknownArgumentType]
-        hsb = ttk.Scrollbar(self.hsbframeholder, orient=HORIZONTAL, command=self.the_canvas.xview)  # type: ignore[reportUnknownArgumentType]
-        self.the_canvas.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+        self.vsb = AutoScrollbar(self, orient=VERTICAL, command=self.the_canvas.yview)  # type: ignore[reportUnknownArgumentType]
+        self.hsb = ttk.Scrollbar(self.hsbframeholder, orient=HORIZONTAL, command=self.the_canvas.xview)  # type: ignore[reportUnknownArgumentType]
+        self.the_canvas.configure(yscrollcommand=self.vsb.set, xscrollcommand=self.hsb.set)
 
         self.container = ttk.Frame(self.the_canvas)
         self.container.bind_all("<Control-s>", self.save_ini_files)
 
-        self.hsbframeholder.pack(anchor=SW, side=BOTTOM, fill=X)
-        vsb.pack(side=RIGHT, fill=Y)
-        hsb.pack(side=BOTTOM, fill=X, expand=True)
-        self.the_canvas.pack(side=LEFT, fill=BOTH, expand=True)
-        self.canvas_frame = self.the_canvas.create_window((4, 4), window=self.container, tags="container")
         self.container.bind("<Configure>", self.on_frame_configure)
         self.sub_container = ttk.Notebook(self.container)
         self.sub_container.bind("<Configure>", self.sub_container_configure)
@@ -199,102 +194,27 @@ class bethini_app(ttk.Window):
         self.statusbar_text = tk.StringVar(self)
         self.statusbar = ttk.Entry(self.hsbframeholder, textvariable=self.statusbar_text)
         
+        self.pw = ttk.Label(self.hsbframeholder, text="Loading... Please Wait... ")
+        self.p = ttk.Progressbar(self.hsbframeholder, orient=HORIZONTAL, mode=INDETERMINATE)
+
+    def pack_stuff(self) -> None:
+        self.hsbframeholder.pack(anchor=SW, side=BOTTOM, fill=X)
+        self.vsb.pack(side=RIGHT, fill=Y)
+        self.hsb.pack(side=BOTTOM, fill=X, expand=True)
+        self.the_canvas.pack(side=LEFT, fill=BOTH, expand=True)
+        canvas_frame = self.the_canvas.create_window((4, 4), window=self.container, tags="container")
+
         menu_frame = MenuBar(self)
         menu_frame.pack(anchor=NW, side=TOP, fill=X)
 
-        self.pw = ttk.Label(self.hsbframeholder, text="Loading... Please Wait... ")
-        self.p = ttk.Progressbar(self.hsbframeholder, orient=HORIZONTAL, mode=INDETERMINATE)
-        self.start_progress()
         self.statusbar.pack(anchor=NW, side=TOP, fill=X)
-
-
-
-
-        self.choose_game_window = ttk.Toplevel(f"Bethini Pie {version}")
-        set_titlebar_style(self.choose_game_window)
-
-        self.choose_game_frame = ttk.Frame(self.choose_game_window)
-
-        self.choose_game_frame_2 = ttk.Frame(self.choose_game_frame)
-
-        self.label_Bethini = ttk.Label(self.choose_game_frame_2, text="Bethini Pie", font=("Segoe UI", 20))
-        self.label_Pie = ttk.Label(
-            self.choose_game_frame_2,
-            text="Performance INI Editor\nby DoubleYou",
-            font=("Segoe UI", 15),
-            justify=CENTER,
-            style=WARNING,
-        )
-        self.label_link = ttk.Label(
-            self.choose_game_frame_2,
-            text="www.nexusmods.com/site/mods/631",
-            font=("Segoe UI", 10),
-            cursor="hand2",
-            style=INFO,
-        )
-
-        self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=("Segoe UI", 15))
-
-        self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode=BROWSE, show="tree", columns=("Name"))
-        self.choose_game_tree.column("#0", width=0, stretch=NO)
-        self.choose_game_tree.column("Name", anchor=W, width=300)
-
-        self.style_override.configure("choose_game_button.TButton", font=("Segoe UI", 14))
-        self.choose_game_button = ttk.Button(
-            self.choose_game_frame_2,
-            text="Select Game",
-            style="choose_game_button.TButton",
-            command=lambda: self.choose_game_done(self.choose_game_tree.focus()),
-        )
-
-        self.choose_game_tip = ttk.Label(
-            self.choose_game_frame_2,
-            text="Tip: You can change the game at any time\nby going to File > Choose Game.",
-            font=("Segoe UI", 12),
-            justify=CENTER,
-            style="success",
-        )
-        for option in Path(exedir / "apps").iterdir():
-            self.choose_game_tree.insert("", index=END, id=option.name, text=option.name, values=[option.name])
-
-        self.preferences_frame = ttk.Frame(self.choose_game_frame_2)
-
-        self.theme_label = ttk.Label(self.preferences_frame, text="Theme:")
-        theme_names = standThemes.STANDARD_THEMES.keys()
-        self.theme_name = tk.StringVar(self)
-        self.theme_dropdown = ttk.OptionMenu(
-            self.preferences_frame,
-            self.theme_name,
-            ModifyINI.app_config().get_value("General", "sTheme", "superhero"),
-            *theme_names,
-            command=lambda t=self.theme_name.get(): set_theme(self.style_override, t),
-        )
-        self.theme_dropdown.var = self.theme_name  # type: ignore[reportAttributeAccessIssue]
-
-        self.choose_game_frame.pack(fill=BOTH, expand=True)
-        self.choose_game_frame_2.pack(anchor=CENTER, expand=True)
-
-        self.label_Bethini.pack(padx=5, pady=5)
-        self.label_Pie.pack(padx=5, pady=15)
-        self.label_link.pack(padx=25, pady=5)
-        self.label_link.bind("<Button-1>", lambda _event: webbrowser.open_new_tab("https://www.nexusmods.com/site/mods/631"))
-
-        self.preferences_frame.pack()
-        self.theme_label.pack(side=LEFT)
-        self.theme_dropdown.pack(padx=5, pady=15)
-        self.choose_game_label.pack(padx=5, pady=2)
-        self.choose_game_tree.pack(padx=10)
-        self.choose_game_button.pack(pady=15)
-        self.choose_game_tip.pack(pady=10)
-        self.choose_game_window.protocol("WM_DELETE_WINDOW", self.quit)
-        self.choose_game_window.minsize(300, 35)
 
     def on_frame_configure(self, _event: "tk.Event[ttk.Frame]") -> None:
         self.the_canvas.configure(scrollregion=self.the_canvas.bbox("all"))
 
     def sub_container_configure(self, event: "tk.Event[ttk.Notebook]") -> None:
         the_width = event.width
-        the_height = event.height + 70
+        the_height = event.height + 100
         self.geometry(f"{the_width}x{the_height}")
 
     def start_progress(self) -> None:
@@ -498,6 +418,86 @@ class bethini_app(ttk.Window):
 
     def choose_game(self, *, forced: bool = False) -> None:
         self.withdraw()
+
+        self.choose_game_window = ttk.Toplevel(f"Bethini Pie {version}")
+        set_titlebar_style(self.choose_game_window)
+
+        self.choose_game_frame = ttk.Frame(self.choose_game_window)
+
+        self.choose_game_frame_2 = ttk.Frame(self.choose_game_frame)
+
+        self.label_Bethini = ttk.Label(self.choose_game_frame_2, text="Bethini Pie", font=("Segoe UI", 20))
+        self.label_Pie = ttk.Label(
+            self.choose_game_frame_2,
+            text="Performance INI Editor\nby DoubleYou",
+            font=("Segoe UI", 15),
+            justify=CENTER,
+            style=WARNING,
+        )
+        self.label_link = ttk.Label(
+            self.choose_game_frame_2,
+            text="www.nexusmods.com/site/mods/631",
+            font=("Segoe UI", 10),
+            cursor="hand2",
+            style=INFO,
+        )
+
+        self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=("Segoe UI", 15))
+
+        self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode=BROWSE, show="tree", columns=("Name"))
+        self.choose_game_tree.column("#0", width=0, stretch=NO)
+        self.choose_game_tree.column("Name", anchor=W, width=300)
+
+        self.style_override.configure("choose_game_button.TButton", font=("Segoe UI", 14))
+        self.choose_game_button = ttk.Button(
+            self.choose_game_frame_2,
+            text="Select Game",
+            style="choose_game_button.TButton",
+            command=lambda: self.choose_game_done(self.choose_game_tree.focus()),
+        )
+
+        self.choose_game_tip = ttk.Label(
+            self.choose_game_frame_2,
+            text="Tip: You can change the game at any time\nby going to File > Choose Game.",
+            font=("Segoe UI", 12),
+            justify=CENTER,
+            style="success",
+        )
+        for option in Path(exedir / "apps").iterdir():
+            self.choose_game_tree.insert("", index=END, id=option.name, text=option.name, values=[option.name])
+
+        self.preferences_frame = ttk.Frame(self.choose_game_frame_2)
+
+        self.theme_label = ttk.Label(self.preferences_frame, text="Theme:")
+        theme_names = standThemes.STANDARD_THEMES.keys()
+        self.theme_name = tk.StringVar(self)
+        self.theme_dropdown = ttk.OptionMenu(
+            self.preferences_frame,
+            self.theme_name,
+            ModifyINI.app_config().get_value("General", "sTheme", "superhero"),
+            *theme_names,
+            command=lambda t=self.theme_name.get(): set_theme(self.style_override, t),
+        )
+        self.theme_dropdown.var = self.theme_name  # type: ignore[reportAttributeAccessIssue]
+
+        self.choose_game_frame.pack(fill=BOTH, expand=True)
+        self.choose_game_frame_2.pack(anchor=CENTER, expand=True)
+
+        self.label_Bethini.pack(padx=5, pady=5)
+        self.label_Pie.pack(padx=5, pady=15)
+        self.label_link.pack(padx=25, pady=5)
+        self.label_link.bind("<Button-1>", lambda _event: webbrowser.open_new_tab("https://www.nexusmods.com/site/mods/631"))
+
+        self.preferences_frame.pack()
+        self.theme_label.pack(side=LEFT)
+        self.theme_dropdown.pack(padx=5, pady=15)
+        self.choose_game_label.pack(padx=5, pady=2)
+        self.choose_game_tree.pack(padx=10)
+        self.choose_game_button.pack(pady=15)
+        self.choose_game_tip.pack(pady=10)
+        self.choose_game_window.protocol("WM_DELETE_WINDOW", self.quit)
+        self.choose_game_window.minsize(300, 35)
+
         # The Choose App/Game dialog window.  The window is skipped here if
         # sAppName is already set in the Bethini.ini file.
         try:
@@ -1939,6 +1939,7 @@ class bethini_app(ttk.Window):
                     self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def createTabs(self, *, from_choose_game_window: bool = False) -> None:
+        self.start_progress()
         global PREVIEW_WINDOW
         PREVIEW_WINDOW = ttk.Toplevel("Preview")
         global PREVIEW_FRAME
@@ -2430,6 +2431,7 @@ if __name__ == "__main__":
         version = ""
 
     window = bethini_app(themename=theme)
+    window.pack_stuff()
     window.choose_game()
     set_titlebar_style(window)
 
