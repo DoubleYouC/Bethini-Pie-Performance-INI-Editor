@@ -38,6 +38,7 @@ class AppName:
         self.preset_values_default = self.preset_values("default")
         self.preset_values_fixedDefault = self.preset_values("fixedDefault")
         self.preset_values_recommended = self.preset_values("recommended")
+        self.valid_inis = cast("list[str]", self.bethini["INI_pecking_order"].keys())
 
     def what_ini_files_are_used(self) -> list[ININame]:
         """Returns a list of INI files used, with Bethini.ini removed from the list."""
@@ -122,8 +123,7 @@ class AppName:
     def does_setting_exist(self, ini: ININame, section: str, setting: str) -> bool:
         """Checks if the given setting for the given section and ini file exists in settings.json."""
         setting_exists_list: list[bool] = []
-        valid_inis = cast("list[str]", self.bethini["INI_pecking_order"].keys())
-        for valid_ini in valid_inis:
+        for valid_ini in self.valid_inis:
             if ini in self.bethini["INI_pecking_order"].get(valid_ini):
                 setting_exists_list.append(
                     setting.lower() in self.ini_section_setting_dict[valid_ini].get(section.lower(), ()))

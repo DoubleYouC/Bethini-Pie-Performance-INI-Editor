@@ -811,6 +811,9 @@ class bethini_app(ttk.Window):
             ini_location = self.getINILocation(winning_ini)
             target_ini_object = ModifyINI.open(winning_ini, Path(ini_location))
 
+            if winning_ini not in self.app.valid_inis:
+               continue
+
             current_value = cast("str", target_ini_object.get_value(target_section, target_setting, this_value))
 
             if current_value == this_value:
