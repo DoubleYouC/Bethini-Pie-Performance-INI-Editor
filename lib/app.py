@@ -52,18 +52,26 @@ class AppName:
         from which we define the INI_pecking_order for that setting. This function iterates over
         those ini files and returns the current ini that is providing the value for the setting.
         """
+        # If Bethini.ini
         if ini == ModifyINI.app_config_name:
             return ini
         test_inis = self.bethini["INI_pecking_order"].get(ini)
+        # If not a key in the INI_pecking_order
         if not test_inis:
             return ini
         for test_ini in reversed(test_inis):
+            # If test_ini is ini, then ini is the winning ini
+            if test_ini == ini:
+                return ini
             ini_location_setting = self.get_ini_setting_name(test_ini)
             if not ini_location_setting:
                 msg = f"Unknown INI: {test_ini}\nini_location_setting: {ini_location_setting}"
                 logging.debug(msg)
                 raise NotImplementedError(msg)
             ini_location = ModifyINI.app_config().get_value("Directories", ini_location_setting)
+            # If no location exists, return the input ini
+            if not ini_location:
+                return ini
             the_target_ini = ModifyINI.open(test_ini, Path(ini_location))
             if the_target_ini.case_insensitive_config.has_option(section, setting):
                 return test_ini
