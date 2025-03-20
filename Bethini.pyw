@@ -204,8 +204,8 @@ class bethini_app(ttk.Window):
         self.the_canvas.pack(side=LEFT, fill=BOTH, expand=True)
         self.the_canvas.create_window((4, 4), window=self.container, tags="container")
 
-        menu_frame = MenuBar(self)
-        menu_frame.pack(anchor=NW, side=TOP, fill=X)
+        self.menu_frame = MenuBar(self)
+        self.menu_frame.pack(anchor=NW, side=TOP, fill=X)
 
         self.statusbar.pack(anchor=NW, side=TOP, fill=X)
 
@@ -214,8 +214,18 @@ class bethini_app(ttk.Window):
 
     def sub_container_configure(self, event: "tk.Event[ttk.Notebook]") -> None:
         the_width = event.width
-        the_height = event.height + 100
-        self.geometry(f"{the_width}x{the_height}")
+        the_height = event.height
+
+        # Get the height of the menubar
+        menubar_height = self.menu_frame.winfo_height()
+
+        # Get the height of the hsbframeholder frame
+        hsbframeholder_height = self.hsbframeholder.winfo_height()
+
+        # Add the menubar height and sub_container tabs height to the_height
+        total_height = the_height + menubar_height + hsbframeholder_height
+
+        self.geometry(f"{the_width}x{total_height}")
 
     def start_progress(self) -> None:
         self.pw.pack(side=LEFT, anchor=S)
