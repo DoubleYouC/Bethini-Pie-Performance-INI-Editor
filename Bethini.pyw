@@ -202,7 +202,7 @@ class bethini_app(ttk.Window):
         self.vsb.pack(side=RIGHT, fill=Y)
         self.hsb.pack(side=BOTTOM, fill=X, expand=True)
         self.the_canvas.pack(side=LEFT, fill=BOTH, expand=True)
-        canvas_frame = self.the_canvas.create_window((4, 4), window=self.container, tags="container")
+        self.the_canvas.create_window((4, 4), window=self.container, tags="container")
 
         menu_frame = MenuBar(self)
         menu_frame.pack(anchor=NW, side=TOP, fill=X)
