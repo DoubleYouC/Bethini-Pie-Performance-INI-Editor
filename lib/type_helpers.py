@@ -42,7 +42,7 @@ ValidationType: TypeAlias = Literal["integer", "whole", "counting", "float"]
 
 Browse: TypeAlias = tuple[Literal["directory"], Literal["directory"] | str, Literal["directory", "file"]]
 
-ColorType: TypeAlias = Literal["rgb", "rgb 1", "rgba", "decimal", "hex"]
+ColorType: TypeAlias = Literal["rgb", "rgb 1", "rgba", "abgr decimal", "rgba decimal", "decimal", "hex"]
 ColorValue: TypeAlias = str | tuple[int, ...]
 
 TabId: TypeAlias = str
@@ -233,6 +233,8 @@ class DisplayTab(TypedDict, total=False):
             "Shadows",
             "Visuals",
             "View Distance",
+            "Advanced",
+            "Log"
         ]
         | str
     )
@@ -249,6 +251,7 @@ class AppBethiniJSON(TypedDict):
     Default: Literal[""]
     displayTabs: dict[str, DisplayTab]
     INIs: dict[ININame, str]
+    INI_pecking_order: dict[ININame, list[str]]
     presetsIgnoreTheseSettings: list[str]
     valueTypes: list[PresetName]
 

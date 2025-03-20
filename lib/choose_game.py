@@ -7,7 +7,6 @@ from webbrowser import open_new_tab
 if __name__ == "__main__":
     sys.exit(1)
 
-from lib.ModifyINI import ModifyINI
 from lib.customFunctions import set_titlebar_style, set_theme
 
 
