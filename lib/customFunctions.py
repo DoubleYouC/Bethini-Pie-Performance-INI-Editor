@@ -368,13 +368,14 @@ class CustomFunctions:
         if game_documents_path is None:
             return ["", "Browse..."]
         game_documents_path.mkdir(parents=True, exist_ok=True)
-        app = AppName(gameName)
-        ini_files = app.what_ini_files_are_used()
-        for file in ini_files:
-            if gameName == "Starfield" and file == "Ultra.ini":
-                continue
-            file_path = game_documents_path / file
-            with file_path.open() as _fp:
-                pass
+        # This code throws errors if the file doesn't exist. What is its purpose? Commenting out for now.
+        # app = AppName(gameName)
+        # ini_files = app.what_ini_files_are_used()
+        # for file in ini_files:
+        #     if gameName == "Starfield" and file == "Ultra.ini":
+        #         continue
+        #     file_path = game_documents_path / file
+        #     with file_path.open() as _fp:
+        #         pass
 
         return [f"{game_documents_path}{os.sep}", "Browse..."]
