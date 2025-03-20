@@ -12,7 +12,6 @@ import math
 import os
 import sys
 import tkinter as tk
-import webbrowser
 from collections.abc import Sequence
 from datetime import datetime
 from operator import eq, ge, gt, le, lt, ne
@@ -33,6 +32,7 @@ from lib.app import AppName
 from lib.menu_bar import MenuBar
 from lib.tableview_scrollable import TableviewScrollable
 from lib.save_changes_dialog import SaveChangesDialog
+from lib.choose_game import ChooseGameWindow
 from lib.advanced_edit_menu import AdvancedEditMenuPopup
 from lib.alphaColorPicker import AlphaColorPicker
 from lib.AutoScrollbar import AutoScrollbar
@@ -137,12 +137,12 @@ class bethini_app(ttk.Window):
         self.setting_dictionary: dict[str, BethiniSetting] = {}
         self.dependent_settings_dictionary: dict[str, dict[str, DependentSetting]] = {}
         self.settings_that_settings_depend_on: dict[str, dict[str, DependentSetting]] = {}
-        self.tab = []
         self.previous_tab = None
         self.app = None
         self.ignore_log_sme_updates = False
         self.preset_var = tk.StringVar(self, "Bethini")
         self.style_override = ttk.Style()
+        self.theme_name = tk.StringVar(self, themename)
 
         self.widget_type_function = {
             "Checkbutton": self.checkbox,
@@ -417,111 +417,20 @@ class bethini_app(ttk.Window):
                      preview_frame=PREVIEW_FRAME, photo_for_setting=photo_for_setting, wraplength=tooltip_wrap_length, bootstyle=INVERSE)
 
     def choose_game(self, *, forced: bool = False) -> None:
-        self.withdraw()
+        always_select_game = ModifyINI.app_config().get_value("General", "bAlwaysSelectGame")
+        if always_select_game is None:
+            ModifyINI.app_config().assign_setting_value("General", "bAlwaysSelectGame", "0")
 
-        self.choose_game_window = ttk.Toplevel(f"Bethini Pie {version}")
-        set_titlebar_style(self.choose_game_window)
+        choose_game_var = ModifyINI.app_config().get_value("General", "sAppName")
 
-        self.choose_game_frame = ttk.Frame(self.choose_game_window)
-
-        self.choose_game_frame_2 = ttk.Frame(self.choose_game_frame)
-
-        self.label_Bethini = ttk.Label(self.choose_game_frame_2, text="Bethini Pie", font=("Segoe UI", 20))
-        self.label_Pie = ttk.Label(
-            self.choose_game_frame_2,
-            text="Performance INI Editor\nby DoubleYou",
-            font=("Segoe UI", 15),
-            justify=CENTER,
-            style=WARNING,
-        )
-        self.label_link = ttk.Label(
-            self.choose_game_frame_2,
-            text="www.nexusmods.com/site/mods/631",
-            font=("Segoe UI", 10),
-            cursor="hand2",
-            style=INFO,
-        )
-
-        self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=("Segoe UI", 15))
-
-        self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode=BROWSE, show="tree", columns=("Name"))
-        self.choose_game_tree.column("#0", width=0, stretch=NO)
-        self.choose_game_tree.column("Name", anchor=W, width=300)
-
-        self.style_override.configure("choose_game_button.TButton", font=("Segoe UI", 14))
-        self.choose_game_button = ttk.Button(
-            self.choose_game_frame_2,
-            text="Select Game",
-            style="choose_game_button.TButton",
-            command=lambda: self.choose_game_done(self.choose_game_tree.focus()),
-        )
-
-        self.choose_game_tip = ttk.Label(
-            self.choose_game_frame_2,
-            text="Tip: You can change the game at any time\nby going to File > Choose Game.",
-            font=("Segoe UI", 12),
-            justify=CENTER,
-            style="success",
-        )
-        for option in Path(exedir / "apps").iterdir():
-            self.choose_game_tree.insert("", index=END, id=option.name, text=option.name, values=[option.name])
-
-        self.preferences_frame = ttk.Frame(self.choose_game_frame_2)
-
-        self.theme_label = ttk.Label(self.preferences_frame, text="Theme:")
-        theme_names = standThemes.STANDARD_THEMES.keys()
-        self.theme_name = tk.StringVar(self)
-        self.theme_dropdown = ttk.OptionMenu(
-            self.preferences_frame,
-            self.theme_name,
-            ModifyINI.app_config().get_value("General", "sTheme", "superhero"),
-            *theme_names,
-            command=lambda t=self.theme_name.get(): set_theme(self.style_override, t),
-        )
-        self.theme_dropdown.var = self.theme_name  # type: ignore[reportAttributeAccessIssue]
-
-        self.choose_game_frame.pack(fill=BOTH, expand=True)
-        self.choose_game_frame_2.pack(anchor=CENTER, expand=True)
-
-        self.label_Bethini.pack(padx=5, pady=5)
-        self.label_Pie.pack(padx=5, pady=15)
-        self.label_link.pack(padx=25, pady=5)
-        self.label_link.bind("<Button-1>", lambda _event: webbrowser.open_new_tab("https://www.nexusmods.com/site/mods/631"))
-
-        self.preferences_frame.pack()
-        self.theme_label.pack(side=LEFT)
-        self.theme_dropdown.pack(padx=5, pady=15)
-        self.choose_game_label.pack(padx=5, pady=2)
-        self.choose_game_tree.pack(padx=10)
-        self.choose_game_button.pack(pady=15)
-        self.choose_game_tip.pack(pady=10)
-        self.choose_game_window.protocol("WM_DELETE_WINDOW", self.quit)
-        self.choose_game_window.minsize(300, 35)
-
-        # The Choose App/Game dialog window.  The window is skipped here if
-        # sAppName is already set in the Bethini.ini file.
         try:
-            choose_game_var = ModifyINI.app_config().get_value("General", "sAppName")
-            if forced:
-                logging.debug("Force choose game/application.")
-                raise NameError
-
-            always_select_game = ModifyINI.app_config().get_value("General", "bAlwaysSelectGame")
-            if always_select_game is None:
-                ModifyINI.app_config().assign_setting_value("General", "bAlwaysSelectGame", "0")
-
-            if always_select_game != "0":
-                logging.debug("Force choose game/application at startup.")
-                # By calling the global variable GAME_NAME before it has been created,
-                # we raise an exception to force the app/game to be chosen only at startup.
-                GAME_NAME  # type: ignore[reportUnusedExpression] # noqa: B018
-            # raise Exception("Forcing you to choose")
+            if forced or always_select_game != "0" or not choose_game_var:
+                self.withdraw()
+                choose_game_window = ChooseGameWindow(self, version=version, exedir=exedir)
+                self.wait_window(choose_game_window)
+                if choose_game_window.result:
+                    choose_game_var = choose_game_window.result
             self.choose_game_done(choose_game_var)
-
-        except NameError:
-            logging.debug("Choose game/application.")
-            self.choose_game_window.deiconify()
-
         except Exception as e:
             self.sme("An unhandled exception occurred.", exception=e)
             Messagebox.show_error(
@@ -534,9 +443,8 @@ class bethini_app(ttk.Window):
 
     def choose_game_done(self, game: str | None, *, from_choose_game_window: bool = False) -> None:
         if not game:
+            sys.exit()
             return
-
-        self.choose_game_window.withdraw()
 
         # Once the app/game is selected, this loads it.
         if game != ModifyINI.app_config().get_value("General", "sAppName"):
@@ -588,7 +496,6 @@ class bethini_app(ttk.Window):
         self.setting_dictionary = {}
         self.dependent_settings_dictionary = {}
         self.settings_that_settings_depend_on = {}
-        self.tab = []
 
         if not from_choose_game_window:
             self.deiconify()
@@ -2347,19 +2254,19 @@ class bethini_app(ttk.Window):
         return setting_values
 
 
-def on_closing(root: bethini_app) -> None:
-    """Ask if the user wants to save INI files if any have been modified before quitting.
+    def on_closing(self) -> None:
+        """Ask if the user wants to save INI files if any have been modified before quitting.
 
-    This is bound to the main app window closing.
-    """
+        This is bound to the main app window closing.
+        """
 
-    response = Messagebox.show_question(
-        message="Do you want to quit?", title="Quit?", parent=root, buttons=["No:secondary", "Yes:primary"])
-    if response == "Yes":
-        if ModifyINI.app_config().has_been_modified:
-            ModifyINI.app_config().save_ini_file(sort=True)
-        root.save_ini_files()
-        root.quit()
+        response = Messagebox.show_question(
+            message="Do you want to quit?", title="Quit?", parent=self, buttons=["No:secondary", "Yes:primary"])
+        if response == "Yes":
+            if ModifyINI.app_config().has_been_modified:
+                ModifyINI.app_config().save_ini_file(sort=True)
+            self.save_ini_files()
+            self.quit()
 
 
 def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_remove: list[str]) -> None:
@@ -2476,5 +2383,5 @@ if __name__ == "__main__":
     window.choose_game()
     set_titlebar_style(window)
 
-    window.protocol("WM_DELETE_WINDOW", lambda: on_closing(window))
+    window.protocol("WM_DELETE_WINDOW", window.on_closing)
     window.mainloop()
