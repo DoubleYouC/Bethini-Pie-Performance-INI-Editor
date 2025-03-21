@@ -1,3 +1,12 @@
+v4.14
+Bethini Pie update notes:
+-Bugfix: The program could hang while attempting to autodetect paths.
+-Bugfix: The program could hang while attempting to close the Choose Game menu without ever having selected a game.
+-Bugfix: Color setting float precision issues.
+-Bugfix: Window height could be less than optimal, allowing the vertical scrollbar to show when undesired.
+-Added the ability to edit the Custom ini files when they are the winning override.
+-Excessive logging was significantly slowing down operations. Log level now defaults to Info level instead of Debug level. This can be changed in Preferences if more verbose logging is required for diagnosing issues with the program.
+
 v4.13
 Bethini Pie update notes:
 -Bugfix: Fixed UnicodeDecodeError when reading some ini files
