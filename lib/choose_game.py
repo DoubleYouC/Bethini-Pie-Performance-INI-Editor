@@ -103,6 +103,26 @@ class ChooseGameWindow(ttk.Toplevel):
         choose_game_button.pack(pady=15)
         choose_game_tip.pack(pady=10)
 
+        # Update the window to get the correct dimensions.
+        self.update_idletasks()
+
+        # Get the dimensions and position of the master (parent) window.
+        parent_width = self.master.winfo_width()
+        parent_height = self.master.winfo_height()
+        parent_x = self.master.winfo_rootx()
+        parent_y = self.master.winfo_rooty()
+
+        # Get our own dimensions.
+        window_width = self.winfo_width()
+        window_height = self.winfo_height()
+
+        # Calculate the center position relative to the master.
+        position_x = parent_x + (parent_width // 2) - (window_width // 2)
+        position_y = parent_y + (parent_height // 2) - (window_height // 2)
+
+        # Set our geometry including our size.
+        self.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
+
     def on_choose_game(self, _event) -> None:
         self.result = self.choose_game_tree.focus()
         self.destroy()
