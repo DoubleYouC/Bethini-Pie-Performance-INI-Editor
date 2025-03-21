@@ -545,6 +545,27 @@ class bethini_app(ttk.Window):
         set_titlebar_style(SETUP_WINDOW)
         SETUP_WINDOW.deiconify()
 
+        # Update the window to get the correct dimensions.
+        SETUP_WINDOW.update_idletasks()
+
+        # Get the dimensions and position of the master (parent) window.
+        parent_width = self.winfo_width()
+        parent_height = self.winfo_height()
+        parent_x = self.winfo_rootx()
+        parent_y = self.winfo_rooty()
+
+        # Get our own dimensions.
+        window_width = SETUP_WINDOW.winfo_width()
+        window_height = SETUP_WINDOW.winfo_height()
+
+        # Calculate the center position relative to the master.
+        position_x = parent_x + (parent_width // 2) - (window_width // 2)
+        position_y = parent_y + (parent_height // 2) - (window_height // 2)
+
+        # Set our geometry including our size.
+        SETUP_WINDOW.geometry(f"+{position_x}+{position_y}")
+        
+
     def withdraw_setup(self) -> None:
         SETUP_WINDOW.withdraw()
         self.deiconify()
@@ -1906,6 +1927,25 @@ class bethini_app(ttk.Window):
                 setup_ok_button.pack(anchor=tk.SE, padx=5, pady=5)
 
                 SETUP_WINDOW.protocol("WM_DELETE_WINDOW", self.withdraw_setup)
+                # Update the window to get the correct dimensions.
+                SETUP_WINDOW.update_idletasks()
+
+                # Get the dimensions and position of the master (parent) window.
+                parent_width = self.winfo_width()
+                parent_height = self.winfo_height()
+                parent_x = self.winfo_rootx()
+                parent_y = self.winfo_rooty()
+
+                # Get our own dimensions.
+                window_width = SETUP_WINDOW.winfo_width()
+                window_height = SETUP_WINDOW.winfo_height()
+
+                # Calculate the center position relative to the master.
+                position_x = parent_x + (parent_width // 2) - (window_width // 2)
+                position_y = parent_y + (parent_height // 2) - (window_height // 2)
+
+                # Set our geometry including our size.
+                SETUP_WINDOW.geometry(f"+{position_x}+{position_y}")
                 if not from_choose_game_window:
                     SETUP_WINDOW.withdraw()
             else:
