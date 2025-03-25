@@ -31,6 +31,7 @@ from lib.app import AppName
 
 from lib.menu_bar import MenuBar
 from lib.tableview_scrollable import TableviewScrollable
+from lib.simple_dialog_windows import AskQuestionWindow
 from lib.save_changes_dialog import SaveChangesDialog
 from lib.choose_game import ChooseGameWindow
 from lib.advanced_edit_menu import AdvancedEditMenuPopup
@@ -131,6 +132,9 @@ class bethini_app(ttk.Window):
 
         CustomFunctions.screenwidth = self.winfo_screenwidth()
         CustomFunctions.screenheight = self.winfo_screenheight()
+
+        set_titlebar_style(self)
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         # Variables
         self.tab_dictionary: dict[TabId, DisplayTab] = {}
@@ -2309,15 +2313,13 @@ class bethini_app(ttk.Window):
 
         This is bound to the main app window closing.
         """
-
-        response = Messagebox.show_question(
-            message="Do you want to quit?", title="Quit?", parent=self, buttons=["No:secondary", "Yes:primary"])
-        if response == "Yes":
+        quit_query = AskQuestionWindow(self, title="Quit", question="Do you want to quit?")
+        self.wait_window(quit_query)
+        if quit_query.result:
             if ModifyINI.app_config().has_been_modified:
                 ModifyINI.app_config().save_ini_file(sort=True)
             self.save_ini_files()
             self.quit()
-
 
 def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_remove: list[str]) -> None:
     """Remove excess logs or backups.
@@ -2431,7 +2433,5 @@ if __name__ == "__main__":
     window = bethini_app(themename=theme)
     window.pack_stuff()
     window.choose_game()
-    set_titlebar_style(window)
-
-    window.protocol("WM_DELETE_WINDOW", window.on_closing)
+    
     window.mainloop()
