@@ -19,6 +19,7 @@ from pathlib import Path
 from shutil import copyfile
 from typing import TYPE_CHECKING, Literal, cast
 from simpleeval import simple_eval  # type: ignore[reportUnknownVariableType]
+from stat import S_IWRITE, S_IREAD
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
@@ -61,10 +62,6 @@ from lib.type_helpers import *
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-# from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
-# This is for changing file read-only access via os.chmod(filename, S_IREAD,
-# S_IRGRP, #S_IROTH) Not currently used.
 
 # This dictionary maps the operator modules to specific text.
 operator_dictionary = {
@@ -594,10 +591,10 @@ class bethini_app(ttk.Window):
         try:
             self.apply_ini_dict(self.app.preset_values_fixedDefault, only_if_missing=True)
         except NameError as e:
-            logging.debug(f"NameError: {e}")
+            logging.error(f"NameError: {e}")
             return
         except AttributeError as e:
-            logging.debug(f"AttributeError: {e}")
+            logging.error(f"AttributeError: {e}")
             return
 
         files_to_remove = [*list(ModifyINI.open_inis)[1:], APP_LOG_FILE.name]
@@ -644,18 +641,48 @@ class bethini_app(ttk.Window):
                     current_backup_path.mkdir(parents=True, exist_ok=True)
                     current_backup_file_path = current_backup_path / ini_object.ini_path.name
                     if current_backup_file_path.exists():
-                        logging.debug(f"{current_backup_file_path} already exists, so it will not be overwritten.")
+                        logging.warning(f"{current_backup_file_path} already exists, so it will not be overwritten.")
                     else:
                         try:
                             copyfile(ini_object.ini_path, current_backup_file_path)
                         except FileNotFoundError as e:
-                            logging.debug(
+                            logging.error(
                                 f"{ini_object.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly."
                             )
-                    ini_object.save_ini_file(sort=True)
-                    files_saved = True
-                    self.sme(f"{ini_object.ini_path} saved.")
-                    copyfile(APP_LOG_FILE, current_backup_path / APP_LOG_FILE.name)
+                    try:
+                        ini_object.save_ini_file(sort=True)
+                        file_saved = True
+                        files_saved = True
+                    except PermissionError as e:
+                        self.sme(f"{ini_object.ini_path} was not able to be saved due to lacking permission to edit the file.", exception=e)
+                        logging.error(
+                            f"{ini_object.ini_path} was not able to be saved due to lacking permission to edit the file."
+                        )
+                        if not os.access(ini_object.ini_path, os.W_OK):
+                            self.sme(f"{ini_object.ini_path} is read only.")
+                            change_read_only = AskQuestionWindow(
+                                self, title="Remove read-only flag?",
+                                question=f"{ini_object.ini_path} is set to read-only, so it cannot be saved. Would you like to temporarily clear the read-only flag to allow it to be saved?")
+                            self.wait_window(change_read_only)
+                            if change_read_only.result:
+                                try:
+                                    os.chmod(ini_object.ini_path, S_IWRITE)
+                                    ini_object.save_ini_file(sort=True)
+                                    file_saved = True
+                                    files_saved = True
+                                    os.chmod(ini_object.ini_path, S_IREAD)
+                                except PermissionError as e:
+                                    self.sme(f"{ini_object.ini_path} was still not able to be saved after clearing read-only flag.", exception=e)
+                            else:
+                                logging.debug(f"User decided not to clear the read-only flag on {ini_object.ini_path}")
+                                file_saved = False
+                        else:
+                            self.sme(f"{ini_object.ini_path} is not read only.")
+                            file_saved = False
+                    if file_saved:
+                        self.sme(f"{ini_object.ini_path} saved.")
+                        copyfile(APP_LOG_FILE, current_backup_path / APP_LOG_FILE.name)
+
 
         if not files_saved:
             self.sme("No files were modified. Saving skipped.")
