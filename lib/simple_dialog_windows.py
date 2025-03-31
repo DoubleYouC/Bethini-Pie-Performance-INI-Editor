@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class AskQuestionWindow(ttk.Toplevel):
     """AskQuestionWindow is a Toplevel window asking the user a yes/no question, with the button pressed being stored as the self.result."""
-    def __init__(self, master, title, question, **kwargs):
+    def __init__(self, master, title: str, question: str, wraplength: int = 400, **kwargs):
         super().__init__(master, **kwargs)
         self.title(title)
         set_titlebar_style(self)
@@ -43,7 +43,8 @@ class AskQuestionWindow(ttk.Toplevel):
         ask_question_label = ttk.Label(
             ask_question_frame_real,
             text=question,
-            justify=CENTER,
+            justify=LEFT,
+            wraplength=wraplength,
         )
         ask_question_label.pack(anchor=CENTER, padx=10, pady=10)
         logger.debug(f"User was asked: {question}")
@@ -75,4 +76,51 @@ class AskQuestionWindow(ttk.Toplevel):
         """Handle the "Yes" button click event."""
         logger.debug("User clicked yes.")
         self.result = True
+        self.destroy()
+
+class ManualEntryWindow(ttk.Toplevel):
+    """ManualEntryWindow is a Toplevel window asking the user to input into a text box."""
+    def __init__(self, master, **kwargs):
+        super().__init__(master, **kwargs)
+        self.title("Manual Entry")
+        set_titlebar_style(self)
+        self.grab_set()
+        self.focus_set()
+        self.protocol("WM_DELETE_WINDOW", self.destroy)
+        self.minsize(300, 35)
+        self.result = ttk.StringVar(self, value=None)
+
+        # Create the main frame for the dialog
+        manual_entry_frame = ttk.Frame(self)
+        manual_entry_frame.pack(fill=BOTH, expand=True)
+
+        # Create a sub-frame for the content
+        manual_entry_frame_real = ttk.Frame(manual_entry_frame)
+        manual_entry_frame_real.pack(anchor=CENTER, expand=True, pady=10)
+
+        # Create and pack the question label
+        manual_entry_label = ttk.Label(
+            manual_entry_frame_real,
+            text="Enter a custom value:",
+            justify=CENTER,
+        )
+        manual_entry_label.pack(anchor=CENTER, padx=10, pady=10)
+
+        # Create and pack the entry
+        manual_entry = ttk.Entry(manual_entry_frame_real, textvariable=self.result)
+        manual_entry.pack()
+
+        # Add a separator
+        ttk.Separator(manual_entry_frame).pack(fill=X)
+
+        # Create and pack the "Yes" button
+        ok_button = ttk.Button(
+            manual_entry_frame, text="OK")
+        ok_button.pack(side=RIGHT, padx=8, pady=8)
+        ok_button.bind(
+            "<Button-1>", lambda e: self.on_ok(e))
+
+    def on_ok(self, event):
+        """Handle the "OK" button click event."""
+        logger.debug("User clicked OK.")
         self.destroy()
