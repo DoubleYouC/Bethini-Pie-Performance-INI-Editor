@@ -211,6 +211,8 @@ class ModifyINI:
         self.case_insensitive_config.remove_section(existing_section)
         if self.original_config.has_section(existing_section):
             self.has_been_modified = True
+            if existing_section not in self.modifications:
+                self.modifications[existing_section] = {}
             self.modifications[existing_section][existing_section] = f"Removed section"
 
     def sort(self) -> None:
