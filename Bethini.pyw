@@ -1776,6 +1776,8 @@ class bethini_app(ttk.Window):
                 if this_value not in setting_choices:
                     return
                 theValue = setting_choices[this_value][n]
+                if isinstance(theValue, list):
+                    theValue = theValue[0]
             elif file_format:
                 if file_format == "directory" and this_value == "\\":
                     this_value = this_value[:-1]
@@ -2324,8 +2326,18 @@ class bethini_app(ttk.Window):
 
         # Check to see if the settings correspond with specified setting_name choices.
         if setting_choices:
-            for choice in setting_choices:
-                if setting_choices[choice] == setting_values:
+            for choice, values_for_choice in setting_choices.items():
+                match = True
+                for i, value in enumerate(values_for_choice):
+                    if isinstance(value, list):
+                        if setting_values[i] not in value:
+                            match = False
+                            break
+                    else:
+                        if setting_values[i] != value:
+                            match = False
+                            break
+                if match:
                     setting_values = [choice]
 
         # Check to see if there are multiple values separated by a delimiter
