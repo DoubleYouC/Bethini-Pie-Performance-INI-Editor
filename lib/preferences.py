@@ -109,7 +109,7 @@ class preferences(ttk.Toplevel):
             "<Button-1>", lambda e: self.on_cancel(e))
 
     def on_save(self, event):
-        logging.debug("Save")
+        logger.debug("Save")
         ModifyINI.app_config().assign_setting_value(
             "General", "sLogLevel", self.log_level_var.get())
         ModifyINI.app_config().assign_setting_value(
@@ -122,5 +122,5 @@ class preferences(ttk.Toplevel):
         self.destroy()
 
     def on_cancel(self, event):
-        logging.debug("Cancel")
+        logger.debug("Cancel")
         self.destroy()

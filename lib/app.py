@@ -66,7 +66,7 @@ class AppName:
             ini_location_setting = self.get_ini_setting_name(test_ini)
             if not ini_location_setting:
                 msg = f"Unknown INI: {test_ini}\nini_location_setting: {ini_location_setting}"
-                logging.debug(msg)
+                logger.error(msg)
                 raise NotImplementedError(msg)
             ini_location = ModifyINI.app_config().get_value("Directories", ini_location_setting)
             # If no location exists, return the input ini

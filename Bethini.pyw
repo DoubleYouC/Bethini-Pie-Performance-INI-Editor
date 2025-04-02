@@ -243,7 +243,7 @@ class bethini_app(ttk.Window):
     def sme(self, message: str, *, exception: Exception | None = None) -> None:
         if not self.ignore_log_sme_updates:
             if exception is not None:
-                logger.error(exception, exc_info=True)  # noqa: LOG014
+                logger.exception(message)
             else:
                 logger.info(message)
             self.statusbar_text.set(message)
@@ -295,7 +295,7 @@ class bethini_app(ttk.Window):
             rgb_float = cast("tuple[float, float, float]", tuple(float(float(i) * 255) for i in ast.literal_eval(old_color)))
             rgb_int = cast("tuple[int, int, int]", tuple(int(round(i, 0)) for i in rgb_float))
             old_color = rgb_to_hex(rgb_int)
-            logging.debug(old_color)
+            logger.debug(old_color)
             
 
         elif color_value_type == "decimal":
@@ -312,7 +312,7 @@ class bethini_app(ttk.Window):
             new_color = response[2]
             if alpha is not None:
                 new_alpha = response[3]
-                logging.debug(f"New alpha: {new_alpha}")
+                logger.debug(f"New alpha: {new_alpha}")
 
         luminance = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
         the_text_color = "#FFFFFF" if luminance < 128 else "#000000"
@@ -443,9 +443,10 @@ class bethini_app(ttk.Window):
                     choose_game_var = choose_game_window.result
             self.choose_game_done(choose_game_var)
         except Exception as e:
-            self.sme("An unhandled exception occurred.", exception=e)
+            msg = f"An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified."
+            logger.exception(msg)
             Messagebox.show_error(
-                message=f"An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified.",
+                message=msg,
                 title="Unhandled exception",
                 parent=self
             )
@@ -459,7 +460,7 @@ class bethini_app(ttk.Window):
 
         # Once the app/game is selected, this loads it.
         if game != ModifyINI.app_config().get_value("General", "sAppName"):
-            logging.debug(f"App/Game specified in {ModifyINI.app_config_name} differs from the game chosen, so it will be changed to the one you chose.")
+            logger.debug(f"App/Game specified in {ModifyINI.app_config_name} differs from the game chosen, so it will be changed to the one you chose.")
             ModifyINI.app_config().assign_setting_value("General", "sAppName", game)
             from_choose_game_window = True
 
@@ -472,7 +473,7 @@ class bethini_app(ttk.Window):
         self.app = AppName(game)
         global GAME_NAME
         GAME_NAME = self.app.data["gameName"]
-        logging.debug(f"Application/game is {GAME_NAME}")
+        logger.debug(f"Application/game is {GAME_NAME}")
 
         # The self.tab_dictionary lists all the tabs, which
         # is variable, based upon the tabs listed in the associated Bethini.json
@@ -496,9 +497,9 @@ class bethini_app(ttk.Window):
             self.log_tab.destroy()
             self.advanced_tab.destroy()
         except AttributeError:
-            logging.debug("No log tab found. It will be created.")
+            logger.debug("No log tab found. It will be created.")
         except ValueError:
-            logging.debug("Log List observer not created yet.")
+            logger.debug("Log List observer not created yet.")
 
         self.tab_dictionary = {}
         for tab_number, tab in enumerate(self.app.bethini["displayTabs"], start=1):
@@ -514,9 +515,10 @@ class bethini_app(ttk.Window):
             self.createTabs(from_choose_game_window=from_choose_game_window)
 
         except Exception as e:
-            self.sme("An unhandled exception occurred.", exception=e)
+            msg = f"An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified."
+            logger.exception(msg)
             Messagebox.show_error(
-                message=f"An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified.",
+                message=msg,
                 title="Unhandled exception",
                 parent=self
             )
@@ -580,7 +582,7 @@ class bethini_app(ttk.Window):
             try:
                 copyfile(ini_file.ini_path, first_time_backup_path / ini_file.ini_path.name)
             except FileNotFoundError as e:
-                logging.debug(
+                logger.debug(
                     f"{ini_file.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.",
                     exception=e,
                 )
@@ -591,10 +593,10 @@ class bethini_app(ttk.Window):
         try:
             self.apply_ini_dict(self.app.preset_values_fixedDefault, only_if_missing=True)
         except NameError as e:
-            logging.error(f"NameError: {e}")
+            logger.error(f"NameError: {e}")
             return
         except AttributeError as e:
-            logging.error(f"AttributeError: {e}")
+            logger.error(f"AttributeError: {e}")
             return
 
         files_to_remove = [*list(ModifyINI.open_inis)[1:], APP_LOG_FILE.name]
@@ -641,12 +643,12 @@ class bethini_app(ttk.Window):
                     current_backup_path.mkdir(parents=True, exist_ok=True)
                     current_backup_file_path = current_backup_path / ini_object.ini_path.name
                     if current_backup_file_path.exists():
-                        logging.warning(f"{current_backup_file_path} already exists, so it will not be overwritten.")
+                        logger.warning(f"{current_backup_file_path} already exists, so it will not be overwritten.")
                     else:
                         try:
                             copyfile(ini_object.ini_path, current_backup_file_path)
                         except FileNotFoundError as e:
-                            logging.error(
+                            logger.exception(
                                 f"{ini_object.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly."
                             )
                     try:
@@ -654,12 +656,9 @@ class bethini_app(ttk.Window):
                         file_saved = True
                         files_saved = True
                     except PermissionError as e:
-                        self.sme(f"{ini_object.ini_path} was not able to be saved due to lacking permission to edit the file.", exception=e)
-                        logging.error(
-                            f"{ini_object.ini_path} was not able to be saved due to lacking permission to edit the file."
-                        )
+                        logger.exception(f"{ini_object.ini_path} was not able to be saved due to lacking permission to edit the file.")
                         if not os.access(ini_object.ini_path, os.W_OK):
-                            self.sme(f"{ini_object.ini_path} is read only.")
+                            logger.warning(f"{ini_object.ini_path} is read only.")
                             change_read_only = AskQuestionWindow(
                                 self, title="Remove read-only flag?",
                                 question=f"{ini_object.ini_path} is set to read-only, so it cannot be saved. Would you like to temporarily clear the read-only flag to allow it to be saved?")
@@ -672,12 +671,12 @@ class bethini_app(ttk.Window):
                                     files_saved = True
                                     os.chmod(ini_object.ini_path, S_IREAD)
                                 except PermissionError as e:
-                                    self.sme(f"{ini_object.ini_path} was still not able to be saved after clearing read-only flag.", exception=e)
+                                    logger.exception(f"{ini_object.ini_path} was still not able to be saved after clearing read-only flag.")
                             else:
-                                logging.debug(f"User decided not to clear the read-only flag on {ini_object.ini_path}")
+                                logger.debug(f"User decided not to clear the read-only flag on {ini_object.ini_path}")
                                 file_saved = False
                         else:
-                            self.sme(f"{ini_object.ini_path} is not read only.")
+                            logger.info(f"{ini_object.ini_path} is not read only.")
                             file_saved = False
                     if file_saved:
                         self.sme(f"{ini_object.ini_path} saved.")
@@ -718,21 +717,21 @@ class bethini_app(ttk.Window):
                     settings = ini_object.get_settings(section)
                     if not settings:
                         ini_object.remove_section(section)
-                        logging.debug(f"{section} was removed because it was empty.")
+                        logger.debug(f"{section} was removed because it was empty.")
                         continue
 
                     for setting_name in settings:
                         if ";" in setting_name or "#" in setting_name:
-                            logging.debug(f"{setting_name}:{section} will be preserved, as it is a comment.")
+                            logger.debug(f"{setting_name}:{section} will be preserved, as it is a comment.")
 
                         elif not self.app.does_setting_exist(each_ini, section, setting_name):
                             # Removal of unknown settings (disabled)
                             # ini_object.remove_setting(section, setting_name)
 
-                            logging.debug(f"{setting_name}:{section} {each_ini} appears to be invalid.")
+                            logger.debug(f"{setting_name}:{section} {each_ini} appears to be invalid.")
                             if not ini_object.get_settings(section):
                                 ini_object.remove_section(section)
-                                logging.debug(f"{section} was removed because it was empty.")
+                                logger.debug(f"{section} was removed because it was empty.")
 
     def apply_ini_dict(self, ini_dict: dict[str, GameSetting], *, only_if_missing: bool = False) -> None:
         for setting_and_section in ini_dict:
@@ -762,7 +761,7 @@ class bethini_app(ttk.Window):
                 continue
 
             target_ini_object.assign_setting_value(target_section, target_setting, this_value)
-            logging.debug(f"{target_ini} [{target_section}] {target_setting}={this_value}")
+            logger.debug(f"{target_ini} [{target_section}] {target_setting}={this_value}")
 
     def remove_ini_dict(self, ini_dict: dict[str, GameSetting]) -> None:
         for setting_and_section in ini_dict:
@@ -788,10 +787,10 @@ class bethini_app(ttk.Window):
             if current_value == this_value:
                 section_exists = target_ini_object.remove_setting(target_section, target_setting)
                 if section_exists:
-                   logging.debug(
+                   logger.debug(
                        f"{winning_ini} [{target_section}] {target_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed")
                 else:
-                   logging.debug(
+                   logger.debug(
                        f"No section {target_section} exists for {target_setting} in {target_ini_object}.")
 
     def create_tab_image(self, tab_id: TabId) -> None:
@@ -800,14 +799,14 @@ class bethini_app(ttk.Window):
             if not icon_path.is_file():
                 icon_path = icon_path.with_name("Blank.png")
                 if not icon_path.is_file():
-                    logging.debug(f"No icon for tab '{tab_id}'")
+                    logger.debug(f"No icon for tab '{tab_id}'")
                     tab_icon = tk.PhotoImage(data=Icon.warning)
                     return
 
             tab_icon = tk.PhotoImage(file=icon_path, height=16, width=16)
 
         except tk.TclError as e:
-            logging.debug(f"Failed to load icon for tab '{tab_id}':\n{icon_path}")
+            logger.debug(f"Failed to load icon for tab '{tab_id}':\n{icon_path}")
             tab_icon = tk.PhotoImage(data=Icon.warning)
 
         self.tab_dictionary[tab_id]["TkPhotoImageForTab"] = tab_icon
@@ -1747,10 +1746,10 @@ class bethini_app(ttk.Window):
                         if partial_setting["valueSet"]:
                             theValueStr += partial_setting["tk_var"].get()
                         else:
-                            logging.info(f"{each_partial_setting} is not set yet.")
+                            logger.info(f"{each_partial_setting} is not set yet.")
                             return
                     except KeyError:
-                        logging.info(f"{each_partial_setting} is not set yet.")
+                        logger.info(f"{each_partial_setting} is not set yet.")
                         return
 
         if not targetINIs:
@@ -1850,7 +1849,7 @@ class bethini_app(ttk.Window):
                 try:
                     this_value = str(round(cast("float", simple_eval(formulaValue)), 8))
                 except:
-                    logging.debug(f"Failed to evaluate formula value for {this_value}.")
+                    logger.debug(f"Failed to evaluate formula value for {this_value}.")
 
             if partial:
                 this_value = theValueStr.format(this_value)
@@ -2196,7 +2195,7 @@ class bethini_app(ttk.Window):
             self.log_text.insert(tk.END, "\n".join(log_list) + '\n')
             self.log_text.see(tk.END)
         except tk.TclError:
-            logging.debug("Log tab currently unavailable.")
+            logger.debug("Log tab currently unavailable.")
 
     def updateValues(self) -> None:
         self.start_progress()

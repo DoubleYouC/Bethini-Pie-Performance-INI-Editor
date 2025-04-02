@@ -140,13 +140,13 @@ class RestoreBackupWindow(ttk.Toplevel):
         backup_directory = Path(self.tk_dict[f"Frame_{i}"]["backup_directory"])
         original_file = ini_location / ini_file
         backup_file = backup_directory / item / ini_file
-        logger.debug(f"Restoring backup {backup_file} to {original_file}")
+        logger.info(f"Restoring backup {backup_file} to {original_file}")
         try:
             shutil.copyfile(backup_file, original_file)
             msg = f"Restoring backup {backup_file} to {original_file} was successful."
             Messagebox.show_info(parent=self, title="Successfully restored backup",
                                  message=f"Restoring backup {backup_file} to {original_file} was successful.")
-            logger.debug(msg)
+            logger.info(msg)
             self.result = True
         except FileNotFoundError:
             msg = f"Restoring {backup_file} to {original_file} failed due to {backup_file} not existing."

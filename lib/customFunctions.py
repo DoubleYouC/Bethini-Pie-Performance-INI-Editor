@@ -267,7 +267,7 @@ class Info:
                 None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
 
             documents_directory = Path(buf.value)
-            logger.debug(f"User documents location: {documents_directory}")
+            logger.info(f"User documents location: {documents_directory}")
 
             game_config_directory = (
                 documents_directory / "My Games" / Info.game_documents_name(game_name))
