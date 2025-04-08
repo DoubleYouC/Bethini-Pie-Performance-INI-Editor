@@ -470,7 +470,7 @@ class bethini_app(ttk.Window):
         # App globals
         # #############
 
-        self.app = AppName(game)
+        self.app = AppName(appname=game, exedir=exedir)
         global GAME_NAME
         GAME_NAME = self.app.data["gameName"]
         logger.debug(f"Application/game is {GAME_NAME}")

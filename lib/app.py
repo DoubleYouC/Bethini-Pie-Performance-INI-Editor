@@ -24,10 +24,10 @@ logger = logging.getLogger(__name__)
 class AppName:
     """This class handles the different apps/games supported, which are placed in the apps folder."""
 
-    def __init__(self, appname: str) -> None:
-        with (Path.cwd() / "apps" / appname / "settings.json").open(encoding="utf-8") as app_json:
+    def __init__(self, appname: str, exedir: Path) -> None:
+        with (exedir / "apps" / appname / "settings.json").open(encoding="utf-8") as app_json:
             self.data: AppSettingsJSON = json.load(app_json)
-        with (Path.cwd() / "apps" / appname / "Bethini.json").open(encoding="utf-8") as bethini:
+        with (exedir / "apps" / appname / "Bethini.json").open(encoding="utf-8") as bethini:
             self.bethini: AppBethiniJSON = json.load(bethini)
 
         self.default_ini: ININame = list(self.bethini["INIs"])[1]
