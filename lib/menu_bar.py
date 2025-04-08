@@ -42,7 +42,7 @@ class MenuBar(ttk.Frame):
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Choose Game", command=lambda: master.choose_game(forced=True))
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Exit", command=self.exit_app)
+        self.file_menu.add_command(label="Exit", command=master.on_closing)
 
         self.edit_menu = tk.Menu(self, tearoff=False)
         self.edit_menu.add_command(label="Preferences", command=lambda: preferences(master))
@@ -51,30 +51,25 @@ class MenuBar(ttk.Frame):
         self.theme_menu = tk.Menu(self, tearoff=False)
         theme_names = list(ttk.Style().theme_names())
         for theme_name in theme_names:
-            self.theme_menu.add_command(label=theme_name, command=lambda t=theme_name: set_theme(master.style_override, t))
+            self.theme_menu.add_radiobutton(label=theme_name, variable=master.theme_name,
+                                            value=theme_name, command=self.set_theme)
 
         self.help_menu = tk.Menu(self, tearoff=False)
         self.help_menu.add_command(label="Visit Web Page", command=lambda: open_new_tab("https://www.nexusmods.com/site/mods/631/"))
         self.help_menu.add_command(label="Get Support", command=lambda: open_new_tab("https://stepmodifications.org/forum/forum/200-Bethini-support/"))
         self.help_menu.add_command(label="About", command=master.about)
 
-    def show_file_menu(self):
+    def show_file_menu(self) -> None:
         self.file_menu.post(self.winfo_rootx(), self.winfo_rooty() + self.winfo_height())
 
-    def show_edit_menu(self):
+    def show_edit_menu(self) -> None:
         self.edit_menu.post(self.winfo_rootx() + 50, self.winfo_rooty() + self.winfo_height())
 
-    def show_theme_menu(self):
+    def show_theme_menu(self) -> None:
         self.theme_menu.post(self.winfo_rootx() + 100, self.winfo_rooty() + self.winfo_height())
 
-    def show_help_menu(self):
+    def show_help_menu(self) -> None:
         self.help_menu.post(self.winfo_rootx() + 150, self.winfo_rooty() + self.winfo_height())
 
-    def exit_app(self):
-        response = Messagebox.show_question(
-            parent=self, title="Quit?", message="Do you want to quit?", buttons=["No:secondary", "Yes:primary"])
-        if response == "Yes":
-            if ModifyINI.app_config().has_been_modified:
-                ModifyINI.app_config().save_ini_file(sort=True)
-            self.master.save_ini_files()
-            self.master.quit()
+    def set_theme(self) -> None:
+        set_theme(self.master.style_override, self.master.theme_name.get())

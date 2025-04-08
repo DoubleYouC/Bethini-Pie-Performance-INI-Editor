@@ -1,3 +1,12 @@
+v4.14
+Bethini Pie update notes:
+-Bugfix: The program could hang while attempting to autodetect paths.
+-Bugfix: The program could hang while attempting to close the Choose Game menu without ever having selected a game.
+-Bugfix: Color setting float precision issues.
+-Bugfix: Window height could be less than optimal, allowing the vertical scrollbar to show when undesired.
+-Added the ability to edit the Custom ini files when they are the winning override.
+-Excessive logging was significantly slowing down operations. Log level now defaults to Info level instead of Debug level. This can be changed in Preferences if more verbose logging is required for diagnosing issues with the program.
+
 v4.13
 Bethini Pie update notes:
 -Bugfix: Fixed UnicodeDecodeError when reading some ini files
@@ -9,7 +18,7 @@ Bethini Pie update notes:
 -Restore Backups function has been removed from the Setup window and moved to the File Menu. It now allows selecting and restoring backups per individual ini file.
 -Menu bar was changed so it matches the theme
 -Closing the program now asks you if you are sure you want to quit to prevent accidental exit
--Linux improvements courtesty of ddbb07 (#8, #28)
+-Linux improvements courtesy of ddbb07 (#8, #28)
 -Logging improvements and under-the-hood changes courtesy of thraindk (#20, #24)
 -Miscellaneous under-the-hood improvements and bug fixes courtesy of wxMichael (#1, #20, #25)
 

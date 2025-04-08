@@ -42,6 +42,7 @@ class RestoreBackupWindow(ttk.Toplevel):
 
         # Iterate over the ini files used by the application
         for i, ini_file in enumerate(master.app.what_ini_files_are_used(), start=1):
+            n = 0
             self.tk_dict[f"Frame_{i}"] = {}
             self.tk_dict[f"Frame_{i}"]["tkFrame"] = ttk.Frame(
                 restore_frame_real)
@@ -60,21 +61,29 @@ class RestoreBackupWindow(ttk.Toplevel):
             # Populate the Treeview with backup directories containing the ini file
             for backup_location in backup_directory.iterdir():
                 if backup_location.is_dir() and (backup_location / ini_file).exists():
+                    has_backup = True
+                    n += 1
                     self.tk_dict[f"Frame_{i}"][f"Treeview_{i}"].insert(
                         "", "end", id=backup_location.name, text=backup_location.name, values=ini_file)
 
             self.tk_dict[f"Frame_{i}"][f"restore_button_{i}"] = ttk.Button(
                 self.tk_dict[f"Frame_{i}"]["tkFrame"], text="Restore Selected")
+
+            #Limit the height of the treeview
+            if n > 5:
+                n = 5
+            self.tk_dict[f"Frame_{i}"][f"Treeview_{i}"]["height"] = n + 2
             
-            self.tk_dict[f"Frame_{i}"]["tkFrame"].pack(
-                padx=5, pady=5, anchor=CENTER)
-            self.tk_dict[f"Frame_{i}"][f"Label_{i}"].pack(
-                padx=5, pady=5, anchor=NW)
-            self.tk_dict[f"Frame_{i}"][f"Treeview_{i}"].pack(
-                padx=5, pady=5)
-            self.tk_dict[f"Frame_{i}"][f"restore_button_{i}"].pack(
-                padx=5, pady=5)
-            self.tk_dict[f"Frame_{i}"][f"restore_button_{i}"].pack_forget()
+            if n > 0:
+                self.tk_dict[f"Frame_{i}"]["tkFrame"].pack(
+                    padx=5, pady=5, anchor=CENTER)
+                self.tk_dict[f"Frame_{i}"][f"Label_{i}"].pack(
+                    padx=5, pady=5, anchor=NW)
+                self.tk_dict[f"Frame_{i}"][f"Treeview_{i}"].pack(
+                    padx=5, pady=5)
+                self.tk_dict[f"Frame_{i}"][f"restore_button_{i}"].pack(
+                    padx=5, pady=5)
+                self.tk_dict[f"Frame_{i}"][f"restore_button_{i}"].pack_forget()
 
             # Bind the Treeview selection event to show the restore button
             self.tk_dict[f"Frame_{i}"][f"Treeview_{i}"].bind(
@@ -131,13 +140,13 @@ class RestoreBackupWindow(ttk.Toplevel):
         backup_directory = Path(self.tk_dict[f"Frame_{i}"]["backup_directory"])
         original_file = ini_location / ini_file
         backup_file = backup_directory / item / ini_file
-        logger.debug(f"Restoring backup {backup_file} to {original_file}")
+        logger.info(f"Restoring backup {backup_file} to {original_file}")
         try:
             shutil.copyfile(backup_file, original_file)
             msg = f"Restoring backup {backup_file} to {original_file} was successful."
             Messagebox.show_info(parent=self, title="Successfully restored backup",
                                  message=f"Restoring backup {backup_file} to {original_file} was successful.")
-            logger.debug(msg)
+            logger.info(msg)
             self.result = True
         except FileNotFoundError:
             msg = f"Restoring {backup_file} to {original_file} failed due to {backup_file} not existing."

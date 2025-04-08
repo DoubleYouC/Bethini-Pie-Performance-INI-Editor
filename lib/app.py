@@ -5,6 +5,7 @@
 # or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 #
 
+import logging
 import json
 import sys
 import tkinter as tk
@@ -14,16 +15,19 @@ from typing import cast
 if __name__ == "__main__":
     sys.exit(1)
 
+from lib.ModifyINI import ModifyINI
 from lib.type_helpers import *
+
+logger = logging.getLogger(__name__)
 
 
 class AppName:
     """This class handles the different apps/games supported, which are placed in the apps folder."""
 
-    def __init__(self, appname: str) -> None:
-        with (Path.cwd() / "apps" / appname / "settings.json").open(encoding="utf-8") as app_json:
+    def __init__(self, appname: str, exedir: Path) -> None:
+        with (exedir / "apps" / appname / "settings.json").open(encoding="utf-8") as app_json:
             self.data: AppSettingsJSON = json.load(app_json)
-        with (Path.cwd() / "apps" / appname / "Bethini.json").open(encoding="utf-8") as bethini:
+        with (exedir / "apps" / appname / "Bethini.json").open(encoding="utf-8") as bethini:
             self.bethini: AppBethiniJSON = json.load(bethini)
 
         self.default_ini: ININame = list(self.bethini["INIs"])[1]
@@ -34,11 +38,44 @@ class AppName:
         self.preset_values_default = self.preset_values("default")
         self.preset_values_fixedDefault = self.preset_values("fixedDefault")
         self.preset_values_recommended = self.preset_values("recommended")
+        self.valid_inis = cast("list[str]", self.bethini["INI_pecking_order"].keys())
 
     def what_ini_files_are_used(self) -> list[ININame]:
         """Returns a list of INI files used, with Bethini.ini removed from the list."""
 
         return [ini for ini in self.bethini["INIs"] if ini != "Bethini.ini"]
+
+    def get_winning_ini_for_setting(self, ini: str, section:str, setting: str) -> str:
+        """An application sometimes has the ability to read multiple ini files in a particular
+        order of priority in which a setting can be overridden. We call this the INI_pecking_order.
+        Defining the ini for the setting in settings.json, we place a dictionary in Bethini.json,
+        from which we define the INI_pecking_order for that setting. This function iterates over
+        those ini files and returns the current ini that is providing the value for the setting.
+        """
+        # If Bethini.ini
+        if ini == ModifyINI.app_config_name:
+            return ini
+        test_inis = self.bethini["INI_pecking_order"].get(ini)
+        # If not a key in the INI_pecking_order
+        if not test_inis:
+            return ini
+        for test_ini in reversed(test_inis):
+            # If test_ini is ini, then ini is the winning ini
+            if test_ini == ini:
+                return ini
+            ini_location_setting = self.get_ini_setting_name(test_ini)
+            if not ini_location_setting:
+                msg = f"Unknown INI: {test_ini}\nini_location_setting: {ini_location_setting}"
+                logger.error(msg)
+                raise NotImplementedError(msg)
+            ini_location = ModifyINI.app_config().get_value("Directories", ini_location_setting)
+            # If no location exists, return the input ini
+            if not ini_location:
+                return ini
+            the_target_ini = ModifyINI.open(test_ini, Path(ini_location))
+            if the_target_ini.case_insensitive_config.has_option(section, setting):
+                return test_ini
+        return ini
 
     def get_ini_setting_name(self, ini: ININame) -> str:
         """Returns the INI settings name used in Bethini.ini to store the location
@@ -93,8 +130,13 @@ class AppName:
 
     def does_setting_exist(self, ini: ININame, section: str, setting: str) -> bool:
         """Checks if the given setting for the given section and ini file exists in settings.json."""
+        setting_exists_list: list[bool] = []
+        for valid_ini in self.valid_inis:
+            if ini in self.bethini["INI_pecking_order"].get(valid_ini):
+                setting_exists_list.append(
+                    setting.lower() in self.ini_section_setting_dict[valid_ini].get(section.lower(), ()))
 
-        return setting.lower() in self.ini_section_setting_dict[ini].get(section.lower(), ())
+        return True in setting_exists_list
 
     def preset_values(self, preset: PresetName) -> dict[str, GameSetting]:
         """Returns a dictionary listing all the settings and values

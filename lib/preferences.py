@@ -36,6 +36,21 @@ class preferences(ttk.Toplevel):
 
         general_lf = ttk.LabelFrame(preferences_frame_real, text="General")
 
+        log_level_frame = ttk.Frame(general_lf)
+        log_level_label = ttk.Label(log_level_frame, text="Log Level")
+        self.log_level_var = ttk.StringVar(self)
+        log_level_mb = ttk.Menubutton(log_level_frame, textvariable=self.log_level_var)
+        log_level_menu = ttk.Menu(log_level_mb)
+        log_level_list = ["Critical",
+                          "Error",
+                          "Warning",
+                          "Info",
+                          "Debug"]
+        for option in log_level_list:
+            log_level_menu.add_radiobutton(label=option, value=option, variable=self.log_level_var)
+        log_level_mb["menu"] = log_level_menu
+        self.log_level_var.set(ModifyINI.app_config().get_value("General", "sLogLevel", "Info"))
+
         max_backup_frame = ttk.Frame(general_lf)
         max_backups_label = ttk.Label(
             max_backup_frame, text="Max Backups to Keep")
@@ -66,6 +81,10 @@ class preferences(ttk.Toplevel):
         preferences_frame_real.pack(anchor=CENTER, expand=True)
         general_lf.pack(anchor=CENTER, padx=10, pady=10)
 
+        log_level_frame.pack(anchor=E, padx=10, pady=10)
+        log_level_label.pack(side=LEFT)
+        log_level_mb.pack(padx=10)
+
         max_backup_frame.pack(anchor=E, padx=10, pady=10)
         max_backups_label.pack(side=LEFT)
         max_backups_sb.pack(padx=10)
@@ -90,7 +109,9 @@ class preferences(ttk.Toplevel):
             "<Button-1>", lambda e: self.on_cancel(e))
 
     def on_save(self, event):
-        logging.debug("Save")
+        logger.debug("Save")
+        ModifyINI.app_config().assign_setting_value(
+            "General", "sLogLevel", self.log_level_var.get())
         ModifyINI.app_config().assign_setting_value(
             "General", "iMaxBackups", self.max_backups_var.get())
         ModifyINI.app_config().assign_setting_value(
@@ -101,5 +122,5 @@ class preferences(ttk.Toplevel):
         self.destroy()
 
     def on_cancel(self, event):
-        logging.debug("Cancel")
+        logger.debug("Cancel")
         self.destroy()

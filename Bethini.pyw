@@ -12,7 +12,6 @@ import math
 import os
 import sys
 import tkinter as tk
-import webbrowser
 from collections.abc import Sequence
 from datetime import datetime
 from operator import eq, ge, gt, le, lt, ne
@@ -20,6 +19,7 @@ from pathlib import Path
 from shutil import copyfile
 from typing import TYPE_CHECKING, Literal, cast
 from simpleeval import simple_eval  # type: ignore[reportUnknownVariableType]
+from stat import S_IWRITE, S_IREAD
 
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
@@ -32,7 +32,9 @@ from lib.app import AppName
 
 from lib.menu_bar import MenuBar
 from lib.tableview_scrollable import TableviewScrollable
+from lib.simple_dialog_windows import AskQuestionWindow
 from lib.save_changes_dialog import SaveChangesDialog
+from lib.choose_game import ChooseGameWindow
 from lib.advanced_edit_menu import AdvancedEditMenuPopup
 from lib.alphaColorPicker import AlphaColorPicker
 from lib.AutoScrollbar import AutoScrollbar
@@ -60,10 +62,6 @@ from lib.type_helpers import *
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-
-# from stat import S_IREAD, S_IRGRP, S_IROTH, S_IWUSR, S_IWGRP, S_IWRITE
-# This is for changing file read-only access via os.chmod(filename, S_IREAD,
-# S_IRGRP, #S_IROTH) Not currently used.
 
 # This dictionary maps the operator modules to specific text.
 operator_dictionary = {
@@ -132,14 +130,20 @@ class bethini_app(ttk.Window):
         CustomFunctions.screenwidth = self.winfo_screenwidth()
         CustomFunctions.screenheight = self.winfo_screenheight()
 
+        set_titlebar_style(self)
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
         # Variables
         self.tab_dictionary: dict[TabId, DisplayTab] = {}
         self.setting_dictionary: dict[str, BethiniSetting] = {}
         self.dependent_settings_dictionary: dict[str, dict[str, DependentSetting]] = {}
         self.settings_that_settings_depend_on: dict[str, dict[str, DependentSetting]] = {}
-        self.tab = []
         self.previous_tab = None
         self.app = None
+        self.ignore_log_sme_updates = False
+        self.preset_var = tk.StringVar(self, "Bethini")
+        self.style_override = ttk.Style()
+        self.theme_name = tk.StringVar(self, themename)
 
         self.widget_type_function = {
             "Checkbutton": self.checkbox,
@@ -174,8 +178,6 @@ class bethini_app(ttk.Window):
             "TkSlider": self.slider_assign_value,
         }
 
-        self.style_override = ttk.Style()
-
         self.the_canvas = ttk.Canvas(self)
         self.hsbframeholder = ttk.Frame(self)
 
@@ -186,11 +188,6 @@ class bethini_app(ttk.Window):
         self.container = ttk.Frame(self.the_canvas)
         self.container.bind_all("<Control-s>", self.save_ini_files)
 
-        self.hsbframeholder.pack(anchor=SW, side=BOTTOM, fill=X)
-        self.vsb.pack(side=RIGHT, fill=Y)
-        self.hsb.pack(side=BOTTOM, fill=X, expand=True)
-        self.the_canvas.pack(side=LEFT, fill=BOTH, expand=True)
-        self.canvas_frame = self.the_canvas.create_window((4, 4), window=self.container, tags="self.container")
         self.container.bind("<Configure>", self.on_frame_configure)
         self.sub_container = ttk.Notebook(self.container)
         self.sub_container.bind("<Configure>", self.sub_container_configure)
@@ -198,102 +195,38 @@ class bethini_app(ttk.Window):
         self.statusbar_text = tk.StringVar(self)
         self.statusbar = ttk.Entry(self.hsbframeholder, textvariable=self.statusbar_text)
         
-        menu_frame = MenuBar(self)
-        menu_frame.pack(anchor=NW, side=TOP, fill=X)
-
         self.pw = ttk.Label(self.hsbframeholder, text="Loading... Please Wait... ")
-        self.p = ttk.Progressbar(self.hsbframeholder, orient=tk.HORIZONTAL, mode=ttk.INDETERMINATE)
-        self.start_progress()
+        self.p = ttk.Progressbar(self.hsbframeholder, orient=HORIZONTAL, mode=INDETERMINATE)
+
+    def pack_stuff(self) -> None:
+        self.hsbframeholder.pack(anchor=SW, side=BOTTOM, fill=X)
+        self.vsb.pack(side=RIGHT, fill=Y)
+        self.hsb.pack(side=BOTTOM, fill=X, expand=True)
+        self.the_canvas.pack(side=LEFT, fill=BOTH, expand=True)
+        self.the_canvas.create_window((4, 4), window=self.container, tags="container")
+
+        self.menu_frame = MenuBar(self)
+        self.menu_frame.pack(anchor=NW, side=TOP, fill=X)
+
         self.statusbar.pack(anchor=NW, side=TOP, fill=X)
-
-        self.choose_game_window = ttk.Toplevel(f"Bethini Pie {version}")
-        set_titlebar_style(self.choose_game_window)
-
-        self.choose_game_frame = ttk.Frame(self.choose_game_window)
-
-        self.choose_game_frame_2 = ttk.Frame(self.choose_game_frame)
-
-        self.label_Bethini = ttk.Label(self.choose_game_frame_2, text="Bethini Pie", font=("Segoe UI", 20))
-        self.label_Pie = ttk.Label(
-            self.choose_game_frame_2,
-            text="Performance INI Editor\nby DoubleYou",
-            font=("Segoe UI", 15),
-            justify=tk.CENTER,
-            style=ttk.WARNING,
-        )
-        self.label_link = ttk.Label(
-            self.choose_game_frame_2,
-            text="www.nexusmods.com/site/mods/631",
-            font=("Segoe UI", 10),
-            cursor="hand2",
-            style=ttk.INFO,
-        )
-
-        self.choose_game_label = ttk.Label(self.choose_game_frame_2, text="Choose Game", font=("Segoe UI", 15))
-
-        self.choose_game_tree = ttk.Treeview(self.choose_game_frame_2, selectmode=BROWSE, show="tree", columns=("Name"))
-        self.choose_game_tree.column("#0", width=0, stretch=tk.NO)
-        self.choose_game_tree.column("Name", anchor=tk.W, width=300)
-
-        self.style_override.configure("choose_game_button.TButton", font=("Segoe UI", 14))
-        self.choose_game_button = ttk.Button(
-            self.choose_game_frame_2,
-            text="Select Game",
-            style="choose_game_button.TButton",
-            command=lambda: self.choose_game_done(self.choose_game_tree.focus()),
-        )
-
-        self.choose_game_tip = ttk.Label(
-            self.choose_game_frame_2,
-            text="Tip: You can change the game at any time\nby going to File > Choose Game.",
-            font=("Segoe UI", 12),
-            justify=tk.CENTER,
-            style="success",
-        )
-        for option in Path("apps").iterdir():
-            self.choose_game_tree.insert("", tk.END, id=option.name, text=option.name, values=[option.name])
-
-        self.preferences_frame = ttk.Frame(self.choose_game_frame_2)
-
-        self.theme_label = ttk.Label(self.preferences_frame, text="Theme:")
-        theme_names = standThemes.STANDARD_THEMES.keys()
-        self.theme_name = tk.StringVar(self)
-        self.theme_dropdown = ttk.OptionMenu(
-            self.preferences_frame,
-            self.theme_name,
-            ModifyINI.app_config().get_value("General", "sTheme", "superhero"),
-            *theme_names,
-            command=lambda t=self.theme_name.get(): set_theme(self.style_override, t),
-        )
-        self.theme_dropdown.var = self.theme_name  # type: ignore[reportAttributeAccessIssue]
-
-        self.choose_game_frame.pack(fill=tk.BOTH, expand=True)
-        self.choose_game_frame_2.pack(anchor=tk.CENTER, expand=True)
-
-        self.label_Bethini.pack(padx=5, pady=5)
-        self.label_Pie.pack(padx=5, pady=15)
-        self.label_link.pack(padx=25, pady=5)
-        self.label_link.bind("<Button-1>", lambda _event: webbrowser.open_new_tab("https://www.nexusmods.com/site/mods/631"))
-
-        self.preferences_frame.pack()
-        self.theme_label.pack(side=tk.LEFT)
-        self.theme_dropdown.pack(padx=5, pady=15)
-        self.choose_game_label.pack(padx=5, pady=2)
-        self.choose_game_tree.pack(padx=10)
-        self.choose_game_button.pack(pady=15)
-        self.choose_game_tip.pack(pady=10)
-        self.choose_game_window.protocol("WM_DELETE_WINDOW", lambda: on_closing(self))
-        self.choose_game_window.minsize(300, 35)
-
-        self.preset_var = tk.StringVar(self, "Bethini")
 
     def on_frame_configure(self, _event: "tk.Event[ttk.Frame]") -> None:
         self.the_canvas.configure(scrollregion=self.the_canvas.bbox("all"))
 
     def sub_container_configure(self, event: "tk.Event[ttk.Notebook]") -> None:
         the_width = event.width
-        the_height = event.height + 70
-        self.geometry(f"{the_width}x{the_height}")
+        the_height = event.height
+
+        # Get the height of the menubar
+        menubar_height = self.menu_frame.winfo_height()
+
+        # Get the height of the hsbframeholder frame
+        hsbframeholder_height = self.hsbframeholder.winfo_height()
+
+        # Add the menubar height and sub_container tabs height to the_height
+        total_height = the_height + menubar_height + hsbframeholder_height
+
+        self.geometry(f"{the_width}x{total_height}")
 
     def start_progress(self) -> None:
         self.pw.pack(side=LEFT, anchor=S)
@@ -308,12 +241,13 @@ class bethini_app(ttk.Window):
         self.p = ttk.Progressbar(self.hsbframeholder, orient=HORIZONTAL, mode=INDETERMINATE)
 
     def sme(self, message: str, *, exception: Exception | None = None) -> None:
-        if exception is not None:
-            logger.error(exception, exc_info=True)  # noqa: LOG014
-        else:
-            logger.debug(message)
-        self.statusbar_text.set(message)
-        self.update()
+        if not self.ignore_log_sme_updates:
+            if exception is not None:
+                logger.exception(message)
+            else:
+                logger.info(message)
+            self.statusbar_text.set(message)
+            self.update()
 
     @staticmethod
     def choose_color(button_to_modify: tk.Button, color_value_type: ColorType = "hex") -> ColorValue:
@@ -357,7 +291,12 @@ class bethini_app(ttk.Window):
         elif color_value_type == "rgb 1":
             # "(1.0000, 1.0000, 1.0000)"
             # (255, 255, 255)
-            old_color = rgb_to_hex(cast("tuple[int, int, int]", tuple(int(float(i) * 255) for i in ast.literal_eval(old_color))))
+            old_color_original_rgb1 = old_color
+            rgb_float = cast("tuple[float, float, float]", tuple(float(float(i) * 255) for i in ast.literal_eval(old_color)))
+            rgb_int = cast("tuple[int, int, int]", tuple(int(round(i, 0)) for i in rgb_float))
+            old_color = rgb_to_hex(rgb_int)
+            logger.debug(old_color)
+            
 
         elif color_value_type == "decimal":
             old_color = rgb_to_hex(decimal_to_rgb(old_color))
@@ -373,7 +312,7 @@ class bethini_app(ttk.Window):
             new_color = response[2]
             if alpha is not None:
                 new_alpha = response[3]
-                logging.debug(f"New alpha: {new_alpha}")
+                logger.debug(f"New alpha: {new_alpha}")
 
         luminance = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
         the_text_color = "#FFFFFF" if luminance < 128 else "#000000"
@@ -411,7 +350,12 @@ class bethini_app(ttk.Window):
         elif color_value_type == "rgb 1":
             # (255, 255, 255)
             # "(1.0000, 1.0000, 1.0000)"
-            the_rgb = str(tuple(round(i / 255, 4) for i in hex_to_rgb(new_color)))
+            if response is None:
+                the_rgb = old_color_original_rgb1
+            elif response[2] == old_color:
+                the_rgb = old_color_original_rgb1
+            else:
+                the_rgb = str(tuple(round(i / 255, 4) for i in hex_to_rgb(new_color)))
             button_to_modify.var.set(the_rgb)  # type: ignore[reportAttributeAccessIssue]
 
         elif color_value_type == "decimal":
@@ -484,35 +428,25 @@ class bethini_app(ttk.Window):
                      preview_frame=PREVIEW_FRAME, photo_for_setting=photo_for_setting, wraplength=tooltip_wrap_length, bootstyle=INVERSE)
 
     def choose_game(self, *, forced: bool = False) -> None:
-        self.withdraw()
-        # The Choose App/Game dialog window.  The window is skipped here if
-        # sAppName is already set in the Bethini.ini file.
+        always_select_game = ModifyINI.app_config().get_value("General", "bAlwaysSelectGame")
+        if always_select_game is None:
+            ModifyINI.app_config().assign_setting_value("General", "bAlwaysSelectGame", "0")
+
+        choose_game_var = ModifyINI.app_config().get_value("General", "sAppName")
+
         try:
-            choose_game_var = ModifyINI.app_config().get_value("General", "sAppName")
-            if forced:
-                self.sme("Force choose game/application.")
-                raise NameError
-
-            always_select_game = ModifyINI.app_config().get_value("General", "bAlwaysSelectGame")
-            if always_select_game is None:
-                ModifyINI.app_config().assign_setting_value("General", "bAlwaysSelectGame", "1")
-
-            if always_select_game != "0":
-                self.sme("Force choose game/application at startup.")
-                # By calling the global variable GAME_NAME before it has been created,
-                # we raise an exception to force the app/game to be chosen only at startup.
-                GAME_NAME  # type: ignore[reportUnusedExpression] # noqa: B018
-            # raise Exception("Forcing you to choose")
+            if forced or always_select_game != "0" or not choose_game_var:
+                self.withdraw()
+                choose_game_window = ChooseGameWindow(self, version=version, exedir=exedir)
+                self.wait_window(choose_game_window)
+                if choose_game_window.result:
+                    choose_game_var = choose_game_window.result
             self.choose_game_done(choose_game_var)
-
-        except NameError:
-            self.sme("Choose game/application.")
-            self.choose_game_window.deiconify()
-
         except Exception as e:
-            self.sme("An unhandled exception occurred.", exception=e)
+            msg = f"An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified."
+            logger.exception(msg)
             Messagebox.show_error(
-                message=f"An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified.",
+                message=msg,
                 title="Unhandled exception",
                 parent=self
             )
@@ -521,13 +455,12 @@ class bethini_app(ttk.Window):
 
     def choose_game_done(self, game: str | None, *, from_choose_game_window: bool = False) -> None:
         if not game:
+            sys.exit()
             return
-
-        self.choose_game_window.withdraw()
 
         # Once the app/game is selected, this loads it.
         if game != ModifyINI.app_config().get_value("General", "sAppName"):
-            self.sme(f"App/Game specified in {ModifyINI.app_config_name} differs from the game chosen, so it will be changed to the one you chose.")
+            logger.debug(f"App/Game specified in {ModifyINI.app_config_name} differs from the game chosen, so it will be changed to the one you chose.")
             ModifyINI.app_config().assign_setting_value("General", "sAppName", game)
             from_choose_game_window = True
 
@@ -537,10 +470,10 @@ class bethini_app(ttk.Window):
         # App globals
         # #############
 
-        self.app = AppName(game)
+        self.app = AppName(appname=game, exedir=exedir)
         global GAME_NAME
         GAME_NAME = self.app.data["gameName"]
-        self.sme(f"Application/game is {GAME_NAME}")
+        logger.debug(f"Application/game is {GAME_NAME}")
 
         # The self.tab_dictionary lists all the tabs, which
         # is variable, based upon the tabs listed in the associated Bethini.json
@@ -564,9 +497,9 @@ class bethini_app(ttk.Window):
             self.log_tab.destroy()
             self.advanced_tab.destroy()
         except AttributeError:
-            self.sme("No log tab found. It will be created.")
+            logger.debug("No log tab found. It will be created.")
         except ValueError:
-            self.sme("Log List observer not created yet.")
+            logger.debug("Log List observer not created yet.")
 
         self.tab_dictionary = {}
         for tab_number, tab in enumerate(self.app.bethini["displayTabs"], start=1):
@@ -575,7 +508,6 @@ class bethini_app(ttk.Window):
         self.setting_dictionary = {}
         self.dependent_settings_dictionary = {}
         self.settings_that_settings_depend_on = {}
-        self.tab = []
 
         if not from_choose_game_window:
             self.deiconify()
@@ -583,9 +515,10 @@ class bethini_app(ttk.Window):
             self.createTabs(from_choose_game_window=from_choose_game_window)
 
         except Exception as e:
-            self.sme("An unhandled exception occurred.", exception=e)
+            msg = f"An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified."
+            logger.exception(msg)
             Messagebox.show_error(
-                message=f"An unhandled exception occurred. See log for details.\n{e}\nThis program will now close. No files will be modified.",
+                message=msg,
                 title="Unhandled exception",
                 parent=self
             )
@@ -615,6 +548,27 @@ class bethini_app(ttk.Window):
         set_titlebar_style(SETUP_WINDOW)
         SETUP_WINDOW.deiconify()
 
+        # Update the window to get the correct dimensions.
+        SETUP_WINDOW.update_idletasks()
+
+        # Get the dimensions and position of the master (parent) window.
+        parent_width = self.winfo_width()
+        parent_height = self.winfo_height()
+        parent_x = self.winfo_rootx()
+        parent_y = self.winfo_rooty()
+
+        # Get our own dimensions.
+        window_width = SETUP_WINDOW.winfo_width()
+        window_height = SETUP_WINDOW.winfo_height()
+
+        # Calculate the center position relative to the master.
+        position_x = parent_x + (parent_width // 2) - (window_width // 2)
+        position_y = parent_y + (parent_height // 2) - (window_height // 2)
+
+        # Set our geometry including our size.
+        SETUP_WINDOW.geometry(f"+{position_x}+{position_y}")
+        
+
     def withdraw_setup(self) -> None:
         SETUP_WINDOW.withdraw()
         self.deiconify()
@@ -628,7 +582,7 @@ class bethini_app(ttk.Window):
             try:
                 copyfile(ini_file.ini_path, first_time_backup_path / ini_file.ini_path.name)
             except FileNotFoundError as e:
-                self.sme(
+                logger.debug(
                     f"{ini_file.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.",
                     exception=e,
                 )
@@ -639,10 +593,10 @@ class bethini_app(ttk.Window):
         try:
             self.apply_ini_dict(self.app.preset_values_fixedDefault, only_if_missing=True)
         except NameError as e:
-            self.sme(f"NameError: {e}", exception=e)
+            logger.error(f"NameError: {e}")
             return
         except AttributeError as e:
-            self.sme(f"AttributeError: {e}", exception=e)
+            logger.error(f"AttributeError: {e}")
             return
 
         files_to_remove = [*list(ModifyINI.open_inis)[1:], APP_LOG_FILE.name]
@@ -689,19 +643,45 @@ class bethini_app(ttk.Window):
                     current_backup_path.mkdir(parents=True, exist_ok=True)
                     current_backup_file_path = current_backup_path / ini_object.ini_path.name
                     if current_backup_file_path.exists():
-                        self.sme(f"{current_backup_file_path} already exists, so it will not be overwritten.")
+                        logger.warning(f"{current_backup_file_path} already exists, so it will not be overwritten.")
                     else:
                         try:
                             copyfile(ini_object.ini_path, current_backup_file_path)
                         except FileNotFoundError as e:
-                            self.sme(
-                                f"{ini_object.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly.",
-                                exception=e,
+                            logger.exception(
+                                f"{ini_object.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly."
                             )
-                    ini_object.save_ini_file(sort=True)
-                    files_saved = True
-                    self.sme(f"{ini_object.ini_path} saved.")
-                    copyfile(APP_LOG_FILE, current_backup_path / APP_LOG_FILE.name)
+                    try:
+                        ini_object.save_ini_file(sort=True)
+                        file_saved = True
+                        files_saved = True
+                    except PermissionError as e:
+                        logger.exception(f"{ini_object.ini_path} was not able to be saved due to lacking permission to edit the file.")
+                        if not os.access(ini_object.ini_path, os.W_OK):
+                            logger.warning(f"{ini_object.ini_path} is read only.")
+                            change_read_only = AskQuestionWindow(
+                                self, title="Remove read-only flag?",
+                                question=f"{ini_object.ini_path} is set to read-only, so it cannot be saved. Would you like to temporarily clear the read-only flag to allow it to be saved?")
+                            self.wait_window(change_read_only)
+                            if change_read_only.result:
+                                try:
+                                    os.chmod(ini_object.ini_path, S_IWRITE)
+                                    ini_object.save_ini_file(sort=True)
+                                    file_saved = True
+                                    files_saved = True
+                                    os.chmod(ini_object.ini_path, S_IREAD)
+                                except PermissionError as e:
+                                    logger.exception(f"{ini_object.ini_path} was still not able to be saved after clearing read-only flag.")
+                            else:
+                                logger.debug(f"User decided not to clear the read-only flag on {ini_object.ini_path}")
+                                file_saved = False
+                        else:
+                            logger.info(f"{ini_object.ini_path} is not read only.")
+                            file_saved = False
+                    if file_saved:
+                        self.sme(f"{ini_object.ini_path} saved.")
+                        copyfile(APP_LOG_FILE, current_backup_path / APP_LOG_FILE.name)
+
 
         if not files_saved:
             self.sme("No files were modified. Saving skipped.")
@@ -737,21 +717,21 @@ class bethini_app(ttk.Window):
                     settings = ini_object.get_settings(section)
                     if not settings:
                         ini_object.remove_section(section)
-                        self.sme(f"{section} was removed because it was empty.")
+                        logger.debug(f"{section} was removed because it was empty.")
                         continue
 
                     for setting_name in settings:
                         if ";" in setting_name or "#" in setting_name:
-                            self.sme(f"{setting_name}:{section} will be preserved, as it is a comment.")
+                            logger.debug(f"{setting_name}:{section} will be preserved, as it is a comment.")
 
                         elif not self.app.does_setting_exist(each_ini, section, setting_name):
                             # Removal of unknown settings (disabled)
                             # ini_object.remove_setting(section, setting_name)
 
-                            self.sme(f"{setting_name}:{section} {each_ini} appears to be invalid.")
+                            logger.debug(f"{setting_name}:{section} {each_ini} appears to be invalid.")
                             if not ini_object.get_settings(section):
                                 ini_object.remove_section(section)
-                                self.sme(f"{section} was removed because it was empty.")
+                                logger.debug(f"{section} was removed because it was empty.")
 
     def apply_ini_dict(self, ini_dict: dict[str, GameSetting], *, only_if_missing: bool = False) -> None:
         for setting_and_section in ini_dict:
@@ -770,15 +750,18 @@ class bethini_app(ttk.Window):
                 msg = f"{setting_and_section} has no INI set."
                 raise TypeError(msg)
 
-            ini_location = self.getINILocation(target_ini)
-            target_ini_object = ModifyINI.open(target_ini, Path(ini_location))
+            
+            winning_ini = self.app.get_winning_ini_for_setting(
+                target_ini, target_section, target_setting)
+            ini_location = self.getINILocation(winning_ini)
+            target_ini_object = ModifyINI.open(winning_ini, Path(ini_location))
 
             # Check if we are only supposed to add the value if the value is missing
             if only_if_missing and (target_ini_object.get_value(target_section, target_setting) is not None):
                 continue
 
             target_ini_object.assign_setting_value(target_section, target_setting, this_value)
-            self.sme(f"{target_ini} [{target_section}] {target_setting}={this_value}")
+            logger.debug(f"{target_ini} [{target_section}] {target_setting}={this_value}")
 
     def remove_ini_dict(self, ini_dict: dict[str, GameSetting]) -> None:
         for setting_and_section in ini_dict:
@@ -791,17 +774,24 @@ class bethini_app(ttk.Window):
                 msg = f"{setting_and_section} has no INI set."
                 raise TypeError(msg)
 
-            ini_location = self.getINILocation(target_ini)
-            target_ini_object = ModifyINI.open(target_ini, Path(ini_location))
+            winning_ini = self.app.get_winning_ini_for_setting(
+                target_ini, target_section, target_setting)
+            ini_location = self.getINILocation(winning_ini)
+            target_ini_object = ModifyINI.open(winning_ini, Path(ini_location))
+
+            if winning_ini not in self.app.valid_inis:
+               continue
+
             current_value = cast("str", target_ini_object.get_value(target_section, target_setting, this_value))
 
             if current_value == this_value:
-                if target_ini_object.remove_setting(target_section, target_setting):
-                    self.sme(
-                        f"{target_ini} [{target_section}] {target_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed",
-                    )
+                section_exists = target_ini_object.remove_setting(target_section, target_setting)
+                if section_exists:
+                   logger.debug(
+                       f"{winning_ini} [{target_section}] {target_setting}={this_value}, which is the default value, and since it is not set to alwaysPrint, it will be removed")
                 else:
-                    self.sme(f"No section {target_section} exists for {target_setting} in {target_ini_object}.")
+                   logger.debug(
+                       f"No section {target_section} exists for {target_setting} in {target_ini_object}.")
 
     def create_tab_image(self, tab_id: TabId) -> None:
         icon_path = exedir / "icons" / f"{self.tab_dictionary[tab_id]['Name']}.png"
@@ -809,14 +799,14 @@ class bethini_app(ttk.Window):
             if not icon_path.is_file():
                 icon_path = icon_path.with_name("Blank.png")
                 if not icon_path.is_file():
-                    self.sme(f"No icon for tab '{tab_id}'")
+                    logger.debug(f"No icon for tab '{tab_id}'")
                     tab_icon = tk.PhotoImage(data=Icon.warning)
                     return
 
             tab_icon = tk.PhotoImage(file=icon_path, height=16, width=16)
 
         except tk.TclError as e:
-            self.sme(f"Failed to load icon for tab '{tab_id}':\n{icon_path}", exception=e)
+            logger.debug(f"Failed to load icon for tab '{tab_id}':\n{icon_path}")
             tab_icon = tk.PhotoImage(data=Icon.warning)
 
         self.tab_dictionary[tab_id]["TkPhotoImageForTab"] = tab_icon
@@ -1702,8 +1692,10 @@ class bethini_app(ttk.Window):
             return
 
         for n in range(len(targetINIs)):
-            ini_location = self.getINILocation(targetINIs[n])
-            the_target_ini = ModifyINI.open(targetINIs[n], Path(ini_location))
+            winning_ini = self.app.get_winning_ini_for_setting(
+                targetINIs[n], targetSections[n], theSettings[n])
+            ini_location = self.getINILocation(winning_ini)
+            the_target_ini = ModifyINI.open(winning_ini, Path(ini_location))
 
             if this_value not in (on_value, off_value):
                 continue
@@ -1720,18 +1712,18 @@ class bethini_app(ttk.Window):
                     theValue = this_value[n][0]
                     try:
                         the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
-                        self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
+                        self.sme(f"{winning_ini} [{targetSections[n]}] {theSettings[n]}={theValue}")
                     except AttributeError as e:
                         self.sme(
-                            f"Failed to assign {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue} because the {targetINIs[n]} has an issue.",
+                            f"Failed to assign {winning_ini} [{targetSections[n]}] {theSettings[n]}={theValue} because the {winning_ini} has an issue.",
                             exception=e,
                         )
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
-                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
+                self.sme(f"{winning_ini} [{targetSections[n]}] {theSettings[n]}={theValue}")
 
             else:
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value[n])  # type: ignore[reportArgumentType]
-                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value[n]}")
+                self.sme(f"{winning_ini} [{targetSections[n]}] {theSettings[n]}={this_value[n]}")
 
     def dropdown_assign_value(self, setting_name: str) -> None:
         this_value = self.setting_dictionary[setting_name]["tk_var"].get()
@@ -1754,10 +1746,10 @@ class bethini_app(ttk.Window):
                         if partial_setting["valueSet"]:
                             theValueStr += partial_setting["tk_var"].get()
                         else:
-                            self.sme(f"{each_partial_setting} is not set yet.")
+                            logger.info(f"{each_partial_setting} is not set yet.")
                             return
                     except KeyError:
-                        self.sme(f"{each_partial_setting} is not set yet.")
+                        logger.info(f"{each_partial_setting} is not set yet.")
                         return
 
         if not targetINIs:
@@ -1765,8 +1757,11 @@ class bethini_app(ttk.Window):
 
         for n in range(len(targetINIs)):
             theValue = ""
-            ini_location = self.getINILocation(targetINIs[n])
-            the_target_ini = ModifyINI.open(targetINIs[n], Path(ini_location))
+
+            winning_ini = self.app.get_winning_ini_for_setting(
+                targetINIs[n], targetSections[n], theSettings[n])
+            ini_location = self.getINILocation(winning_ini)
+            the_target_ini = ModifyINI.open(winning_ini, Path(ini_location))
 
             if this_value in {"Manual...", "Browse..."}:
                 theValue = ""
@@ -1780,6 +1775,8 @@ class bethini_app(ttk.Window):
                 if this_value not in setting_choices:
                     return
                 theValue = setting_choices[this_value][n]
+                if isinstance(theValue, list):
+                    theValue = theValue[0]
             elif file_format:
                 if file_format == "directory" and this_value == "\\":
                     this_value = this_value[:-1]
@@ -1790,7 +1787,7 @@ class bethini_app(ttk.Window):
             if partial:
                 theValue = theValueStr.format(this_value)
             the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
-            self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
+            self.sme(f"{winning_ini} [{targetSections[n]}] {theSettings[n]}={theValue}")
 
     def combobox_assign_value(self, setting_name: str) -> None:
         targetINIs = self.setting_dictionary[setting_name].get("targetINIs")
@@ -1804,8 +1801,10 @@ class bethini_app(ttk.Window):
 
         decimal_places_str = self.setting_dictionary[setting_name].get("decimal places")
         for n in range(len(targetINIs)):
-            ini_location = self.getINILocation(targetINIs[n])
-            the_target_ini = ModifyINI.open(targetINIs[n], Path(ini_location))
+            winning_ini = self.app.get_winning_ini_for_setting(
+                targetINIs[n], targetSections[n], theSettings[n])
+            ini_location = self.getINILocation(winning_ini)
+            the_target_ini = ModifyINI.open(winning_ini, Path(ini_location))
 
             if decimal_places_str and str_value:
                 decimal_places = int(decimal_places_str)
@@ -1814,7 +1813,7 @@ class bethini_app(ttk.Window):
                 str_value = str(int(float_value)) if decimal_places == 0 else str(float_value)
 
             the_target_ini.assign_setting_value(targetSections[n], theSettings[n], str_value)
-            self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={str_value}")
+            self.sme(f"{winning_ini} [{targetSections[n]}] {theSettings[n]}={str_value}")
 
     def entry_assign_value(self, setting_name: str) -> None:
         targetINIs = self.setting_dictionary[setting_name].get("targetINIs")
@@ -1840,20 +1839,22 @@ class bethini_app(ttk.Window):
         formula = self.setting_dictionary[setting_name].get("formula")
 
         for n in range(len(targetINIs)):
-            ini_location = self.getINILocation(targetINIs[n])
-            the_target_ini = ModifyINI.open(targetINIs[n], Path(ini_location))
+            winning_ini = self.app.get_winning_ini_for_setting(
+                targetINIs[n], targetSections[n], theSettings[n])
+            ini_location = self.getINILocation(winning_ini)
+            the_target_ini = ModifyINI.open(winning_ini, Path(ini_location))
 
             if formula:
                 formulaValue = formula.format(this_value)
                 try:
                     this_value = str(round(cast("float", simple_eval(formulaValue)), 8))
                 except:
-                    self.sme(f"Failed to evaluate formula value for {this_value}.")
+                    logger.debug(f"Failed to evaluate formula value for {this_value}.")
 
             if partial:
                 this_value = theValueStr.format(this_value)
             the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-            self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
+            self.sme(f"{winning_ini} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def slider_assign_value(self, setting_name: str) -> None:
         setting: BethiniSetting = self.setting_dictionary[setting_name]
@@ -1867,16 +1868,18 @@ class bethini_app(ttk.Window):
         theSettings = setting.get("settings", [])
 
         for n in range(len(targetINIs)):
-            ini_location = self.getINILocation(targetINIs[n])
-            the_target_ini = ModifyINI.open(targetINIs[n], Path(ini_location))
+            winning_ini = self.app.get_winning_ini_for_setting(
+                targetINIs[n], targetSections[n], theSettings[n])
+            ini_location = self.getINILocation(winning_ini)
+            the_target_ini = ModifyINI.open(winning_ini, Path(ini_location))
 
             try:
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
+                self.sme(f"{winning_ini} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
             except AttributeError as e:
                 self.sme(
-                    f"Failed to set {targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value} because the {targetINIs[n]} has an issue.",
+                    f"Failed to set {winning_ini} [{targetSections[n]}] {theSettings[n]}={this_value} because the {winning_ini} has an issue.",
                     exception=e,
                 )
 
@@ -1891,11 +1894,13 @@ class bethini_app(ttk.Window):
         theSettings = self.setting_dictionary[setting_name].get("settings", [])
 
         for n in range(len(targetINIs)):
-            ini_location = self.getINILocation(targetINIs[n])
-            the_target_ini = ModifyINI.open(targetINIs[n], Path(ini_location))
+            winning_ini = self.app.get_winning_ini_for_setting(
+                targetINIs[n], targetSections[n], theSettings[n])
+            ini_location = self.getINILocation(winning_ini)
+            the_target_ini = ModifyINI.open(winning_ini, Path(ini_location))
 
             the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-            self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
+            self.sme(f"{winning_ini} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def color_assign_value(self, setting_name: str) -> None:
         targetINIs = self.setting_dictionary[setting_name].get("targetINIs")
@@ -1909,23 +1914,26 @@ class bethini_app(ttk.Window):
 
         color_value_type = self.setting_dictionary[setting_name].get("colorValueType")
         for n in range(len(targetINIs)):
-            ini_location = self.getINILocation(targetINIs[n])
-            the_target_ini = ModifyINI.open(targetINIs[n], Path(ini_location))
+            winning_ini = self.app.get_winning_ini_for_setting(
+                targetINIs[n], targetSections[n], theSettings[n])
+            ini_location = self.getINILocation(winning_ini)
+            the_target_ini = ModifyINI.open(winning_ini, Path(ini_location))
 
             if color_value_type in {"hex", "decimal", "rgba decimal", "abgr decimal"}:
                 the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
+                self.sme(f"{winning_ini} [{targetSections[n]}] {theSettings[n]}={this_value}")
             elif color_value_type in {"rgb", "rgb 1", "rgba"}:
                 if len(theSettings) > 1:
                     theValue = str(ast.literal_eval(this_value)[n])
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], theValue)
-                    self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={theValue}")
+                    self.sme(f"{winning_ini} [{targetSections[n]}] {theSettings[n]}={theValue}")
                 else:
                     this_value = this_value.lstrip("(").rstrip(")")
                     the_target_ini.assign_setting_value(targetSections[n], theSettings[n], this_value)
-                    self.sme(f"{targetINIs[n]} [{targetSections[n]}] {theSettings[n]}={this_value}")
+                    self.sme(f"{winning_ini} [{targetSections[n]}] {theSettings[n]}={this_value}")
 
     def createTabs(self, *, from_choose_game_window: bool = False) -> None:
+        self.start_progress()
         global PREVIEW_WINDOW
         PREVIEW_WINDOW = ttk.Toplevel("Preview")
         global PREVIEW_FRAME
@@ -1951,6 +1959,25 @@ class bethini_app(ttk.Window):
                 setup_ok_button.pack(anchor=tk.SE, padx=5, pady=5)
 
                 SETUP_WINDOW.protocol("WM_DELETE_WINDOW", self.withdraw_setup)
+                # Update the window to get the correct dimensions.
+                SETUP_WINDOW.update_idletasks()
+
+                # Get the dimensions and position of the master (parent) window.
+                parent_width = self.winfo_width()
+                parent_height = self.winfo_height()
+                parent_x = self.winfo_rootx()
+                parent_y = self.winfo_rooty()
+
+                # Get our own dimensions.
+                window_width = SETUP_WINDOW.winfo_width()
+                window_height = SETUP_WINDOW.winfo_height()
+
+                # Calculate the center position relative to the master.
+                position_x = parent_x + (parent_width // 2) - (window_width // 2)
+                position_y = parent_y + (parent_height // 2) - (window_height // 2)
+
+                # Set our geometry including our size.
+                SETUP_WINDOW.geometry(f"+{position_x}+{position_y}")
                 if not from_choose_game_window:
                     SETUP_WINDOW.withdraw()
             else:
@@ -2125,8 +2152,11 @@ class bethini_app(ttk.Window):
 
             ini_setting_type = self.app.get_setting_type(target_setting, target_section)
             
-            ini_location = self.getINILocation(target_ini)
-            the_target_ini = ModifyINI.open(target_ini, Path(ini_location))
+            winning_ini = self.app.get_winning_ini_for_setting(
+                target_ini, target_section, target_setting)
+            ini_location = self.getINILocation(winning_ini)
+            the_target_ini = ModifyINI.open(winning_ini, Path(ini_location))
+
             current_value = the_target_ini.get_value(target_section, target_setting, default_value)
             if ini_setting_type == "float":
                 default_value = trim_trailing_zeros(float(default_value))
@@ -2135,7 +2165,7 @@ class bethini_app(ttk.Window):
             # If current_value differs from default_value, set tag "changed"
             tag = "changed" if str(current_value) != str(default_value) else ""
             tagdata.append(tag)
-            rowdata.append((target_ini, target_section, target_setting, default_value, current_value))
+            rowdata.append((winning_ini, target_section, target_setting, default_value, current_value))
 
         return rowdata, tagdata
 
@@ -2165,15 +2195,19 @@ class bethini_app(ttk.Window):
             self.log_text.insert(tk.END, "\n".join(log_list) + '\n')
             self.log_text.see(tk.END)
         except tk.TclError:
-            self.sme("Log tab currently unavailable.")
+            logger.debug("Log tab currently unavailable.")
 
     def updateValues(self) -> None:
         self.start_progress()
         self.sme("Updating INI values.")
+        self.ignore_log_sme_updates = True
         for setting_name in self.setting_dictionary:
             self.widget_type_switcher(setting_name)
+        self.ignore_log_sme_updates = False
         self.sme("Checking for dependent settings.")
+        self.ignore_log_sme_updates = True
         self.dependents()
+        self.ignore_log_sme_updates = False
         self.sme("Update values complete.")
         self.stop_progress()
 
@@ -2264,15 +2298,18 @@ class bethini_app(ttk.Window):
             return setting_values
 
         for i, ini_name in enumerate(target_inis):
-            ini_location = self.getINILocation(ini_name)
-            if ini_location:
-                current_section = target_sections[i]
-                current_setting = target_settings[i]
+            current_section = target_sections[i]
+            current_setting = target_settings[i]
 
+            winning_ini = self.app.get_winning_ini_for_setting(
+                ini_name, current_section, current_setting)
+            ini_location = self.getINILocation(winning_ini)
+
+            if ini_location:
                 # This looks for a default value in the settings.json
                 default_value = None if ModifyINI.app_config_name == ini_name else self.app.setting_values[current_setting].get("default")
 
-                target_ini_object = ModifyINI.open(ini_name, Path(ini_location))
+                target_ini_object = ModifyINI.open(winning_ini, Path(ini_location))
                 try:
                     value = str(target_ini_object.get_value(current_section, current_setting, default_value))  # type: ignore[reportArgumentType]
                 except AttributeError as e:
@@ -2288,8 +2325,18 @@ class bethini_app(ttk.Window):
 
         # Check to see if the settings correspond with specified setting_name choices.
         if setting_choices:
-            for choice in setting_choices:
-                if setting_choices[choice] == setting_values:
+            for choice, values_for_choice in setting_choices.items():
+                match = True
+                for i, value in enumerate(values_for_choice):
+                    if isinstance(value, list):
+                        if setting_values[i] not in value:
+                            match = False
+                            break
+                    else:
+                        if setting_values[i] != value:
+                            match = False
+                            break
+                if match:
                     setting_values = [choice]
 
         # Check to see if there are multiple values separated by a delimiter
@@ -2299,20 +2346,18 @@ class bethini_app(ttk.Window):
         return setting_values
 
 
-def on_closing(root: bethini_app) -> None:
-    """Ask if the user wants to save INI files if any have been modified before quitting.
+    def on_closing(self) -> None:
+        """Ask if the user wants to save INI files if any have been modified before quitting.
 
-    This is bound to the main app window closing.
-    """
-
-    response = Messagebox.show_question(
-        message="Do you want to quit?", title="Quit?", parent=root, buttons=["No:secondary", "Yes:primary"])
-    if response == "Yes":
-        if ModifyINI.app_config().has_been_modified:
-            ModifyINI.app_config().save_ini_file(sort=True)
-        root.save_ini_files()
-        root.quit()
-
+        This is bound to the main app window closing.
+        """
+        quit_query = AskQuestionWindow(self, title="Quit", question="Do you want to quit?")
+        self.wait_window(quit_query)
+        if quit_query.result:
+            if ModifyINI.app_config().has_been_modified:
+                ModifyINI.app_config().save_ini_file(sort=True)
+            self.save_ini_files()
+            self.quit()
 
 def remove_excess_directory_files(directory: Path, max_to_keep: int, files_to_remove: list[str]) -> None:
     """Remove excess logs or backups.
@@ -2376,7 +2421,18 @@ if __name__ == "__main__":
 
     fmt = "%(asctime)s  [%(levelname)s]  %(filename)s  %(funcName)s:%(lineno)s:  %(message)s"
     datefmt = "%Y-%m-%d %H:%M:%S"
-    logging.basicConfig(filename=APP_LOG_FILE, filemode="w", format=fmt, datefmt=datefmt, encoding="utf-8", level=logging.DEBUG)
+
+    log_level = ModifyINI.app_config().get_value("General", "sLogLevel", "Info")
+
+    log_level_dict = {
+        "Critical": logging.CRITICAL,
+        "Error": logging.ERROR,
+        "Warning": logging.WARNING,
+        "Info": logging.INFO,
+        "Debug": logging.DEBUG
+    }
+
+    logging.basicConfig(filename=APP_LOG_FILE, filemode="w", format=fmt, datefmt=datefmt, encoding="utf-8", level=log_level_dict.get(log_level))
     logger = logging.getLogger()
     _log_stdout = logging.StreamHandler(sys.stdout)  # to console
     _log_stdout.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
@@ -2413,8 +2469,7 @@ if __name__ == "__main__":
         version = ""
 
     window = bethini_app(themename=theme)
+    window.pack_stuff()
     window.choose_game()
-    set_titlebar_style(window)
-
-    window.protocol("WM_DELETE_WINDOW", lambda: on_closing(window))
+    
     window.mainloop()

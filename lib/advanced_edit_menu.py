@@ -107,13 +107,13 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
         # Retrieve the current value from the entry widget
         current_val = self.current_value_entry.get()
         if current_val != self.row_data[4]:
-            logging.debug("Saved new value: " + str(self.row_data[0:3]) + " " + str(current_val))
+            logger.debug("Saved new value: " + str(self.row_data[0:3]) + " " + str(current_val))
             # Store the result so parent code can access it after wait_window
             self.result = current_val
         self.destroy()
 
     def on_cancel(self, event):
-        logging.debug("Cancel")
+        logger.debug("Cancel")
         self.destroy()
 
     def on_focus_out(self, event, default_value):

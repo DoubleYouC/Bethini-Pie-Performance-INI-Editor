@@ -11,7 +11,7 @@ import os
 import sys
 import re
 from pathlib import Path
-from tkinter import filedialog, simpledialog, messagebox
+from tkinter import filedialog, simpledialog
 
 if os.name == "nt":
     import winreg
@@ -26,22 +26,35 @@ from lib.type_helpers import *
 
 logger = logging.getLogger(__name__)
 
+
 def set_titlebar_style(window: tk.Misc) -> None:
+    """
+    Set the title bar style for a given window to use dark mode and Mica effect on Windows 11.
+
+    Args:
+        window (tk.Misc): The window to apply the title bar style to.
+    """
+    # Check if the windowing system is win32 (Windows) and the build version is 22000 or higher (Windows 11)
     winsys = window.style.tk.call("tk", "windowingsystem")
     if winsys == "win32" and sys.getwindowsversion().build >= 22000:
+        window.update()  # Ensure the window is updated to get the correct window handle
+        hwnd = windll.user32.GetParent(
+            window.winfo_id())  # Get the window handle
 
-        window.update()
-        hwnd = windll.user32.GetParent(window.winfo_id())
+        # Constants for setting the dark mode and Mica effect
         DWMWA_USE_IMMERSIVE_DARK_MODE = 20
         DWMWA_MICA_EFFECT = 1029
 
         # Enable dark mode for the title bar
         dark_mode = c_int(1)
-        windll.dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, byref(dark_mode), sizeof(dark_mode))
+        windll.dwmapi.DwmSetWindowAttribute(
+            hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, byref(dark_mode), sizeof(dark_mode))
 
         # Enable Mica effect for the title bar
         mica_effect = c_int(1)
-        windll.dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_MICA_EFFECT, byref(mica_effect), sizeof(mica_effect))
+        windll.dwmapi.DwmSetWindowAttribute(
+            hwnd, DWMWA_MICA_EFFECT, byref(mica_effect), sizeof(mica_effect))
+
 
 def set_theme(style_object: ttk.Style, theme_name: str) -> None:
     """Set the application theme."""
@@ -82,6 +95,15 @@ def sanitize_and_convert_float(value: str) -> str:
 
 
 def trim_trailing_zeros(value: float) -> str:
+    """
+    Remove trailing zeros from a float and return it as a string.
+
+    Args:
+        value (float): The float value to be formatted.
+
+    Returns:
+        str: The formatted string without trailing zeros.
+    """
     # Format as a fixed-point number first
     formatted = f"{value:f}"
     # If there is a decimal point, strip trailing zeros and the trailing decimal point if needed.
@@ -161,7 +183,23 @@ def decimal_to_abgr(decimal_string: str) -> tuple[int, int, int, int]:
 
 
 def browse_to_location(choice: str, browse: Browse, function: str, game_name: str) -> str | None:
+    """
+    Handle browsing to a location or manual entry for a file or directory.
+
+    Args:
+        choice (str): The user's choice, either "Browse...", "Manual...", or a predefined option.
+        browse (Browse): A tuple containing browse options.
+        function (str): A custom function to call if provided.
+        game_name (str): The name of the game for context in custom functions.
+
+    Returns:
+        str | None: The selected or entered location, or None if the operation was canceled.
+
+    Note:
+        This is NOT meant to replace typical queries for paths, but solely for advanced use of the dropdowns optionmenus.
+    """
     if choice == "Browse...":
+        # Handle directory selection
         if browse[2] == "directory":
             response = filedialog.askdirectory()
             if not response:
@@ -170,6 +208,7 @@ def browse_to_location(choice: str, browse: Browse, function: str, game_name: st
             location = Path(response).resolve()
 
         else:
+            # Handle file selection
             response = filedialog.askopenfilename(
                 filetypes=[(browse[1], browse[1])])
             if not response:
@@ -180,10 +219,10 @@ def browse_to_location(choice: str, browse: Browse, function: str, game_name: st
                 with location.open() as _fp:
                     pass
 
-            except OSError:
-                logger.exception("Failed to open file")
+            except OSError as e:
+                logger.exception(f"Failed to open file: {e}")
                 return None
-
+            # If a directory is expected but a file is selected, use the file's parent directory
             if browse[0] == "directory" and location.is_file():
                 location = location.parent
 
@@ -191,13 +230,16 @@ def browse_to_location(choice: str, browse: Browse, function: str, game_name: st
         return str(location) + os.sep
 
     if choice == "Manual...":
+        # Handle manual entry
         response = simpledialog.askstring(
-            "Manual Entry", "Custom Value:") or ""
+            "  Manual Entry", "Custom Value:") or ""
+
         if response:
             logger.debug(f"Manually entered a value of '{response}'")
         return response or None
 
     if function:
+        # Call a custom function if provided
         return_value_of_custom_function = getattr(
             CustomFunctions, function)(game_name, choice)
         logger.debug(
@@ -208,14 +250,15 @@ def browse_to_location(choice: str, browse: Browse, function: str, game_name: st
 
 class Info:
     @staticmethod
-    def get_game_config_directory(game_name: str) -> Path:
+    def get_game_config_directory(game_name: str) -> Path | None:
+        """Find the game config directory as used for autodetection in dropdowns."""
+
+        # Get existing saved location
         game_config_directory = ModifyINI.app_config().get_value(
             "Directories", f"s{game_name}INIPath")
 
-        if game_config_directory is not None:
-            return Path(game_config_directory)
-
-        if os.name == "nt":
+        # If no saved location, use the Windows environment variable to find the location
+        if game_config_directory is None and os.name == "nt":
             CSIDL_PERSONAL = 5  # My Documents
             SHGFP_TYPE_CURRENT = 0  # Get current, not default value
 
@@ -224,27 +267,15 @@ class Info:
                 None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
 
             documents_directory = Path(buf.value)
-            logger.debug(f"User documents location: {documents_directory}")
+            logger.info(f"User documents location: {documents_directory}")
 
             game_config_directory = (
-                documents_directory / "My Games" /
-                Info.game_documents_name(game_name)
-            )
-
-        elif (
-            messagebox.showwarning(
-                message=f"The config directory for {game_name} was not found automatically, do you want to specify it manually?\nChoosing no will close program",
-                type=messagebox.YESNO,
-            )
-            == messagebox.YES
-        ):
-            game_config_path = browse_to_location(
-                "Browse...", ("", "", "directory"))
+                documents_directory / "My Games" / Info.game_documents_name(game_name))
 
         if game_config_directory is not None:
             return Path(game_config_directory)
         else:
-            raise NotImplementedError
+            return None
 
     @staticmethod
     def game_documents_name(game_name: str) -> str:
@@ -301,13 +332,15 @@ class CustomFunctions:
         return f"{CustomFunctions.screenwidth}x{CustomFunctions.screenheight}"
 
     @staticmethod
-    def getBethesdaGameFolder(game_name: str) -> str:
+    def getBethesdaGameFolder(game_name: str) -> str | None:
+        """Find the game install directory as used for autodetection in dropdowns for Bethesda games."""
+
+        # Get existing saved location
         game_folder = ModifyINI.app_config().get_value(
             "Directories", f"s{game_name}Path")
-        if game_folder is not None:
-            return game_folder
 
-        if "winreg" in globals():
+        # If no saved location, check the registry
+        if game_folder is None and "winreg" in globals():
             key_name = Info.game_reg(game_name)
             try:
                 with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, Rf"SOFTWARE\WOW6432Node\Bethesda Softworks\{key_name}") as reg_handle:
@@ -315,45 +348,34 @@ class CustomFunctions:
                         reg_handle, "Installed Path")
 
                 if value and value_type == winreg.REG_SZ and isinstance(value, str):
-                    return value
+                    game_folder = value
 
             except OSError:
                 logger.exception(
-                    "Game path not found in the registry. Run the game launcher to set it.")
-                # TODO: Handle what happens next
+                    f"Game path not found in the registry. Run the {game_name} launcher to set it.")
 
-        if (
-            messagebox.showwarning(
-                message=f"The path to {game_name} was not found automatically, do you want to specify it manually?\nChoosing no will close program",
-                type=messagebox.YESNO,
-            )
-            == messagebox.YES
-        ):
-            try:
-
-                value = browse_to_location("Browse...", ("", "", "directory"))
-                if isinstance(value, str) and value is not None:
-                    return value
-            except:
-                logger.exception("Manual path failed")
-
-        raise NotImplementedError
+        if game_folder is None:
+            game_folder = ""
+        return game_folder
 
     @staticmethod
-    def getGamePath(game_name: str) -> str | None:
-        return ModifyINI.app_config().get_value("Directories", f"s{game_name}Path")
+    def getGamePath(game_name: str) -> str:
+        return ModifyINI.app_config().get_value("Directories", f"s{game_name}Path", "")
 
     @staticmethod
     def getINILocations(gameName: str) -> list[str]:
         game_documents_path = Info.get_game_config_directory(gameName)
+        if game_documents_path is None:
+            return ["", "Browse..."]
         game_documents_path.mkdir(parents=True, exist_ok=True)
-        app = AppName(gameName)
-        ini_files = app.what_ini_files_are_used()
-        for file in ini_files:
-            if file == "Ultra.ini":
-                continue
-            file_path = game_documents_path / file
-            with file_path.open() as _fp:
-                pass
+        # This code throws errors if the file doesn't exist. What is its purpose? Commenting out for now.
+        # app = AppName(gameName)
+        # ini_files = app.what_ini_files_are_used()
+        # for file in ini_files:
+        #     if gameName == "Starfield" and file == "Ultra.ini":
+        #         continue
+        #     file_path = game_documents_path / file
+        #     with file_path.open() as _fp:
+        #         pass
 
         return [f"{game_documents_path}{os.sep}", "Browse..."]
