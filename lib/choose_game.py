@@ -3,6 +3,7 @@ import ttkbootstrap as ttk
 from pathlib import Path
 from ttkbootstrap.constants import *
 from webbrowser import open_new_tab
+from ttkbootstrap.themes.standard import STANDARD_THEMES
 
 if __name__ == "__main__":
     sys.exit(1)
@@ -52,9 +53,10 @@ class ChooseGameWindow(ttk.Toplevel):
         self.choose_game_tree.column("#0", width=0, stretch=NO)
         self.choose_game_tree.column("Name", anchor=W, width=300)
 
-        style_override = ttk.Style()
-        style_override.configure(
-            "choose_game_button.TButton", font=("Segoe UI", 14))
+        self.master.style_override.configure(
+            "choose_game_button.TButton", font=("Segoe UI", 14),
+            background=STANDARD_THEMES[master.theme_name.get()]["colors"].get("inputbg"),
+            foreground=STANDARD_THEMES[master.theme_name.get()]["colors"].get("inputfg"))
         choose_game_button = ttk.Button(
             choose_game_frame_2,
             text="Select Game",
@@ -110,3 +112,7 @@ class ChooseGameWindow(ttk.Toplevel):
 
     def set_theme(self) -> None:
         set_theme(self.master.style_override, self.master.theme_name.get())
+        self.master.style_override.configure(
+            "choose_game_button.TButton", font=("Segoe UI", 14),
+            background=STANDARD_THEMES[self.master.theme_name.get()]["colors"].get("inputbg"),
+            foreground=STANDARD_THEMES[self.master.theme_name.get()]["colors"].get("inputfg"))

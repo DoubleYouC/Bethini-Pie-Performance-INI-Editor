@@ -1011,7 +1011,7 @@ class bethini_app(ttk.Window):
         widget_id = "TkPresetButton"
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
         preset_id = setting["preset id"]
-        setting[widget_id] = ttk.Button(setting["TkFinalSettingFrame"], text=setting_name, command=lambda: self.set_preset(preset_id))
+        setting[widget_id] = ttk.Button(setting["TkFinalSettingFrame"], text=setting_name, width=setting.get("width", ""), bootstyle="outline", command=lambda: self.set_preset(preset_id))
         setting[widget_id].pack(anchor=tk.CENTER, padx=5, pady=0)
         self.tooltip(tab_id, label_frame_id, setting_frame_id, setting_id, widget_id)
         self.add_to_setting_dictionary(tab_id, label_frame_name, label_frame_id, setting_frame_id, setting_name, setting_id, widget_id)
