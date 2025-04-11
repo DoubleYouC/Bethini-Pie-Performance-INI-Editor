@@ -17,6 +17,7 @@ class ChooseGameWindow(ttk.Toplevel):
         set_titlebar_style(self)
         self.grab_set()
         self.focus_set()
+        self.lift()
         self.protocol("WM_DELETE_WINDOW", self.destroy)
         self.minsize(300, 35)
         self.master = master
