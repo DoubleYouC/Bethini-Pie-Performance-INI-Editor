@@ -1288,7 +1288,7 @@ class bethini_app(ttk.Window):
 
         from_value = float(setting["from"])
         to_value = float(setting["to"])
-        increment = float(setting.get("increment", 0))
+        increment = float(setting.get("increment", 1))
         width = int(setting["width"])
         validate = setting.get("validate")
 
