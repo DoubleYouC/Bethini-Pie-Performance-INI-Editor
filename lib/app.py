@@ -11,6 +11,7 @@ import sys
 import tkinter as tk
 from pathlib import Path
 from typing import cast
+from xmlrpc.client import boolean
 
 if __name__ == "__main__":
     sys.exit(1)
@@ -30,10 +31,13 @@ class AppName:
         with (exedir / "apps" / appname / "Bethini.json").open(encoding="utf-8") as bethini:
             self.bethini: AppBethiniJSON = json.load(bethini)
 
+        self.appname = appname
+        self.exedir = exedir
         self.default_ini: ININame = list(self.bethini["INIs"])[1]
         self.setting_values = self.get_setting_values()
         self.ini_section_setting_dict = self.get_ini_section_setting_dict()
         self.setting_type_dict = self.get_setting_type_dict()
+        self.setting_notes_dict = self.get_setting_notes_dict()
         self.can_remove_dict = self.can_remove()
         self.preset_values_default = self.preset_values("default")
         self.preset_values_fixedDefault = self.preset_values("fixedDefault")
@@ -77,6 +81,13 @@ class AppName:
                 return test_ini
         return ini
 
+    def get_main_ini_from_pecking_order(self, ini: str) -> str:
+        """Returns the main ini file from the pecking order for the given ini file."""
+        pecking_orders = self.bethini["INI_pecking_order"]
+        for main_ini in pecking_orders:
+            if ini in pecking_orders[main_ini]:
+                return main_ini
+
     def get_ini_setting_name(self, ini: ININame) -> str:
         """Returns the INI settings name used in Bethini.ini to store the location
         of the given ini file.
@@ -111,6 +122,36 @@ class AppName:
             setting_type_dict.setdefault(
                 f"{setting}:{section}", ini_setting.get("type", "string"))
         return setting_type_dict
+
+    def get_setting_notes(self, setting: str, section: str) -> str:
+        """Returns the setting notes for the given setting."""
+        return self.setting_notes_dict.get(f"{setting.lower()}:{section.lower()}", "")
+
+    def get_setting_notes_dict(self) -> dict[str, str]:
+        """Returns a dictionary listing all the settings and their notes as specified in settings.json."""
+        setting_notes_dict: dict[str, str] = {}
+        for ini_setting in self.data["iniValues"]:
+            section = ini_setting["section"].lower()
+            setting = ini_setting["name"].lower()
+            setting_notes_dict.setdefault(
+                f"{setting}:{section}", ini_setting.get("notes", ""))
+        return setting_notes_dict
+
+    def update_setting_notes(self, setting: str, section: str, notes: str) -> bool:
+        """Updates the setting notes for the given setting."""
+        success = False
+        self.setting_notes_dict[f"{setting.lower()}:{section.lower()}"] = notes
+        for ini_setting in self.data["iniValues"]:
+            if ini_setting["name"].lower() == setting.lower() and ini_setting["section"].lower() == section.lower():
+                ini_setting["notes"] = notes
+                success = True
+                break
+        return success
+
+    def save_data(self) -> None:
+        """Saves the settings.json file."""
+        with open(self.exedir / "apps" / self.appname / "settings.json", "w", encoding="utf-8") as app_json:
+            json.dump(self.data, app_json, indent=4, ensure_ascii=False)
 
     def get_ini_section_setting_dict(self) -> dict[ININame, dict[str, list[str]]]:
         """Returns a dictionary listing all the INI files with their
