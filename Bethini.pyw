@@ -1599,7 +1599,9 @@ class bethini_app(ttk.Window):
             elif color_value_type == "rgba decimal":
                 this_value = setting_value[0]
                 new_color_rgba = decimal_to_rgba(this_value)
-                new_color_rgb = (new_color_rgba[0:2])
+                logger.debug("Color rgba: " + str(new_color_rgba))
+                new_color_rgb = (new_color_rgba[0:3])
+                logger.debug("Color rgb: " + str(new_color_rgb))
                 new_color = rgb_to_hex(new_color_rgb)
             elif color_value_type == "abgr decimal":
                 this_value = setting_value[0]
