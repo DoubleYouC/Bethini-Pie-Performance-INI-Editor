@@ -11,7 +11,6 @@ import sys
 import tkinter as tk
 from pathlib import Path
 from typing import cast
-from xmlrpc.client import boolean
 
 if __name__ == "__main__":
     sys.exit(1)
