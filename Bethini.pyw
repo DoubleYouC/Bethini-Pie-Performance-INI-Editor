@@ -706,6 +706,9 @@ class bethini_app(ttk.Window):
         self.sme(f"Preset {preset_var} {preset_id} applied.")
 
     def remove_invalid_settings(self) -> None:
+        remove_unknown_settings: str = ModifyINI.app_config().get_value("RemoveUnknown",
+                                                                        f"b{GAME_NAME}RemoveUnknownSettings",
+                                                                        self.app.bethini.get("Remove Unknown Settings Default"))
         for each_ini in ModifyINI.open_inis:
             if each_ini == ModifyINI.app_config_name or not self.app.get_ini_setting_name(each_ini):
                 continue
@@ -725,8 +728,8 @@ class bethini_app(ttk.Window):
                             logger.debug(f"{setting_name}:{section} will be preserved, as it is a comment.")
 
                         elif not self.app.does_setting_exist(each_ini, section, setting_name):
-                            # Removal of unknown settings (disabled)
-                            # ini_object.remove_setting(section, setting_name)
+                            if remove_unknown_settings == "1":
+                                ini_object.remove_setting(section, setting_name)
 
                             logger.debug(f"{setting_name}:{section} {each_ini} appears to be invalid.")
                             if not ini_object.get_settings(section):
