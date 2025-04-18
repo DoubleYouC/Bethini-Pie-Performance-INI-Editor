@@ -1999,7 +1999,8 @@ class bethini_app(ttk.Window):
             self.label_frames_for_tab(tab_id)
             if self.tab_dictionary[tab_id]["Name"] == "Setup":
                 for setting_name in self.setting_dictionary:
-                    self.widget_type_switcher(setting_name)
+                    if setting_name == "Remove Unknown Settings":
+                        self.widget_type_switcher(setting_name)
 
         self.advanced_tab = ttk.Frame(self.sub_container)
         icon_path = exedir / "icons" / "Advanced.png"
