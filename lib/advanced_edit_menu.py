@@ -24,12 +24,10 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
         # Set a minimum window size (width=500, height=300)
         self.minsize(500, 300)
 
-        # Get the cursor position
-        cursor_x = master.winfo_pointerx()
-        cursor_y = master.winfo_pointery()
-
-        # Set the position of the Toplevel window near the cursor
-        self.geometry(f"+{cursor_x}+{cursor_y}")
+        # Position the Toplevel window near the master window
+        x = master.winfo_x()
+        y = master.winfo_y()
+        self.geometry(f"+{x + 100}+{y + 100}")
 
         main_frame = ttk.Frame(self)
         main_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
