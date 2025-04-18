@@ -399,23 +399,25 @@ class bethini_app(ttk.Window):
                 settings_location_dict[target_ini_files[n]][target_sections[n]].append(target_settings[n])
 
             # Iterates through the dictionary and makes a formatted string to append to the bottom of the tooltip description.
-            tooltip_INI_targets = ""
+            tooltip_INI_targets: list[str] = []
             for iterator, target_ini in enumerate(settings_location_dict, start=1):
-                if iterator > 1:
-                    tooltip_INI_targets += "\n"
-                tooltip_INI_targets += target_ini
+                
+                tooltip_INI_targets.append(target_ini)
 
                 for target_section in settings_location_dict[target_ini]:
-                    tooltip_INI_targets += f"\n[{target_section}]"
+                    tooltip_INI_targets.append(f"[{target_section}]")
                     for target_setting in settings_location_dict[target_ini][target_section]:
-                        tooltip_INI_targets += f"\n{target_setting}"
+                        tooltip_INI_targets.append(target_setting)
                 if iterator != len(settings_location_dict):
-                    tooltip_INI_targets += "\n"
-
+                    tooltip_INI_targets.append("")
             # Appends our formatted string of INI settings to the bottom of the tooltip description.
-            tooltip_text = f"{tooltip_description}\n\n{tooltip_INI_targets}"
+            tooltip_text = f"{tooltip_description}\n"
+            for line in tooltip_INI_targets:
+                tooltip_text += f"\n{line}"
+
         else:  # If there are no INI settings specified, only the tooltip description will be used.
             tooltip_text = tooltip_description
+            tooltip_INI_targets = None
 
         setting_name = setting.get("Name")
         photo_for_setting: Path | None = exedir / "apps" / GAME_NAME / "images" / f"{setting_name}.jpg"
@@ -424,7 +426,7 @@ class bethini_app(ttk.Window):
 
         anchor_widget = setting[widget_id]
         if anchor_widget is not None:
-            Hovertip(widget=anchor_widget, text=tooltip_text, preview_window=PREVIEW_WINDOW,
+            Hovertip(widget=anchor_widget, text=tooltip_text, description=tooltip_description, code=tooltip_INI_targets, preview_window=PREVIEW_WINDOW,
                      preview_frame=PREVIEW_FRAME, photo_for_setting=photo_for_setting, wraplength=tooltip_wrap_length, bootstyle=INVERSE)
 
     def choose_game(self, *, forced: bool = False) -> None:

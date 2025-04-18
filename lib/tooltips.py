@@ -22,6 +22,8 @@ class Hovertip(ToolTip):
         self,
         widget: tk.Widget,
         text: str,
+        description: str,
+        code: list[str] | None,
         preview_window: ttk.Toplevel,
         preview_frame: ttk.Frame,
         photo_for_setting: Path | None,
@@ -30,10 +32,9 @@ class Hovertip(ToolTip):
         delay: int = 500,
         **kwargs,
     ) -> None:
-        """A semi-transparent tooltip popup window that shows text when the
+        """A tooltip popup window that shows text when the
         mouse is hovering over the widget and closes when the mouse is no
-        longer hovering over the widget. Clicking a mouse button will also
-        close the tooltip.
+        longer hovering over the widget. Also serves as our Preview Window handler.
 
 
         ToolTip Parameters:
@@ -44,6 +45,21 @@ class Hovertip(ToolTip):
 
             text (str):
                 The text to display in the tooltip window.
+
+            description (str):
+                The description to display in the preview window.
+
+            code list[str]:
+                A list of strings, typically ini settings in their section and ini file, placed inside a "code block" or Entry widget.
+
+            preview_window (ttk.Toplevel):
+                The toplevel widget for the preview window.
+
+            preview_frame (ttk.Frame):
+                The frame widget inside the preview window.
+
+            photo_for_setting (Path):
+                The photo to be placed inside the preview window.
 
             bootstyle (str):
                 The style to apply to the tooltip label. You can use
@@ -67,11 +83,12 @@ class Hovertip(ToolTip):
             delay,
             **kwargs,)
 
-        self.text = text
+        self.description = description
         self.preview_window = preview_window
         self.preview_frame = preview_frame
         self.photo_for_setting = photo_for_setting
         self.widget = widget
+        self.code = code
         self.preview_image: ImageTk.PhotoImage | None = None
         self.widget.bind("<Button-3>", self.show_preview)
 
@@ -94,8 +111,16 @@ class Hovertip(ToolTip):
 
         ttk.Label(
             self.preview_frame,
-            text=self.text,
+            text=self.description,
             wraplength=1000,
-        ).pack(anchor=NW)
+        ).pack(anchor=NW, padx = 10, pady = 10)
+
+        if self.code:
+            code_text = ttk.Text(self.preview_frame)
+            for iterator, line in enumerate(self.code, start = 1):
+                code_text.insert(END, line + "\n")
+                code_text.configure(height=iterator)
+            code_text.pack(anchor=NW, padx = 10, pady=10)
+
         self.preview_window.minsize(300, 50)
         self.preview_window.deiconify()
