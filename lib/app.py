@@ -82,10 +82,14 @@ class AppName:
 
     def get_main_ini_from_pecking_order(self, ini: str) -> str:
         """Returns the main ini file from the pecking order for the given ini file."""
+        # If Bethini.ini
+        if ini == ModifyINI.app_config_name:
+            return ini
         pecking_orders = self.bethini["INI_pecking_order"]
         for main_ini in pecking_orders:
             if ini in pecking_orders[main_ini]:
                 return main_ini
+        return ini
 
     def get_ini_setting_name(self, ini: ININame) -> str:
         """Returns the INI settings name used in Bethini.ini to store the location
