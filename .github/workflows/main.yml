@@ -69,25 +69,25 @@ jobs:
         xcopy /e /i fonts\Comfortaa dist\fonts\Comfortaa
         mkdir dist\apps
         mkdir "dist\apps\Fallout 4"
-        xcopy /y "apps\Fallout 4\Bethini.json" "dist\apps\Fallout 4\"
-        xcopy "apps\Fallout 4\settings.json" "dist\apps\Fallout 4\"
+        Copy-Item "apps\Fallout 4\Bethini.json" "dist\apps\Fallout 4\Bethini.json" -Force
+        Copy-Item "apps\Fallout 4\settings.json" "dist\apps\Fallout 4\settings.json" -Force
         mkdir "dist\apps\Fallout New Vegas"
-        xcopy /y "apps\Fallout New Vegas\Bethini.json" "dist\apps\Fallout New Vegas\"
-        xcopy /y "apps\Fallout New Vegas\settings.json" "dist\apps\Fallout New Vegas\"
+        Copy-Item "apps\Fallout New Vegas\Bethini.json" "dist\apps\Fallout New Vegas\" -Force
+        Copy-Item "apps\Fallout New Vegas\settings.json" "dist\apps\Fallout New Vegas\" -Force
         mkdir "dist\apps\Fallout New Vegas\images"
-        xcopy /e /i "apps\Fallout New Vegas\images" "dist\apps\Fallout New Vegas\images"
+        Copy-Item "apps\Fallout New Vegas\images" "dist\apps\Fallout New Vegas\images" -recurse -Force
         Remove-Item -Recurse -Force "dist\apps\Fallout New Vegas\images\src"
         mkdir "dist\apps\Skyrim Special Edition"
-        xcopy /y "apps\Skyrim Special Edition\Bethini.json" "dist\apps\Skyrim Special Edition\"
-        xcopy /y "apps\Skyrim Special Edition\settings.json" "dist\apps\Skyrim Special Edition\"
+        Copy-Item "apps\Skyrim Special Edition\Bethini.json" "dist\apps\Skyrim Special Edition\" -Force
+        Copy-Item "apps\Skyrim Special Edition\settings.json" "dist\apps\Skyrim Special Edition\" -Force
         mkdir "dist\apps\Skyrim Special Edition\images"
-        xcopy /e /i "apps\Skyrim Special Edition\images" "dist\apps\Skyrim Special Edition\images"
+        Copy-Item "apps\Skyrim Special Edition\images" "dist\apps\Skyrim Special Edition\images" -recurse -Force
         Remove-Item -Recurse -Force "dist\apps\Skyrim Special Edition\images\src"
         mkdir "dist\apps\Starfield"
-        xcopy /y "apps\Starfield\Bethini.json" "dist\apps\Starfield\"
-        xcopy /y "apps\Starfield\settings.json" "dist\apps\Starfield\"
+        Copy-Item "apps\Starfield\Bethini.json" "dist\apps\Starfield\Bethini.json" -Force
+        Copy-Item "apps\Starfield\settings.json" "dist\apps\Starfield\settings.json" -Force
         mkdir "dist\apps\Starfield\images"
-        xcopy /e /i "apps\Starfield\images" "dist\apps\Starfield\images"
+        Copy-Item "apps\Starfield\images" "dist\apps\Starfield\images" -recurse -Force
         Remove-Item -Recurse -Force "dist\apps\Starfield\images\src"
     
     - name: Upload a Build Artifact
