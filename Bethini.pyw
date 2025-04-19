@@ -822,7 +822,7 @@ class bethini_app(ttk.Window):
         for label_frame_number, frame_name in enumerate(self.app.bethini["displayTabs"][the_dict["Name"]], start=1):
             label_frame_id = f"LabelFrame{label_frame_number}"
             the_dict["LabelFrames"][label_frame_id] = {"Name": frame_name}
-            if frame_name != "NoLabelFrame":
+            if "NoLabelFrame" not in frame_name:
                 the_dict["LabelFrames"][label_frame_id]["TkLabelFrame"] = ttk.Labelframe(
                     the_dict["TkFrameForTab"],
                     text=frame_name,
