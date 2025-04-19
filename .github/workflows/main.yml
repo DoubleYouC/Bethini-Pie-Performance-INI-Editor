@@ -57,6 +57,38 @@ jobs:
     
     - name: Build with PyInstaller
       run: pyinstaller bethini_onefile.spec
+
+    - name: Copy additional files
+      run: |
+        copy LICENSE.txt dist\LICENSE.txt
+        copy README.md dist\README.md
+        copy changelog.txt dist\changelog.txt
+        mkdir dist\icons
+        xcopy /e /i icons dist\icons
+        mkdir dist\fonts\Comfortaa
+        xcopy /e /i fonts\Comfortaa dist\fonts\Comfortaa
+        mkdir dist\apps
+        mkdir "dist\apps\Fallout 4"
+        copy "apps\Fallout 4\Bethini.json" "dist\apps\Fallout 4\Bethini.json"
+        copy "apps\Fallout 4\settings.json" "dist\apps\Fallout 4\settings.json"
+        mkdir "dist\apps\Fallout New Vegas"
+        copy "apps\Fallout New Vegas\Bethini.json" "dist\apps\Fallout New Vegas\Bethini.json"
+        copy "apps\Fallout New Vegas\settings.json" "dist\apps\Fallout New Vegas\settings.json"
+        mkdir "dist\apps\Fallout New Vegas\images"
+        xcopy /e /i "apps\Fallout New Vegas\images" "dist\apps\Fallout New Vegas\images"
+        rmdir /s /q "dist\Bethini\apps\Fallout New Vegas\images\src"
+        mkdir "dist\apps\Skyrim Special Edition"
+        copy "apps\Skyrim Special Edition\Bethini.json" "dist\apps\Skyrim Special Edition\Bethini.json"
+        copy "apps\Skyrim Special Edition\settings.json" "dist\apps\Skyrim Special Edition\settings.json"
+        mkdir "dist\apps\Skyrim Special Edition\images"
+        xcopy /e /i "apps\Skyrim Special Edition\images" "dist\apps\Skyrim Special Edition\images"
+        rmdir /s /q "dist\Bethini\apps\Skyrim Special Edition\images\src"
+        mkdir "dist\apps\Starfield"
+        copy "apps\Starfield\Bethini.json" "dist\apps\Starfield\Bethini.json"
+        copy "apps\Starfield\settings.json" "dist\apps\Starfield\settings.json"
+        mkdir "dist\apps\Starfield\images"
+        xcopy /e /i "apps\Starfield\images" "dist\apps\Starfield\images"
+        rmdir /s /q "dist\Bethini\apps\Starfield\images\src"
     
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.6.1
