@@ -2,9 +2,13 @@ import sys
 import logging
 import ttkbootstrap as ttk
 import shutil
+import os
+
+from pathlib import Path
+from stat import S_IWRITE, S_IREAD
 from ttkbootstrap.constants import *
 from ttkbootstrap.dialogs import Messagebox
-from pathlib import Path
+from lib.simple_dialog_windows import AskQuestionWindow
 
 if __name__ == "__main__":
     sys.exit(1)
@@ -20,6 +24,7 @@ class RestoreBackupWindow(ttk.Toplevel):
     def __init__(self, master, **kwargs):
         super().__init__(master, **kwargs)
         self.title("Restore Backup")
+        self.master = master
         set_titlebar_style(self)
         self.grab_set()
         self.focus_set()
@@ -153,3 +158,30 @@ class RestoreBackupWindow(ttk.Toplevel):
             logger.exception(msg)
             Messagebox.show_error(
                 parent=self, title="Error restoring backup", message=msg)
+        except PermissionError:
+            msg = f"Restoring {backup_file} to {original_file} failed due to a permission error."
+            logger.exception(msg)
+            if not os.access(original_file, os.W_OK):
+                logger.warning(f"{original_file} is read only.")
+                change_read_only = AskQuestionWindow(
+                    self.master, title="Remove read-only flag?",
+                    question=f"{original_file} is set to read-only, so it cannot be overwritten. Would you like to temporarily clear the read-only flag to allow it to be saved?")
+                self.master.wait_window(change_read_only)
+                if change_read_only.result:
+                    try:
+                        os.chmod(original_file, S_IWRITE)
+                        shutil.copyfile(backup_file, original_file)
+                        msg = f"Restoring backup {backup_file} to {original_file} was successful."
+                        Messagebox.show_info(parent=self, title="Successfully restored backup",
+                                             message=f"Restoring backup {backup_file} to {original_file} was successful.")
+                        logger.info(msg)
+                        self.result = True
+                        os.chmod(original_file, S_IREAD)
+                    except PermissionError as e:
+                        logger.exception(
+                            f"{original_file} was still not able to be modified after clearing the read-only flag.")
+                else:
+                    logger.debug(f"User decided not to clear the read-only flag on {original_file}")
+            else:
+                logger.info(f"{original_file} is not read only.")
+            

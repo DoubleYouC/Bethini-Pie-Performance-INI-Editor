@@ -399,23 +399,25 @@ class bethini_app(ttk.Window):
                 settings_location_dict[target_ini_files[n]][target_sections[n]].append(target_settings[n])
 
             # Iterates through the dictionary and makes a formatted string to append to the bottom of the tooltip description.
-            tooltip_INI_targets = ""
+            tooltip_INI_targets: list[str] = []
             for iterator, target_ini in enumerate(settings_location_dict, start=1):
-                if iterator > 1:
-                    tooltip_INI_targets += "\n"
-                tooltip_INI_targets += target_ini
+                
+                tooltip_INI_targets.append(target_ini)
 
                 for target_section in settings_location_dict[target_ini]:
-                    tooltip_INI_targets += f"\n[{target_section}]"
+                    tooltip_INI_targets.append(f"[{target_section}]")
                     for target_setting in settings_location_dict[target_ini][target_section]:
-                        tooltip_INI_targets += f"\n{target_setting}"
+                        tooltip_INI_targets.append(target_setting)
                 if iterator != len(settings_location_dict):
-                    tooltip_INI_targets += "\n"
-
+                    tooltip_INI_targets.append("")
             # Appends our formatted string of INI settings to the bottom of the tooltip description.
-            tooltip_text = f"{tooltip_description}\n\n{tooltip_INI_targets}"
+            tooltip_text = f"{tooltip_description}\n"
+            for line in tooltip_INI_targets:
+                tooltip_text += f"\n{line}"
+
         else:  # If there are no INI settings specified, only the tooltip description will be used.
             tooltip_text = tooltip_description
+            tooltip_INI_targets = None
 
         setting_name = setting.get("Name")
         photo_for_setting: Path | None = exedir / "apps" / GAME_NAME / "images" / f"{setting_name}.jpg"
@@ -424,7 +426,7 @@ class bethini_app(ttk.Window):
 
         anchor_widget = setting[widget_id]
         if anchor_widget is not None:
-            Hovertip(widget=anchor_widget, text=tooltip_text, preview_window=PREVIEW_WINDOW,
+            Hovertip(widget=anchor_widget, text=tooltip_text, description=tooltip_description, code=tooltip_INI_targets, preview_window=PREVIEW_WINDOW,
                      preview_frame=PREVIEW_FRAME, photo_for_setting=photo_for_setting, wraplength=tooltip_wrap_length, bootstyle=INVERSE)
 
     def choose_game(self, *, forced: bool = False) -> None:
@@ -706,6 +708,9 @@ class bethini_app(ttk.Window):
         self.sme(f"Preset {preset_var} {preset_id} applied.")
 
     def remove_invalid_settings(self) -> None:
+        remove_unknown_settings: str = ModifyINI.app_config().get_value("RemoveUnknown",
+                                                                        f"b{GAME_NAME}RemoveUnknownSettings",
+                                                                        self.app.bethini.get("Remove Unknown Settings Default"))
         for each_ini in ModifyINI.open_inis:
             if each_ini == ModifyINI.app_config_name or not self.app.get_ini_setting_name(each_ini):
                 continue
@@ -725,8 +730,8 @@ class bethini_app(ttk.Window):
                             logger.debug(f"{setting_name}:{section} will be preserved, as it is a comment.")
 
                         elif not self.app.does_setting_exist(each_ini, section, setting_name):
-                            # Removal of unknown settings (disabled)
-                            # ini_object.remove_setting(section, setting_name)
+                            if remove_unknown_settings == "1":
+                                ini_object.remove_setting(section, setting_name)
 
                             logger.debug(f"{setting_name}:{section} {each_ini} appears to be invalid.")
                             if not ini_object.get_settings(section):
@@ -817,7 +822,7 @@ class bethini_app(ttk.Window):
         for label_frame_number, frame_name in enumerate(self.app.bethini["displayTabs"][the_dict["Name"]], start=1):
             label_frame_id = f"LabelFrame{label_frame_number}"
             the_dict["LabelFrames"][label_frame_id] = {"Name": frame_name}
-            if frame_name != "NoLabelFrame":
+            if "NoLabelFrame" not in frame_name:
                 the_dict["LabelFrames"][label_frame_id]["TkLabelFrame"] = ttk.Labelframe(
                     the_dict["TkFrameForTab"],
                     text=frame_name,
@@ -1011,7 +1016,7 @@ class bethini_app(ttk.Window):
         widget_id = "TkPresetButton"
         setting: BethiniSetting = self.tab_dictionary[tab_id]["LabelFrames"][label_frame_id]["SettingFrames"][setting_frame_id][setting_id]
         preset_id = setting["preset id"]
-        setting[widget_id] = ttk.Button(setting["TkFinalSettingFrame"], text=setting_name, command=lambda: self.set_preset(preset_id))
+        setting[widget_id] = ttk.Button(setting["TkFinalSettingFrame"], text=setting_name, width=setting.get("width", ""), bootstyle="info-outline", command=lambda: self.set_preset(preset_id))
         setting[widget_id].pack(anchor=tk.CENTER, padx=5, pady=0)
         self.tooltip(tab_id, label_frame_id, setting_frame_id, setting_id, widget_id)
         self.add_to_setting_dictionary(tab_id, label_frame_name, label_frame_id, setting_frame_id, setting_name, setting_id, widget_id)
@@ -1288,7 +1293,7 @@ class bethini_app(ttk.Window):
 
         from_value = float(setting["from"])
         to_value = float(setting["to"])
-        increment = float(setting.get("increment", 0))
+        increment = float(setting.get("increment", 1))
         width = int(setting["width"])
         validate = setting.get("validate")
 
@@ -1599,7 +1604,9 @@ class bethini_app(ttk.Window):
             elif color_value_type == "rgba decimal":
                 this_value = setting_value[0]
                 new_color_rgba = decimal_to_rgba(this_value)
-                new_color_rgb = (new_color_rgba[0:2])
+                logger.debug("Color rgba: " + str(new_color_rgba))
+                new_color_rgb = (new_color_rgba[0:3])
+                logger.debug("Color rgb: " + str(new_color_rgb))
                 new_color = rgb_to_hex(new_color_rgb)
             elif color_value_type == "abgr decimal":
                 this_value = setting_value[0]
@@ -1990,6 +1997,10 @@ class bethini_app(ttk.Window):
                 )
 
             self.label_frames_for_tab(tab_id)
+            if self.tab_dictionary[tab_id]["Name"] == "Setup":
+                for setting_name in self.setting_dictionary:
+                    if setting_name == "Remove Unknown Settings":
+                        self.widget_type_switcher(setting_name)
 
         self.advanced_tab = ttk.Frame(self.sub_container)
         icon_path = exedir / "icons" / "Advanced.png"

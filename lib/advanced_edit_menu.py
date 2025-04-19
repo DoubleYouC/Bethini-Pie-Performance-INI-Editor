@@ -24,17 +24,19 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
         # Set a minimum window size (width=500, height=300)
         self.minsize(500, 300)
 
-        # Get the cursor position
-        cursor_x = master.winfo_pointerx()
-        cursor_y = master.winfo_pointery()
+        # Position the Toplevel window near the master window
+        x = master.winfo_x()
+        y = master.winfo_y()
+        self.geometry(f"+{x + 100}+{y + 100}")
 
-        # Set the position of the Toplevel window near the cursor
-        self.geometry(f"+{cursor_x}+{cursor_y}")
+        main_frame = ttk.Frame(self)
+        main_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
 
-        self.info_frame = ttk.Frame(self)
-        self.info_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
+        info_frame = ttk.Frame(main_frame)
+        info_frame.pack(side=LEFT, fill=BOTH, expand=YES, padx=5, pady=5)
 
-        ini_file_frame = ttk.Frame(self.info_frame)
+
+        ini_file_frame = ttk.Frame(info_frame)
         ini_file_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
         ini_file_label = ttk.Label(ini_file_frame, text="INI File:")
         ini_file_label.pack(fill=tk.X, expand=NO, anchor=W, pady=3)
@@ -45,7 +47,7 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
             "<FocusOut>", lambda e: self.on_focus_out(e, row_data[0]))
         ini_file_entry.configure(style="secondary.TEntry")
 
-        section_frame = ttk.Frame(self.info_frame)
+        section_frame = ttk.Frame(info_frame)
         section_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
         section_label = ttk.Label(section_frame, text="Section:")
         section_label.pack(fill=tk.X, expand=NO, anchor=W, pady=3)
@@ -56,7 +58,7 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
             "<FocusOut>", lambda e: self.on_focus_out(e, row_data[1]))
         section_entry.configure(style="secondary.TEntry")
 
-        setting_frame = ttk.Frame(self.info_frame)
+        setting_frame = ttk.Frame(info_frame)
         setting_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
         setting_label = ttk.Label(setting_frame, text="Setting:")
         setting_label.pack(fill=tk.X, expand=NO, anchor=W, pady=3)
@@ -67,7 +69,7 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
             "<FocusOut>", lambda e: self.on_focus_out(e, row_data[2]))
         setting_entry.configure(style="secondary.TEntry")
 
-        default_value_frame = ttk.Frame(self.info_frame)
+        default_value_frame = ttk.Frame(info_frame)
         default_value_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
         default_value_label = ttk.Label(
             default_value_frame, text="Default Value:")
@@ -79,9 +81,21 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
             "<FocusOut>", lambda e: self.on_focus_out(e, row_data[3]))
         default_value_entry.configure(style="secondary.TEntry")
 
-        ttk.Separator(self.info_frame).pack(fill=tk.X, expand=YES, pady=5)
+        notes_frame = ttk.Frame(main_frame)
+        notes_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
+        notes_label = ttk.Label(notes_frame, text="Notes:")
+        notes_label.pack(fill=tk.X, expand=NO, anchor=W, pady=3)
+        self.notes_text = ttk.Text(notes_frame, height=14, wrap=WORD)
+        self.notes_data = ""
+        self.main_ini = master.app.get_main_ini_from_pecking_order(row_data[0])
+        if master.app.does_setting_exist(ini=self.main_ini, section=row_data[1], setting=row_data[2]):
+            self.notes_data = master.app.get_setting_notes(setting=row_data[2], section=row_data[1])
+        self.notes_text.insert("1.0", self.notes_data)
+        self.notes_text.pack(fill=tk.X, expand=YES, anchor=W)
 
-        current_value_frame = ttk.Frame(self.info_frame)
+        ttk.Separator(self).pack(fill=tk.X, expand=YES, pady=5)
+
+        current_value_frame = ttk.Frame(self)
         current_value_frame.pack(fill=BOTH, expand=YES, padx=5, pady=5)
         current_value_label = ttk.Label(
             current_value_frame, text="Current Value:")
@@ -92,10 +106,10 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
         self.current_value_entry.configure(style="primary.TEntry")
 
         self.save_button = ttk.Button(
-            self.info_frame, text="Save", style="success.TButton")
+            self, text="Save", style="success.TButton")
         self.save_button.pack(side=RIGHT, padx=5, pady=5)
         self.cancel_button = ttk.Button(
-            self.info_frame, text="Cancel", style="danger.TButton")
+            self, text="Cancel", style="danger.TButton")
         self.cancel_button.pack(side=RIGHT, padx=5, pady=5)
 
         self.save_button.bind(
@@ -110,6 +124,20 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
             logger.debug("Saved new value: " + str(self.row_data[0:3]) + " " + str(current_val))
             # Store the result so parent code can access it after wait_window
             self.result = current_val
+
+        # Retrieve notes text
+        notes = self.notes_text.get("1.0", tk.END).strip()
+        if notes != self.notes_data:
+            logger.info(f"New notes for {self.row_data[2]}:{self.row_data[1]}: {notes}")
+            # Save the notes to the setting
+            if self.master.app.update_setting_notes(
+                    setting=self.row_data[2],
+                    section=self.row_data[1],
+                    notes=notes
+            ):
+                self.master.app.save_data()
+                logger.info("Notes saved successfully.")
+
         self.destroy()
 
     def on_cancel(self, event):

@@ -1,13 +1,17 @@
 import sys
 import ttkbootstrap as ttk
+import logging
 from pathlib import Path
 from ttkbootstrap.constants import *
 from webbrowser import open_new_tab
+from ttkbootstrap.themes.standard import STANDARD_THEMES
 
 if __name__ == "__main__":
     sys.exit(1)
 
 from lib.customFunctions import set_titlebar_style, set_theme
+
+logger = logging.getLogger(__name__)
 
 
 class ChooseGameWindow(ttk.Toplevel):
@@ -17,10 +21,15 @@ class ChooseGameWindow(ttk.Toplevel):
         set_titlebar_style(self)
         self.grab_set()
         self.focus_set()
+        self.lift()
         self.protocol("WM_DELETE_WINDOW", self.destroy)
         self.minsize(300, 35)
         self.master = master
         self.result = None
+        x = master.winfo_x()
+        y = master.winfo_y()
+        self.geometry(f"+{x + 50}+{y + 50}")
+
 
         choose_game_frame = ttk.Frame(self)
 
@@ -51,9 +60,10 @@ class ChooseGameWindow(ttk.Toplevel):
         self.choose_game_tree.column("#0", width=0, stretch=NO)
         self.choose_game_tree.column("Name", anchor=W, width=300)
 
-        style_override = ttk.Style()
-        style_override.configure(
-            "choose_game_button.TButton", font=("Segoe UI", 14))
+        self.master.style_override.configure(
+            "choose_game_button.TButton", font=("Segoe UI", 14),
+            background=STANDARD_THEMES[master.theme_name.get()]["colors"].get("inputbg"),
+            foreground=STANDARD_THEMES[master.theme_name.get()]["colors"].get("inputfg"))
         choose_game_button = ttk.Button(
             choose_game_frame_2,
             text="Select Game",
@@ -105,7 +115,12 @@ class ChooseGameWindow(ttk.Toplevel):
 
     def on_choose_game(self, _event) -> None:
         self.result = self.choose_game_tree.focus()
+        logger.debug(f"User selected: {self.result}")
         self.destroy()
 
     def set_theme(self) -> None:
         set_theme(self.master.style_override, self.master.theme_name.get())
+        self.master.style_override.configure(
+            "choose_game_button.TButton", font=("Segoe UI", 14),
+            background=STANDARD_THEMES[self.master.theme_name.get()]["colors"].get("inputbg"),
+            foreground=STANDARD_THEMES[self.master.theme_name.get()]["colors"].get("inputfg"))

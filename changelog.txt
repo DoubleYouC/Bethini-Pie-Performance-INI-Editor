@@ -1,3 +1,31 @@
+v4.15
+Added Fallout New Vegas plugin.
+
+Bethini Pie update notes:
+-Changed Preset button appearance.
+-Changed how the Preview window displays ini settings.
+-Added Notes to Advanced edit menu popups.
+-Added option to remove unknown settings.
+-Bugfix: The exit menu prompt could sometimes hang.
+-Bugfix: Saving ini files could fail if an ini file was read-only. Now it prompts the user if they want to override the read-only flag.
+-Bugfix: Restore Backup could fail if the file was read-only. Now it prompts the user if they want to override the read-only flag.
+-Bugfix: Unhandled exception when starting directory was not the application directory.
+-Bugfix: Unhandled exception when logging changes made when a section was removed.
+
+Skyrim Special Edition plugin update notes:
+-Setup tab notes added.
+-Broke up the Disable Grass toggle into its individual ini settings (Draw Grass, Create Grass, and Load Grass GID).
+-Bugfix: Display Mode sometimes saying Custom instead of Fullscreen.
+-Bugfix: Disable Kill Cam was pointing to the wrong section.
+
+Fallout 4 plugin update notes:
+-Setup tab notes added.
+-Bugfix: Display Mode sometimes saying Custom instead of Fullscreen.
+
+Starfield plugin update notes:
+-Setup tab notes updated.
+-Directional Shadow LOD now saves to the Ultra.ini.
+
 v4.14
 Bethini Pie update notes:
 -Bugfix: The program could hang while attempting to autodetect paths.

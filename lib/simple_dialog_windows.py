@@ -23,6 +23,9 @@ class AskQuestionWindow(ttk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.destroy)
         self.minsize(200, 35)
         self.result = None
+        x = master.winfo_x()
+        y = master.winfo_y()
+        self.geometry(f"+{x + 50}+{y + 50}")
 
         # Create the main frame for the dialog
         ask_question_frame = ttk.Frame(self)
