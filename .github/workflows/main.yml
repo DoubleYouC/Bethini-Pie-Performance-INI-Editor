@@ -76,19 +76,19 @@ jobs:
         xcopy /y "apps\Fallout New Vegas\settings.json" "dist\apps\Fallout New Vegas\"
         mkdir "dist\apps\Fallout New Vegas\images"
         xcopy /e /i "apps\Fallout New Vegas\images" "dist\apps\Fallout New Vegas\images"
-        rmdir /s /q "dist\Bethini\apps\Fallout New Vegas\images\src"
+        Remove-Item -Recurse -Force "dist\apps\Fallout New Vegas\images\src"
         mkdir "dist\apps\Skyrim Special Edition"
         xcopy /y "apps\Skyrim Special Edition\Bethini.json" "dist\apps\Skyrim Special Edition\"
         xcopy /y "apps\Skyrim Special Edition\settings.json" "dist\apps\Skyrim Special Edition\"
         mkdir "dist\apps\Skyrim Special Edition\images"
         xcopy /e /i "apps\Skyrim Special Edition\images" "dist\apps\Skyrim Special Edition\images"
-        rmdir /s /q "dist\Bethini\apps\Skyrim Special Edition\images\src"
+        Remove-Item -Recurse -Force "dist\Bethini\apps\Skyrim Special Edition\images\src"
         mkdir "dist\apps\Starfield"
         xcopy /y "apps\Starfield\Bethini.json" "dist\apps\Starfield\"
         xcopy /y "apps\Starfield\settings.json" "dist\apps\Starfield\"
         mkdir "dist\apps\Starfield\images"
         xcopy /e /i "apps\Starfield\images" "dist\apps\Starfield\images"
-        rmdir /s /q "dist\Bethini\apps\Starfield\images\src"
+        Remove-Item -Recurse -Force "dist\Bethini\apps\Starfield\images\src"
     
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.6.1
