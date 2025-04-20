@@ -106,18 +106,13 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
         self.current_value_entry.configure(style="primary.TEntry")
 
         self.save_button = ttk.Button(
-            self, text="Save", style="success.TButton")
+            self, text="Save", style="success.TButton", command=self.on_save)
         self.save_button.pack(side=RIGHT, padx=5, pady=5)
         self.cancel_button = ttk.Button(
-            self, text="Cancel", style="danger.TButton")
+            self, text="Cancel", style="danger.TButton", command=self.on_cancel)
         self.cancel_button.pack(side=RIGHT, padx=5, pady=5)
 
-        self.save_button.bind(
-            "<Button-1>", lambda e: self.on_save(e))
-        self.cancel_button.bind(
-            "<Button-1>", lambda e: self.on_cancel(e))
-
-    def on_save(self, event):
+    def on_save(self):
         # Retrieve the current value from the entry widget
         current_val = self.current_value_entry.get()
         if current_val != self.row_data[4]:
@@ -140,7 +135,7 @@ class AdvancedEditMenuPopup(ttk.Toplevel):
 
         self.destroy()
 
-    def on_cancel(self, event):
+    def on_cancel(self):
         logger.debug("Cancel")
         self.destroy()
 

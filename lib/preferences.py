@@ -97,18 +97,13 @@ class preferences(ttk.Toplevel):
         always_select_game_cb.pack(side=LEFT, padx=10)
 
         self.save_button = ttk.Button(
-            preferences_frame, text="Save", style="success.TButton")
+            preferences_frame, text="Save", style="success.TButton", command=self.on_save)
         self.save_button.pack(side=RIGHT, padx=5, pady=5)
         self.cancel_button = ttk.Button(
-            preferences_frame, text="Cancel", style="danger.TButton")
+            preferences_frame, text="Cancel", style="danger.TButton", command=self.on_cancel)
         self.cancel_button.pack(side=RIGHT, padx=5, pady=5)
 
-        self.save_button.bind(
-            "<Button-1>", lambda e: self.on_save(e))
-        self.cancel_button.bind(
-            "<Button-1>", lambda e: self.on_cancel(e))
-
-    def on_save(self, event):
+    def on_save(self):
         logger.debug("Save")
         ModifyINI.app_config().assign_setting_value(
             "General", "sLogLevel", self.log_level_var.get())
@@ -121,6 +116,6 @@ class preferences(ttk.Toplevel):
 
         self.destroy()
 
-    def on_cancel(self, event):
+    def on_cancel(self):
         logger.debug("Cancel")
         self.destroy()

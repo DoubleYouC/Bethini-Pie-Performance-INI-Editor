@@ -57,25 +57,21 @@ class AskQuestionWindow(ttk.Toplevel):
 
         # Create and pack the "Yes" button
         yes_button = ttk.Button(
-            ask_question_frame, text="Yes", style="success.TButton")
+            ask_question_frame, text="Yes", command=self.on_yes, style="success.TButton")
         yes_button.pack(side=RIGHT, padx=8, pady=8)
-        yes_button.bind(
-            "<Button-1>", lambda e: self.on_yes(e))
 
         # Create and pack the "No" button
         no_button = ttk.Button(
-            ask_question_frame, text="No", style="danger.TButton")
+            ask_question_frame, text="No", command=self.on_no, style="danger.TButton")
         no_button.pack(side=RIGHT, pady=8)
-        no_button.bind(
-            "<Button-1>", lambda e: self.on_no(e))
 
-    def on_no(self, event):
+    def on_no(self):
         """Handle the "No" button click event."""
         logger.debug("User clicked no.")
         self.result = False
         self.destroy()
 
-    def on_yes(self, event):
+    def on_yes(self):
         """Handle the "Yes" button click event."""
         logger.debug("User clicked yes.")
         self.result = True
@@ -118,12 +114,10 @@ class ManualEntryWindow(ttk.Toplevel):
 
         # Create and pack the "Yes" button
         ok_button = ttk.Button(
-            manual_entry_frame, text="OK")
+            manual_entry_frame, command=self.on_ok, text="OK")
         ok_button.pack(side=RIGHT, padx=8, pady=8)
-        ok_button.bind(
-            "<Button-1>", lambda e: self.on_ok(e))
 
-    def on_ok(self, event):
+    def on_ok(self):
         """Handle the "OK" button click event."""
         logger.debug("User clicked OK.")
         self.destroy()

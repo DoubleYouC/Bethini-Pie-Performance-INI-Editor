@@ -68,10 +68,8 @@ class ChooseGameWindow(ttk.Toplevel):
             choose_game_frame_2,
             text="Select Game",
             style="choose_game_button.TButton",
+            command=self.on_choose_game,
         )
-
-        choose_game_button.bind(
-            "<Button-1>", lambda e: self.on_choose_game(e))
 
         choose_game_tip = ttk.Label(
             choose_game_frame_2,
@@ -81,8 +79,9 @@ class ChooseGameWindow(ttk.Toplevel):
             style="success",
         )
         for option in Path(exedir / "apps").iterdir():
-            self.choose_game_tree.insert(
-                "", index=END, id=option.name, text=option.name, values=[option.name])
+            if Path(exedir / "apps" / option.name / "settings.json").exists():
+                self.choose_game_tree.insert(
+                    "", index=END, id=option.name, text=option.name, values=[option.name])
 
         preferences_frame = ttk.Frame(choose_game_frame_2)
 
@@ -113,7 +112,7 @@ class ChooseGameWindow(ttk.Toplevel):
         choose_game_button.pack(pady=15)
         choose_game_tip.pack(pady=10)
 
-    def on_choose_game(self, _event) -> None:
+    def on_choose_game(self) -> None:
         self.result = self.choose_game_tree.focus()
         logger.debug(f"User selected: {self.result}")
         self.destroy()

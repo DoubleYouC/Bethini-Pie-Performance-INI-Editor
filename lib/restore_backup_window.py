@@ -95,16 +95,13 @@ class RestoreBackupWindow(ttk.Toplevel):
                 "<ButtonRelease-1>", lambda e, i=i: self.on_treeview_click(e, i))
 
         self.close_button = ttk.Button(
-            restore_frame, text="Close")
+            restore_frame, text="Close", command=self.on_close)
         self.close_button.pack(side=RIGHT, padx=10, pady=5)
-
-        self.close_button.bind(
-            "<Button-1>", lambda e: self.on_close(e))
 
         # Bind the window close event to the on_close method
         self.protocol("WM_DELETE_WINDOW", lambda: self.on_close(None))
 
-    def on_close(self, event):
+    def on_close(self):
         """Handle the window close event."""
         logger.debug("Closed restore backup window")
         if self.result:
@@ -119,7 +116,7 @@ class RestoreBackupWindow(ttk.Toplevel):
         if item:
             self.tk_dict[f"Frame_{i}"][f"restore_button_{i}"].pack()
             self.tk_dict[f"Frame_{i}"][f"restore_button_{i}"].bind(
-                "<Button-1>", lambda e, i=i, item=item: self.on_restore_button_click(e, i, item))
+                "<ButtonRelease-1>", lambda e, i=i, item=item: self.on_restore_button_click(e, i, item))
         else:
             self.tk_dict[f"Frame_{i}"][f"restore_button_{i}"].pack_forget()
 
