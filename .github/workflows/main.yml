@@ -58,6 +58,11 @@ jobs:
     - name: Build with PyInstaller
       run: pyinstaller bethini_onefile.spec
 
+    - name: List files in dist
+      run: |
+        echo "Listing files in apps directory:"
+        dir apps
+
     - name: Copy additional files
       run: |
         copy LICENSE.txt dist\LICENSE.txt
@@ -68,27 +73,23 @@ jobs:
         mkdir dist\fonts\Comfortaa
         xcopy /e /i fonts\Comfortaa dist\fonts\Comfortaa
         mkdir dist\apps
-        mkdir "dist\apps\Fallout 4"
-        Copy-Item "apps\Fallout 4\Bethini.json" "dist\apps\Fallout 4\Bethini.json" -Force
-        Copy-Item "apps\Fallout 4\settings.json" "dist\apps\Fallout 4\settings.json" -Force
-        mkdir "dist\apps\Fallout New Vegas"
-        Copy-Item "apps\Fallout New Vegas\Bethini.json" "dist\apps\Fallout New Vegas\" -Force
-        Copy-Item "apps\Fallout New Vegas\settings.json" "dist\apps\Fallout New Vegas\" -Force
-        mkdir "dist\apps\Fallout New Vegas\images"
-        Copy-Item "apps\Fallout New Vegas\images" "dist\apps\Fallout New Vegas\images" -recurse -Force
-        Remove-Item -Recurse -Force "dist\apps\Fallout New Vegas\images\src"
-        mkdir "dist\apps\Skyrim Special Edition"
-        Copy-Item "apps\Skyrim Special Edition\Bethini.json" "dist\apps\Skyrim Special Edition\" -Force
-        Copy-Item "apps\Skyrim Special Edition\settings.json" "dist\apps\Skyrim Special Edition\" -Force
-        mkdir "dist\apps\Skyrim Special Edition\images"
-        Copy-Item "apps\Skyrim Special Edition\images" "dist\apps\Skyrim Special Edition\images" -recurse -Force
-        Remove-Item -Recurse -Force "dist\apps\Skyrim Special Edition\images\src"
-        mkdir "dist\apps\Starfield"
-        Copy-Item "apps\Starfield\Bethini.json" "dist\apps\Starfield\Bethini.json" -Force
-        Copy-Item "apps\Starfield\settings.json" "dist\apps\Starfield\settings.json" -Force
-        mkdir "dist\apps\Starfield\images"
-        Copy-Item "apps\Starfield\images" "dist\apps\Starfield\images" -recurse -Force
-        Remove-Item -Recurse -Force "dist\apps\Starfield\images\src"
+        #This had better work...
+        $workspace = $Env:GITHUB_WORKSPACE
+        Copy-Item "$workspace\apps\Starfield\Bethini.json" "$workspace\dist\apps\Starfield\Bethini.json" -Force -ErrorAction SilentlyContinue
+        Copy-Item "$workspace\apps\Starfield\settings.json" "$workspace\dist\apps\Starfield\settings.json" -Force -ErrorAction SilentlyContinue
+        Copy-Item "$workspace\apps\Starfield\images" "$workspace\dist\apps\Starfield\images" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force "$workspace\dist\apps\Starfield\images\src" -ErrorAction SilentlyContinue
+        Copy-Item "$workspace\apps\Fallout 4\Bethini.json" "$workspace\dist\apps\Fallout 4\Bethini.json" -Force -ErrorAction SilentlyContinue
+        Copy-Item "$workspace\apps\Fallout 4\settings.json" "$workspace\dist\apps\Fallout 4\settings.json" -Force -ErrorAction SilentlyContinue
+        Copy-Item "$workspace\apps\Fallout New Vegas\Bethini.json" "$workspace\dist\apps\Fallout New Vegas\Bethini.json" -Force -ErrorAction SilentlyContinue
+        Copy-Item "$workspace\apps\Fallout New Vegas\settings.json" "$workspace\dist\apps\Fallout New Vegas\settings.json" -Force -ErrorAction SilentlyContinue
+        Copy-Item "$workspace\apps\Fallout New Vegas\images" "$workspace\dist\apps\Fallout New Vegas\images" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force "$workspace\dist\apps\Fallout New Vegas\images\src" -ErrorAction SilentlyContinue
+        Copy-Item "$workspace\apps\Skyrim Special Edition\Bethini.json" "$workspace\dist\apps\Skyrim Special Edition\Bethini.json" -Force -ErrorAction SilentlyContinue
+        Copy-Item "$workspace\apps\Skyrim Special Edition\settings.json" "$workspace\dist\apps\Skyrim Special Edition\settings.json" -Force -ErrorAction SilentlyContinue
+        Copy-Item "$workspace\apps\Skyrim Special Edition\images" "$workspace\dist\apps\Skyrim Special Edition\images" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force "$workspace\dist\apps\Skyrim Special Edition\images\src" -ErrorAction SilentlyContinue
+        
     
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.6.1
