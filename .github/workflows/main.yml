@@ -64,33 +64,54 @@ jobs:
         dir apps
 
     - name: Copy additional files
+      shell: powershell
       run: |
-        copy LICENSE.txt dist\LICENSE.txt
-        copy README.md dist\README.md
-        copy changelog.txt dist\changelog.txt
-        mkdir dist\icons
-        xcopy /e /i icons dist\icons
-        mkdir dist\fonts\Comfortaa
-        xcopy /e /i fonts\Comfortaa dist\fonts\Comfortaa
-        mkdir dist\apps
-        #This had better work...
-        $workspace = $Env:GITHUB_WORKSPACE
-        Copy-Item "$workspace\apps\Starfield\Bethini.json" "$workspace\dist\apps\Starfield\Bethini.json" -Force -ErrorAction SilentlyContinue
-        Copy-Item "$workspace\apps\Starfield\settings.json" "$workspace\dist\apps\Starfield\settings.json" -Force -ErrorAction SilentlyContinue
-        Copy-Item "$workspace\apps\Starfield\images" "$workspace\dist\apps\Starfield\images" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Recurse -Force "$workspace\dist\apps\Starfield\images\src" -ErrorAction SilentlyContinue
+        $workspace = $env:GITHUB_WORKSPACE
+
+        # Copy top level files
+        Copy-Item "$workspace\LICENSE.txt" "$workspace\dist\LICENSE.txt" -Force
+        Copy-Item "$workspace\README.md" "$workspace\dist\README.md" -Force
+        Copy-Item "$workspace\changelog.txt" "$workspace\dist\changelog.txt" -Force
+
+        # Icons and fonts
+        New-Item -ItemType Directory -Path "$workspace\dist\icons" -Force | Out-Null
+        xcopy /e /i "$workspace\icons" "$workspace\dist\icons" | Out-Null
+
+        New-Item -ItemType Directory -Path "$workspace\dist\fonts\Comfortaa" -Force | Out-Null
+        xcopy /e /i "$workspace\fonts\Comfortaa" "$workspace\dist\fonts\Comfortaa" | Out-Null
+
+        # Apps directory
+        New-Item -ItemType Directory -Path "$workspace\dist\apps" -Force | Out-Null
+
+        # Fallout 4 files
+        New-Item -ItemType Directory -Path "$workspace\dist\apps\Fallout 4" -Force | Out-Null
         Copy-Item "$workspace\apps\Fallout 4\Bethini.json" "$workspace\dist\apps\Fallout 4\Bethini.json" -Force -ErrorAction SilentlyContinue
         Copy-Item "$workspace\apps\Fallout 4\settings.json" "$workspace\dist\apps\Fallout 4\settings.json" -Force -ErrorAction SilentlyContinue
+
+        # Fallout New Vegas files
+        New-Item -ItemType Directory -Path "$workspace\dist\apps\Fallout New Vegas" -Force | Out-Null
         Copy-Item "$workspace\apps\Fallout New Vegas\Bethini.json" "$workspace\dist\apps\Fallout New Vegas\Bethini.json" -Force -ErrorAction SilentlyContinue
         Copy-Item "$workspace\apps\Fallout New Vegas\settings.json" "$workspace\dist\apps\Fallout New Vegas\settings.json" -Force -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path "$workspace\dist\apps\Fallout New Vegas\images" -Force | Out-Null
         Copy-Item "$workspace\apps\Fallout New Vegas\images" "$workspace\dist\apps\Fallout New Vegas\images" -Recurse -Force -ErrorAction SilentlyContinue
         Remove-Item -Recurse -Force "$workspace\dist\apps\Fallout New Vegas\images\src" -ErrorAction SilentlyContinue
+
+        # Skyrim Special Edition files
+        New-Item -ItemType Directory -Path "$workspace\dist\apps\Skyrim Special Edition" -Force | Out-Null
         Copy-Item "$workspace\apps\Skyrim Special Edition\Bethini.json" "$workspace\dist\apps\Skyrim Special Edition\Bethini.json" -Force -ErrorAction SilentlyContinue
         Copy-Item "$workspace\apps\Skyrim Special Edition\settings.json" "$workspace\dist\apps\Skyrim Special Edition\settings.json" -Force -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path "$workspace\dist\apps\Skyrim Special Edition\images" -Force | Out-Null
         Copy-Item "$workspace\apps\Skyrim Special Edition\images" "$workspace\dist\apps\Skyrim Special Edition\images" -Recurse -Force -ErrorAction SilentlyContinue
         Remove-Item -Recurse -Force "$workspace\dist\apps\Skyrim Special Edition\images\src" -ErrorAction SilentlyContinue
-        
-    
+
+        # Starfield files
+        New-Item -ItemType Directory -Path "$workspace\dist\apps\Starfield" -Force | Out-Null
+        Copy-Item "$workspace\apps\Starfield\Bethini.json" "$workspace\dist\apps\Starfield\Bethini.json" -Force -ErrorAction SilentlyContinue
+        Copy-Item "$workspace\apps\Starfield\settings.json" "$workspace\dist\apps\Starfield\settings.json" -Force -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path "$workspace\dist\apps\Starfield\images" -Force | Out-Null
+        Copy-Item "$workspace\apps\Starfield\images" "$workspace\dist\apps\Starfield\images" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force "$workspace\dist\apps\Starfield\images\src" -ErrorAction SilentlyContinue
+
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.6.1
       with:
