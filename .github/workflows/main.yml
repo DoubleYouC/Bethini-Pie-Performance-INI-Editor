@@ -58,59 +58,92 @@ jobs:
     - name: Build with PyInstaller
       run: pyinstaller bethini_onefile.spec
 
-    - name: List files in dist
-      run: |
-        echo "Listing files in apps directory:"
-        dir apps
-
     - name: Copy additional files
       shell: powershell
       run: |
         $workspace = $env:GITHUB_WORKSPACE
 
         # Copy top level files
-        Copy-Item "$workspace\LICENSE.txt" "$workspace\dist\LICENSE.txt" -Force
-        Copy-Item "$workspace\README.md" "$workspace\dist\README.md" -Force
-        Copy-Item "$workspace\changelog.txt" "$workspace\dist\changelog.txt" -Force
+        $src = Join-Path $workspace 'LICENSE.txt'
+        $dst = Join-Path $workspace 'dist\LICENSE.txt'
+        Copy-Item -LiteralPath $src -Destination $dst -Force
+
+        $src = Join-Path $workspace 'README.md'
+        $dst = Join-Path $workspace 'dist\README.md'
+        Copy-Item -LiteralPath $src -Destination $dst -Force
+
+        $src = Join-Path $workspace 'changelog.txt'
+        $dst = Join-Path $workspace 'dist\changelog.txt'
+        Copy-Item -LiteralPath $src -Destination $dst -Force
 
         # Icons and fonts
-        New-Item -ItemType Directory -Path "$workspace\dist\icons" -Force | Out-Null
-        xcopy /e /i "$workspace\icons" "$workspace\dist\icons" | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $workspace 'dist\icons') -Force | Out-Null
+        xcopy /e /i (Join-Path $workspace 'icons') (Join-Path $workspace 'dist\icons') | Out-Null
 
-        New-Item -ItemType Directory -Path "$workspace\dist\fonts\Comfortaa" -Force | Out-Null
-        xcopy /e /i "$workspace\fonts\Comfortaa" "$workspace\dist\fonts\Comfortaa" | Out-Null
+        New-Item -ItemType Directory -Path (Join-Path $workspace 'dist\fonts\Comfortaa') -Force | Out-Null
+        xcopy /e /i (Join-Path $workspace 'fonts\Comfortaa') (Join-Path $workspace 'dist\fonts\Comfortaa') | Out-Null
 
-        # Apps directory
-        New-Item -ItemType Directory -Path "$workspace\dist\apps" -Force | Out-Null
+        # Apps directories and files
+        New-Item -ItemType Directory -Path (Join-Path $workspace 'dist\apps') -Force | Out-Null
 
         # Fallout 4 files
-        New-Item -ItemType Directory -Path "$workspace\dist\apps\Fallout 4" -Force | Out-Null
-        Copy-Item "$workspace\apps\Fallout 4\Bethini.json" "$workspace\dist\apps\Fallout 4\Bethini.json" -Force -ErrorAction SilentlyContinue
-        Copy-Item "$workspace\apps\Fallout 4\settings.json" "$workspace\dist\apps\Fallout 4\settings.json" -Force -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path (Join-Path $workspace 'dist\apps\Fallout 4') -Force | Out-Null
+        $src = Join-Path $workspace 'apps\Fallout 4\Bethini.json'
+        $dst = Join-Path $workspace 'dist\apps\Fallout 4\Bethini.json'
+        Copy-Item -LiteralPath $src -Destination $dst -Force -ErrorAction SilentlyContinue
+
+        $src = Join-Path $workspace 'apps\Fallout 4\settings.json'
+        $dst = Join-Path $workspace 'dist\apps\Fallout 4\settings.json'
+        Copy-Item -LiteralPath $src -Destination $dst -Force -ErrorAction SilentlyContinue
 
         # Fallout New Vegas files
-        New-Item -ItemType Directory -Path "$workspace\dist\apps\Fallout New Vegas" -Force | Out-Null
-        Copy-Item "$workspace\apps\Fallout New Vegas\Bethini.json" "$workspace\dist\apps\Fallout New Vegas\Bethini.json" -Force -ErrorAction SilentlyContinue
-        Copy-Item "$workspace\apps\Fallout New Vegas\settings.json" "$workspace\dist\apps\Fallout New Vegas\settings.json" -Force -ErrorAction SilentlyContinue
-        New-Item -ItemType Directory -Path "$workspace\dist\apps\Fallout New Vegas\images" -Force | Out-Null
-        Copy-Item "$workspace\apps\Fallout New Vegas\images" "$workspace\dist\apps\Fallout New Vegas\images" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Recurse -Force "$workspace\dist\apps\Fallout New Vegas\images\src" -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path (Join-Path $workspace 'dist\apps\Fallout New Vegas') -Force | Out-Null
+        $src = Join-Path $workspace 'apps\Fallout New Vegas\Bethini.json'
+        $dst = Join-Path $workspace 'dist\apps\Fallout New Vegas\Bethini.json'
+        Copy-Item -LiteralPath $src -Destination $dst -Force -ErrorAction SilentlyContinue
+
+        $src = Join-Path $workspace 'apps\Fallout New Vegas\settings.json'
+        $dst = Join-Path $workspace 'dist\apps\Fallout New Vegas\settings.json'
+        Copy-Item -LiteralPath $src -Destination $dst -Force -ErrorAction SilentlyContinue
+
+        New-Item -ItemType Directory -Path (Join-Path $workspace 'dist\apps\Fallout New Vegas\images') -Force | Out-Null
+        $src = Join-Path $workspace 'apps\Fallout New Vegas\images'
+        $dst = Join-Path $workspace 'dist\apps\Fallout New Vegas\images'
+        Copy-Item -LiteralPath $src -Destination $dst -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force (Join-Path $workspace 'dist\apps\Fallout New Vegas\images\src') -ErrorAction SilentlyContinue
 
         # Skyrim Special Edition files
-        New-Item -ItemType Directory -Path "$workspace\dist\apps\Skyrim Special Edition" -Force | Out-Null
-        Copy-Item "$workspace\apps\Skyrim Special Edition\Bethini.json" "$workspace\dist\apps\Skyrim Special Edition\Bethini.json" -Force -ErrorAction SilentlyContinue
-        Copy-Item "$workspace\apps\Skyrim Special Edition\settings.json" "$workspace\dist\apps\Skyrim Special Edition\settings.json" -Force -ErrorAction SilentlyContinue
-        New-Item -ItemType Directory -Path "$workspace\dist\apps\Skyrim Special Edition\images" -Force | Out-Null
-        Copy-Item "$workspace\apps\Skyrim Special Edition\images" "$workspace\dist\apps\Skyrim Special Edition\images" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Recurse -Force "$workspace\dist\apps\Skyrim Special Edition\images\src" -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path (Join-Path $workspace 'dist\apps\Skyrim Special Edition') -Force | Out-Null
+        $src = Join-Path $workspace 'apps\Skyrim Special Edition\Bethini.json'
+        $dst = Join-Path $workspace 'dist\apps\Skyrim Special Edition\Bethini.json'
+        Copy-Item -LiteralPath $src -Destination $dst -Force -ErrorAction SilentlyContinue
+
+        $src = Join-Path $workspace 'apps\Skyrim Special Edition\settings.json'
+        $dst = Join-Path $workspace 'dist\apps\Skyrim Special Edition\settings.json'
+        Copy-Item -LiteralPath $src -Destination $dst -Force -ErrorAction SilentlyContinue
+
+        New-Item -ItemType Directory -Path (Join-Path $workspace 'dist\apps\Skyrim Special Edition\images') -Force | Out-Null
+        $src = Join-Path $workspace 'apps\Skyrim Special Edition\images'
+        $dst = Join-Path $workspace 'dist\apps\Skyrim Special Edition\images'
+        Copy-Item -LiteralPath $src -Destination $dst -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force (Join-Path $workspace 'dist\apps\Skyrim Special Edition\images\src') -ErrorAction SilentlyContinue
 
         # Starfield files
-        New-Item -ItemType Directory -Path "$workspace\dist\apps\Starfield" -Force | Out-Null
-        Copy-Item "$workspace\apps\Starfield\Bethini.json" "$workspace\dist\apps\Starfield\Bethini.json" -Force -ErrorAction SilentlyContinue
-        Copy-Item "$workspace\apps\Starfield\settings.json" "$workspace\dist\apps\Starfield\settings.json" -Force -ErrorAction SilentlyContinue
-        New-Item -ItemType Directory -Path "$workspace\dist\apps\Starfield\images" -Force | Out-Null
-        Copy-Item "$workspace\apps\Starfield\images" "$workspace\dist\apps\Starfield\images" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Recurse -Force "$workspace\dist\apps\Starfield\images\src" -ErrorAction SilentlyContinue
+        New-Item -ItemType Directory -Path (Join-Path $workspace 'dist\apps\Starfield') -Force | Out-Null
+        $src = Join-Path $workspace 'apps\Starfield\Bethini.json'
+        $dst = Join-Path $workspace 'dist\apps\Starfield\Bethini.json'
+        Copy-Item -LiteralPath $src -Destination $dst -Force -ErrorAction SilentlyContinue
+
+        $src = Join-Path $workspace 'apps\Starfield\settings.json'
+        $dst = Join-Path $workspace 'dist\apps\Starfield\settings.json'
+        Copy-Item -LiteralPath $src -Destination $dst -Force -ErrorAction SilentlyContinue
+
+        New-Item -ItemType Directory -Path (Join-Path $workspace 'dist\apps\Starfield\images') -Force | Out-Null
+        $src = Join-Path $workspace 'apps\Starfield\images'
+        $dst = Join-Path $workspace 'dist\apps\Starfield\images'
+        Copy-Item -LiteralPath $src -Destination $dst -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Recurse -Force (Join-Path $workspace 'dist\apps\Starfield\images\src') -ErrorAction SilentlyContinue
+
 
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.6.1
