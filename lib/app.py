@@ -75,7 +75,9 @@ class AppName:
             # If no location exists, return the input ini
             if not ini_location:
                 return ini
-            the_target_ini = ModifyINI.open(test_ini, Path(ini_location))
+            allow_sorting: bool = test_ini in self.bethini.get("Allow Sorted INIs", [])
+            the_target_ini = ModifyINI.open(
+                name=test_ini, location=Path(ini_location), sortable=allow_sorting)
             if the_target_ini.case_insensitive_config.has_option(section, setting):
                 return test_ini
         return ini

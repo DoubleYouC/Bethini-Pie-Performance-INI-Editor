@@ -37,11 +37,12 @@ class ModifyINI:
         """Access Bethini's config INI."""
 
         if not ModifyINI._open_app_config:
-            ModifyINI._open_app_config = ModifyINI.open(ModifyINI.app_config_name, Path.cwd())
+            ModifyINI._open_app_config = ModifyINI.open(
+                name=ModifyINI.app_config_name, location=Path.cwd(), sortable=True)
         return ModifyINI._open_app_config
 
     @staticmethod
-    def open(name: ININame, location: Path, *, preserve_case: bool = True) -> "ModifyINI":
+    def open(name: ININame, location: Path, sortable: bool, *, preserve_case: bool = True) -> "ModifyINI":
         """Open an INI file.
 
         If the file is already open, the existing ModifyINI instance will be returned.
@@ -54,13 +55,14 @@ class ModifyINI:
                 raise NotImplementedError(msg)
             return existing_object
 
-        new_object = ModifyINI(name, location, preserve_case=preserve_case)
+        new_object = ModifyINI(name, location, sortable, preserve_case=preserve_case)
         ModifyINI.open_inis.setdefault(name, {})[location] = new_object
         return new_object
 
-    def __init__(self, name: ININame, location: Path, *, preserve_case: bool = True) -> None:
+    def __init__(self, name: ININame, location: Path, sortable: bool, *, preserve_case: bool = True) -> None:
         self.ini_path = Path(location, name)
         self.preserve_case = preserve_case
+        self.sortable = sortable
 
         self.config = customConfigParser()
         if preserve_case:
@@ -217,11 +219,12 @@ class ModifyINI:
 
     def sort(self) -> None:
         """Sorts all sections and settings."""
-
+        
         for section in self.config._sections:  # noqa: SLF001
             self.config._sections[section] = dict(sorted(self.config._sections[section].items()))  # noqa: SLF001
         self.config._sections = dict(sorted(self.config._sections.items()))  # noqa: SLF001
         self.has_been_modified = True
+        logger.debug(f"Sorted {self.ini_path.name}")
 
     def save_ini_file(self, *, sort: bool = False) -> None:
         """Writes the file."""
