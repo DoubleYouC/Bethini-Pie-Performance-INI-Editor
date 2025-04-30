@@ -99,7 +99,7 @@ class RestoreBackupWindow(ttk.Toplevel):
         self.close_button.pack(side=RIGHT, padx=10, pady=5)
 
         # Bind the window close event to the on_close method
-        self.protocol("WM_DELETE_WINDOW", lambda: self.on_close(None))
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def on_close(self):
         """Handle the window close event."""
