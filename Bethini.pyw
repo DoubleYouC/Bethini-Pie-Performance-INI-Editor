@@ -12,6 +12,7 @@ import math
 import os
 import sys
 import tkinter as tk
+import argparse
 from collections.abc import Sequence
 from datetime import datetime
 from operator import eq, ge, gt, le, lt, ne
@@ -126,6 +127,11 @@ class bethini_app(ttk.Window):
                          themename=themename,
                          iconphoto="Icons/Icon.png",
                          minsize=(400, 200))
+
+        parser = argparse.ArgumentParser()
+        parser.add_argument('--noBackups', action='store_true')
+        args, _ = parser.parse_known_args()
+        self.makeBackups = not args.noBackups
 
         CustomFunctions.screenwidth = self.winfo_screenwidth()
         CustomFunctions.screenheight = self.winfo_screenheight()
