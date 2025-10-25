@@ -644,22 +644,23 @@ class bethini_app(ttk.Window):
                         int(cast("str", ModifyINI.app_config().get_value("General", "iMaxBackups", "5"))),
                         files_to_remove,
                     )
-                    if ini_location in locations_without_first_backup:
-                        locations_without_first_backup.remove(ini_location)
-                        self.create_first_time_backup(ini_location, inis_by_location[ini_location])
+                    if self.makeBackups:
+                        if ini_location in locations_without_first_backup and self.makeBackups:
+                            locations_without_first_backup.remove(ini_location)
+                            self.create_first_time_backup(ini_location, inis_by_location[ini_location])
 
-                    current_backup_path = backups_path / LOG_DIR_DATE
-                    current_backup_path.mkdir(parents=True, exist_ok=True)
-                    current_backup_file_path = current_backup_path / ini_object.ini_path.name
-                    if current_backup_file_path.exists():
-                        logger.warning(f"{current_backup_file_path} already exists, so it will not be overwritten.")
-                    else:
-                        try:
-                            copyfile(ini_object.ini_path, current_backup_file_path)
-                        except FileNotFoundError as e:
-                            logger.exception(
-                                f"{ini_object.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly."
-                            )
+                        current_backup_path = backups_path / LOG_DIR_DATE
+                        current_backup_path.mkdir(parents=True, exist_ok=True)
+                        current_backup_file_path = current_backup_path / ini_object.ini_path.name
+                        if current_backup_file_path.exists():
+                            logger.warning(f"{current_backup_file_path} already exists, so it will not be overwritten.")
+                        else:
+                            try:
+                                copyfile(ini_object.ini_path, current_backup_file_path)
+                            except FileNotFoundError as e:
+                                logger.exception(
+                                    f"{ini_object.ini_path} does not exist, so it cannot be backed up. This is typically caused by a path not being set correctly."
+                                )
                     try:
                         ini_object.save_ini_file(sort=save_dialog.sort)
                         file_saved = True
@@ -689,7 +690,8 @@ class bethini_app(ttk.Window):
                             file_saved = False
                     if file_saved:
                         self.sme(f"{ini_object.ini_path} saved.")
-                        copyfile(APP_LOG_FILE, current_backup_path / APP_LOG_FILE.name)
+                        if self.makeBackups:
+                            copyfile(APP_LOG_FILE, current_backup_path / APP_LOG_FILE.name)
 
 
         if not files_saved:
