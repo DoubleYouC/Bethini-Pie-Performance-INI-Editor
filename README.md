@@ -7,7 +7,7 @@ Bethini Pie is an INI editor designed to allow advanced customization of game co
 
 `--noBackups` - does not create any backup files or directories
 
-## Ressources
+## Resources
 - Official Download Page on Nexus Mods: https://www.nexusmods.com/site/mods/631/
 - Bethini Support on STEP Forums: https://stepmodifications.org/forum/forum/200-bethini-support/
 
