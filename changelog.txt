@@ -1,3 +1,15 @@
+v4.16
+Bethini Pie update notes:
+-Added command line option `--noBackups` - does not create any backup files or directories
+-Sorting of ini files can be toggled off in the Save dialog by unchecking the Sorted checkmark at bottom left.
+
+Skyrim Special Edition plugin update notes:
+-Bugfix: Foreign fonts being changed when using Reset To Default.
+-Presets: Mesh LOD settings improved.
+
+Fallout 4 plugin update notes:
+-Updated for official game update 1.11.137.0
+
 v4.15
 Added Fallout New Vegas plugin.
 
