@@ -113,7 +113,7 @@ def trim_trailing_zeros(value: float) -> str:
 
 def is_valid_hex(value: str) -> bool:
     """Check if a string is a valid hex value."""
-
+    is_hex = False
     if (
         value.startswith("#")
         or value.lower().startswith("0x")
@@ -345,8 +345,11 @@ class CustomFunctions:
     @staticmethod
     def getCurrentResolution(_game_name: str) -> str:
         # _game_name is required for CustomFunction calls
-
-        return f"{CustomFunctions.screenwidth}x{CustomFunctions.screenheight}"
+        resolutions_list = ["1280x720", "1366x768", "1440x900", "1600x900", "1680x1050", "1920x1200", "1920x1080", "2560x1080", "2560x1440", "2560x1600", "3440x1440", "3840x2160", "Manual..." ]
+        current_resolution = f"{CustomFunctions.screenwidth}x{CustomFunctions.screenheight}"
+        if current_resolution not in resolutions_list:
+            resolutions_list.append(current_resolution)
+        return resolutions_list
 
     @staticmethod
     def getBethesdaGameFolder(game_name: str) -> str | None:
