@@ -2,6 +2,10 @@ v4.17
 Bethini Pie update notes:
 -Bugfix: INI setting values expected to be in decimal format instead of hexadecimal format are converted to decimal format if encountered.
 
+Fallout New Vegas plugin update notes:
+-Limit antialiasing to 8x.
+-Added missing fixedDefault value for fTexturePctThreshold
+
 v4.16
 Bethini Pie update notes:
 -Added command line option `--noBackups` - does not create any backup files or directories (thanks to majcosta #51)
