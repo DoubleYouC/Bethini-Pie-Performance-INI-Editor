@@ -1,6 +1,10 @@
+v4.17
+Bethini Pie update notes:
+-Bugfix: INI setting values expected to be in decimal format instead of hexadecimal format are converted to decimal format if encountered.
+
 v4.16
 Bethini Pie update notes:
--Added command line option `--noBackups` - does not create any backup files or directories
+-Added command line option `--noBackups` - does not create any backup files or directories (thanks to majcosta #51)
 -Sorting of ini files can be toggled off in the Save dialog by unchecking the Sorted checkmark at bottom left.
 
 Skyrim Special Edition plugin update notes:

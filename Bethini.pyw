@@ -47,6 +47,7 @@ from lib.customFunctions import (
     decimal_to_abgr,
     hex_to_decimal,
     hex_to_rgb,
+    is_valid_hex,
     rgb_to_hex,
     rgba_to_hex,
     rgba_to_decimal,
@@ -1581,6 +1582,8 @@ class bethini_app(ttk.Window):
                 new_color = this_value
             elif color_value_type == "decimal":
                 this_value = setting_value[0]
+                if is_valid_hex(this_value):
+                    this_value = hex_to_decimal(this_value)
                 new_color = rgb_to_hex(decimal_to_rgb(setting_value[0]))
             elif color_value_type == "rgb":
                 rgb_type = self.setting_dictionary[setting_name].get("rgbType")
@@ -1608,6 +1611,8 @@ class bethini_app(ttk.Window):
                     new_color = rgb_to_hex(ast.literal_eval(this_value)[0:3])
             elif color_value_type == "rgba decimal":
                 this_value = setting_value[0]
+                if is_valid_hex(this_value):
+                    this_value = hex_to_decimal(this_value)
                 new_color_rgba = decimal_to_rgba(this_value)
                 logger.debug("Color rgba: " + str(new_color_rgba))
                 new_color_rgb = (new_color_rgba[0:3])
@@ -1615,6 +1620,8 @@ class bethini_app(ttk.Window):
                 new_color = rgb_to_hex(new_color_rgb)
             elif color_value_type == "abgr decimal":
                 this_value = setting_value[0]
+                if is_valid_hex(this_value):
+                    this_value = hex_to_decimal(this_value)
                 new_color_abgr = decimal_to_abgr(this_value)
                 logger.debug("Color abgr: " + str(new_color_abgr))
                 new_color_rgb = (new_color_abgr[3], new_color_abgr[2], new_color_abgr[1])

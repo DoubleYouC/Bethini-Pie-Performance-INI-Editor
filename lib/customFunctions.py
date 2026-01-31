@@ -111,6 +111,23 @@ def trim_trailing_zeros(value: float) -> str:
         formatted = formatted.rstrip('0').rstrip('.')
     return formatted
 
+def is_valid_hex(value: str) -> bool:
+    """Check if a string is a valid hex value."""
+
+    if (
+        value.startswith("#")
+        or value.lower().startswith("0x")
+        or re.search(r"[A-Fa-f]", value)
+    ):
+        try:
+            hex_str = value.lstrip("#")
+            if hex_str.lower().startswith("0x"):
+                hex_str = hex_str[2:]
+            hex_str = str(int(hex_str, 16))
+            is_hex = True
+        except ValueError:
+            is_hex = False
+    return is_hex
 
 def rgb_to_hex(rgb: tuple[int, int, int]) -> str:
     """Convert an RGB color value to a hex representation."""
