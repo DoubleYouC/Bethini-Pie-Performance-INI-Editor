@@ -2,8 +2,20 @@ v4.17
 Bethini Pie update notes:
 -Bugfix: INI setting values expected to be in decimal format instead of hexadecimal format are converted to decimal format if encountered.
 
+Starfield plugin update notes:
+-Improve resolution dropdown
+
+Skyrim Special Edition plugin update notes:
+-Improve resolution dropdown
+
+Fallout 4 update notes:
+-Improve resolution dropdown
+-Updated Bethesda Modding Platform checkbox to toggle it on the Anniversary Edition. This can solve issues related to Bethesda's built in mod platform causing plugins to randomly disable themselves at the expense of making the Creations menu inaccessible.
+-Remove Pip-Boy constraint settings. These are now integrated into the Pip-Boy Resolution dropdown (these settings fix the controller issue when increasing the Pip-Boy resolution).
+
 Fallout New Vegas plugin update notes:
--Limit antialiasing to 8x.
+-Improve resolution dropdown
+-Limit antialiasing to 8x
 -Added missing fixedDefault value for fTexturePctThreshold
 
 v4.16
